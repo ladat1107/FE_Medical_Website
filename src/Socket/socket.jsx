@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import { BASE_URL } from "@/constant/environment";
 
 // Create the socket instance
-const socket = io('http://localhost:8843', {
+const socket = io(BASE_URL, {
   withCredentials: true,
   reconnection: true,
   reconnectionAttempts: Infinity,
@@ -43,7 +44,7 @@ export const getSocket = () => {
 export const connectSocket = (token) => {
   if (!socket.connected) {
     socket.connect();
-    
+
     // Wait for connection before trying to authenticate
     socket.on('connect', () => {
       if (token) {

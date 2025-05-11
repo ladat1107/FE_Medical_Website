@@ -88,7 +88,7 @@ const Instruction = () => {
                                     <td className="px-3 py-2 font-medium text-gray-900">{item.role}</td>
                                     <td className="px-3 py-2">{item.email}</td>
                                     <td className="px-3 py-2">{item.password}</td>
-                                    <td className="px-3 py-2">{item.description}</td>
+                                    <td className="px-3 py-2 whitespace-nowrap">{item.description}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -12,6 +12,7 @@ import { faAddressCard } from '@fortawesome/free-regular-svg-icons';
 import Register from './Register';
 import ForgotPassword from './ForgotPassword';
 import socket, { authenticateSocket } from "@/Socket/socket";
+import { BASE_URL } from "@/constant/environment";
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 const Login = () => {
     const open = {
@@ -214,7 +215,7 @@ const Login = () => {
                             <div className="w-[90%] flex flex-col gap-2.5">
                                 <Button icon={<FontAwesomeIcon icon={faGoogle} />}
                                     className="w-full bg-white text-black border rounded-lg hover:border-primary-tw hover:text-primary-tw transition-colors"
-                                    onClick={() => window.location.href = `http://localhost:8843/auth/google`}>
+                                    onClick={() => window.location.href = `${BASE_URL}/auth/google`}>
                                     Đăng nhập với Google
                                 </Button>
                             </div>
