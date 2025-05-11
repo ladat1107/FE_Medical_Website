@@ -12,7 +12,9 @@ export const PATHS = {
         HANDBOOK_MANAGE: "/adminHandbook",
         HANDBOOK_DETAIL: "/adminHandbookDetail",
         SCHEDULE_MANAGE: "/adminSchedule",
-        //EXAMINATION_MANAGE: "/adminExamination",
+        NOTIFICATION: "/adminNotification",
+        MEDICINE_MANAGE: "/adminMedicineManage",
+        EXAMINATION_MANAGE: "/adminExaminationManage",
     },
     STAFF: {
         DASHBOARD: "/doctor",
@@ -22,6 +24,10 @@ export const PATHS = {
         HANDBOOK: "/doctorHandbook",
         SCHEDULE: "/doctorSchedule",
         PROFILE: "/doctorProfile",
+        CONSULTANT: "/consultant",
+        NOTIFICATION: "/staffNotification",
+        INPATIENT: "/inpatient",
+        INPATIENT_DETAIL: "/inpatient/:id",
     },
     RECEPTIONIST: {
         DASHBOARD: "/receptionist",
@@ -43,5 +49,10 @@ export const PATHS = {
         BOOKING: "/make-appointment",
         INSTRUCTION: "/instruction",
         LOGIN: "/login",
+        NOTIFICATION: "/notification",
+    },
+    SYSTEM: {
+        GET_NUMBER: "/getNumber",
+        PRECRIPTION_PDF: "/prescription-pdf",
     }
 }

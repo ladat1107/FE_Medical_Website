@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SearchOutlined } from "@ant-design/icons";
 import "./Room.scss";
-import { primaryColorAdmin } from "@/style/variables";
-import { faBed, faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { primaryColorAdmin } from "@/styles//variables";
+import { faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import InsertRoom from "./InsertRoom";
 import { useEffect, useState } from "react";
 import { useMutation } from "@/hooks/useMutation";
@@ -16,10 +16,11 @@ import DropdownDepartment from "./DropdownDepartment";
 import useQuery from "@/hooks/useQuery";
 import Status from "../../components/Status";
 import DropdownAction from "../../components/Dropdown/DropdownAction";
+import SkeletonRoom from "./SkeletonRoom";
 const Room = () => {
     let [showInsert, setShowInsert] = useState(false);
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    let [rowsPerPage, setRowPaper] = useState(10);
     let [totalPages, setTotalPage] = useState(0);
     let [listRoom, setListRoom] = useState([]);
     let [checkAll, setCheckAll] = useState(false);
@@ -40,10 +41,9 @@ const Room = () => {
     }, [departmentData])
     let {
         data: dataRoom,
-        loading: listRoomLoading,
-        error: listRoomError,
+        loading: loadingRoom,
         execute: fetchRooms,
-    } = useMutation((query) => getAllRoom(currentPage, rowsPerPage.id, searchDebounce, searchDepartment))
+    } = useMutation((query) => getAllRoom(currentPage, rowsPerPage, searchDebounce, searchDepartment))
     useEffect(() => {
         if (dataRoom && dataRoom.DT && dataRoom.DT.rows && dataRoom.DT) {
             let _listRoom = [...dataRoom.DT.rows];
@@ -63,7 +63,7 @@ const Room = () => {
                 _listRoom[i].bedBusy = bedBusy;
             }
             setListRoom(_listRoom);
-            setTotalPage(dataRoom.DT.count / rowsPerPage.value);
+            setTotalPage(dataRoom.DT.count / rowsPerPage);
         }
     }, [dataRoom])
     useEffect(() => {
@@ -80,7 +80,7 @@ const Room = () => {
         }
     }, [serviceData])
 
-    let handleChange = (item) => {
+    const handleChange = (item) => {
         let _listRoom = [...listRoom];
         _listRoom = _listRoom.map(obj =>
             obj.id === item.id ? { ...obj, checked: !item.checked } : obj
@@ -88,7 +88,7 @@ const Room = () => {
         setCheckAll(false);
         setListRoom(_listRoom);
     };
-    let handleChangeSelectedAll = () => {
+    const handleChangeSelectedAll = () => {
         let _listRoom = [...listRoom];
         setCheckAll(!checkAll);
         _listRoom = _listRoom.map(obj =>
@@ -96,40 +96,42 @@ const Room = () => {
         );
         setListRoom(_listRoom);
     }
-    let handleChangePaginate = (item) => {
+    const handleChangePaginate = (item) => {
         setRowPaper(item);
         setCurrentPage(1);
     }
     searchDebounce = useDebounce(search, 500);
-    let handleChangeSearch = (event) => {
+    const handleChangeSearch = (event) => {
         setSearch(event.target.value);
         setCurrentPage(1)
     }
-    let refresh = () => {
+    const refresh = () => {
         setCheckAll(false)
         handleShow(false)
+        setCurrentPage(1);
+        setSearch("");
         fetchRooms();
     }
-    let handleShow = (value) => {
+    const handleShow = (value) => {
         setObUpdate(null)
     }
-    let handleUpdate = async (item) => {
+    const handleUpdate = async (item) => {
         setShowInsert(false)
         let response = await getRoomById(item.id);
-        if (response?.data?.EC == 0) {
-            let value = response?.data?.DT;
+        if (response?.EC == 0) {
+            let value = response?.DT;
             setObUpdate(value)
             setShowInsert(true)
         } else {
-            message.error(response?.data?.EM || "Không thể chọn phòng ban")
+            message.error(response?.EM || "Không thể chọn phòng ban")
             refresh();
         }
     }
-    let handleShowInsert = (value) => {
+    const handleShowInsert = (value) => {
         setObUpdate(null)
         setShowInsert(value)
     }
-    let handleChangeDepartment = (value) => {
+    const handleChangeDepartment = (value) => {
         setSearchDepartment(value);
         setCurrentPage(1);
         setSearch("");
@@ -190,71 +192,70 @@ const Room = () => {
                                 </tr>
                             </thead>
                             <tbody className="table-body ">
-                                {+listRoom.length > 0 && +totalPages != 0 ?
-                                    <>
-                                        {
-                                            listRoom.map((item, index) => {
-                                                return (
-                                                    <Popover
-                                                        key={index}
-                                                        placement="topLeft"
-                                                        content={
-                                                            item?.serviceData.map((service, index) => (
-                                                                <span key={index}>
-                                                                    {service.name}
-                                                                    <br />
-                                                                </span>
-                                                            ))}
-                                                        title="Dịch vụ"
-                                                    >
-                                                        <tr>
-                                                            <td className="p-2">
-                                                                <div>
-                                                                    <Checkbox
-                                                                        checked={item.checked}
-                                                                        onChange={() => { handleChange(item, index) }}
-                                                                        size="small"
-                                                                    /></div>
-                                                            </td>
-                                                            <td className="text-start px-1 py-2 text-uppercase">
-                                                                <div> {item?.name || "Khác"}</div>
-                                                            </td>
-                                                            <td className="text-start px-1 py-2">
-                                                                <div className="fw-normal">{item?.roomDepartmentData?.name || "_"}</div>
-                                                            </td>
-                                                            <td className="text-center px-1 py-2">
-                                                                {item.bedQuantity > 0 ?
-                                                                    <div className="fw-normal"><b style={{ color: primaryColorAdmin }}>{item?.bedFree || 0}</b> / {item?.bedQuantity || 0}</div>
-                                                                    :
-                                                                    <div>
-                                                                        -
-                                                                    </div>}
-                                                            </td>
-                                                            <td className="text-center ps-5 py-2">
-                                                                <Status data={item?.status} />
-                                                            </td>
-                                                            <td className="px-1 py-2 d-flex justify-content-end">
-                                                                <div className='iconDetail'>
-                                                                    <DropdownAction
-                                                                        data={item}
-                                                                        action={handleUpdate}
-                                                                        refresh={refresh}
-                                                                        table={TABLE.ROOM}
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </Popover>
-                                                )
+                                {
+                                    loadingRoom ? <SkeletonRoom /> :
+                                        +listRoom.length > 0 && +totalPages != 0 ?
+                                            <>
+                                                {
+                                                    listRoom.map((item, index) => {
+                                                        return (
+                                                            <Popover
+                                                                key={index}
+                                                                placement="topLeft"
+                                                                content={
+                                                                    item?.serviceData.map((service, index) => (
+                                                                        <span key={index}>{service.name}<br /></span>
+                                                                    ))}
+                                                                title="Dịch vụ"
+                                                            >
+                                                                <tr>
+                                                                    <td className="p-2">
+                                                                        <div>
+                                                                            <Checkbox
+                                                                                checked={item.checked}
+                                                                                onChange={() => { handleChange(item, index) }}
+                                                                                size="small"
+                                                                            /></div>
+                                                                    </td>
+                                                                    <td className="text-start px-1 py-2 text-uppercase">
+                                                                        <div> {item?.name || "Khác"}</div>
+                                                                    </td>
+                                                                    <td className="text-start px-1 py-2">
+                                                                        <div className="fw-normal">{item?.roomDepartmentData?.name || "_"}</div>
+                                                                    </td>
+                                                                    <td className="text-center px-1 py-2">
+                                                                        {item.bedQuantity > 0 ?
+                                                                            <div className="fw-normal"><b style={{ color: primaryColorAdmin }}>{item?.bedFree || 0}</b> / {item?.bedQuantity || 0}</div>
+                                                                            :
+                                                                            <div>
+                                                                                -
+                                                                            </div>}
+                                                                    </td>
+                                                                    <td className="text-center ps-5 py-2">
+                                                                        <Status data={item?.status} />
+                                                                    </td>
+                                                                    <td className="px-1 py-2 d-flex justify-content-end">
+                                                                        <div className='iconDetail'>
+                                                                            <DropdownAction
+                                                                                data={item}
+                                                                                action={handleUpdate}
+                                                                                refresh={refresh}
+                                                                                table={TABLE.ROOM}
+                                                                            />
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </Popover>
+                                                        )
 
-                                            })
-                                        }
-                                    </> :
-                                    <tr>
-                                        <td colSpan="7" className="text-center">
-                                            <span className="text-gray-500">Không có dữ liệu</span>
-                                        </td>
-                                    </tr>
+                                                    })
+                                                }
+                                            </> :
+                                            <tr>
+                                                <td colSpan="7" className="text-center">
+                                                    <span className="text-gray-500">Không có dữ liệu</span>
+                                                </td>
+                                            </tr>
                                 }
 
                             </tbody>

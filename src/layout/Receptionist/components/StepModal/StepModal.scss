@@ -1,0 +1,113 @@
+.step-modal {
+    margin-top: -80px;
+
+    .modal-content {
+        padding: 24px;
+        background: white;
+        border-radius: 12px;
+    }
+
+    .progress-section {
+        margin-bottom: 32px;
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #1f2937;
+        }
+    }
+
+    .steps-container {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .step-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .step-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        margin-bottom: 12px;
+        font-size: 16px;
+        color: #6b7280;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+        outline: 5px solid white;
+
+        &.completed {
+            background: #4da674;
+            border-color: #c1e6ba;
+            color: white;
+        }
+
+        &.active {
+            background: #007BFF;
+            border-color: #bedeff;
+            color: white;
+        }
+    }
+
+    .step-connector {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 1;
+
+        &.completed {
+            background: #c1e6ba;
+        }
+    }
+
+    .step-content {
+        text-align: center;
+        max-width: 200px;
+
+        h4 {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        p {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+    }
+}
+
+// Modal style overrides
+.ant-modal-content {
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.ant-modal-header {
+    margin: 0 !important;
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.ant-modal-body {
+    padding: 0 !important;
+}

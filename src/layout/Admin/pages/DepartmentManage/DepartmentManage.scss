@@ -1,26 +1,24 @@
-@import "../../../../style/variables.scss";
-
 .department-content {
     display: flex;
     justify-content: center; // Căn giữa theo chiều ngang
     align-items: center; // Căn giữa theo chiều dọc
     height: 100%;
 
-    background: $background-color;
+    background: var(--background-color);
 
     .container {
         padding: 0 3%;
         margin: 0;
-        background: $background-color;
+        background: var(--background-color);
 
         .first {
             .text {
                 font-size: 1.2rem;
-                color: $secondary-color-admin;
+                color: var(--secondary-color-admin);
             }
 
             .btn-add-department {
-                background: $background-color;
+                background: var(--background-color);
                 border: 1px solid #0A8FDC;
                 border-radius: 8px;
                 color: #0A8FDC;
@@ -38,7 +36,7 @@
             }
 
             .btn-refresh-department {
-                background: $background-color;
+                background: var(--background-color);
                 border: 1px solid #04a9f3;
                 border-radius: 8px;
                 color: #04a9f3;
@@ -78,7 +76,7 @@
 
         .insert-department {
             border-radius: 10px;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
             background: white;
             margin-bottom: 1rem;
 
@@ -89,6 +87,7 @@
 
                 textarea {
                     z-index: 0;
+                    min-height: 230px;
 
                     &:focus {
                         box-shadow: none !important;
@@ -120,7 +119,7 @@
                     }
 
                     .container {
-                        background: $background-color;
+                        background: var(--background-color);
                         display: flex;
                         flex-direction: column;
                         justify-content: center;
@@ -152,13 +151,13 @@
         .department {
             border-radius: 10px;
             width: 100%;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
 
             .header {
                 width: 100%;
                 height: 50px;
-                background: $background-table-head-admin;
-                color: $text-head-color-admin;
+                background: var(--background-table-head-admin);
+                color: var(--text-head-color-admin);
 
                 .rounded-top-left {
                     border-top-left-radius: 5px;
@@ -193,7 +192,7 @@
                         .text {
                             font-weight: 500;
                             text-transform: uppercase;
-                            color: $secondary-color-admin;
+                            color: var(--secondary-color-admin);
                             letter-spacing: 0.02em;
                         }
 
@@ -212,10 +211,10 @@
 
                     &:hover {
                         td {
-                            background: $hover-color-admin;
+                            background: var(--hover-color-admin);
                         }
 
-                        background:$hover-color-admin;
+                        background: var(--hover-color-admin);
                     }
                 }
             }

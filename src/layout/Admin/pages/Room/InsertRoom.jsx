@@ -4,12 +4,14 @@ import { createRoom, getNameDepartment, getServiceSearch, getSpecialtySelect, up
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Col, Form, Input, InputNumber, message, Row, Select } from "antd";
+import { set } from "lodash";
 import { useEffect, useState } from "react";
 
 const InsertRoom = (props) => {
     let [form] = Form.useForm();
     let [departmentChoose, setDepartmentChoose] = useState(null);
     let [minBed, setMinBed] = useState(0);
+    let [isLoadingAction, setIsLoadingAction] = useState(false);
     let col = 8;
     let departments = props.departments;
     let [roomUpdate, setRoomUpdate] = useState(props.obUpdate);
@@ -33,24 +35,27 @@ const InsertRoom = (props) => {
     }, [props.obUpdate])
     let handleInsert = () => {
         form.validateFields().then(async (values) => {
+            setIsLoadingAction(true);
             let response = null;
             if (roomUpdate?.id) {
                 response = await updateRoom({ ...values, oldBed: minBed, newBed: values.bedQuantity, id: roomUpdate.id });
             } else {
                 response = await createRoom({ ...values, bedQuantity: values.bedQuantity + "" });
             }
-            if (response?.data?.EC === 0) {
-                message.success(response.data.EM || "Thành công");
+            if (response?.EC === 0) {
+                message.success(response.EM || "Thành công");
                 handleCloseInsert();
             }
             else {
-                message.error(response.data.EM || "Thất bại");
+                message.error(response.EM || "Thất bại");
             }
         }).catch((error) => {
             console.log("error,", error)
+        }).finally(() => {
+            setIsLoadingAction(false);
         })
     }
-    let handleCloseInsert = () => {
+    const handleCloseInsert = () => {
         form.resetFields()
         props.handleShowInsert(false)
         props.refresh();
@@ -212,7 +217,7 @@ const InsertRoom = (props) => {
                             }
                             <Col xs={24} style={{ display: 'flex', justifyContent: 'flex-end' }} >
                                 <Form.Item>
-                                    <Button type="primary" htmlType="submit"
+                                    <Button loading={isLoadingAction} type="primary" htmlType="submit"
                                         style={{ background: "#04a9f3" }}
                                         onClick={() => { handleInsert() }}>{roomUpdate?.id ? "Cập nhật" : "Thêm"}</Button>
                                 </Form.Item>

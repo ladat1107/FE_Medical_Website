@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Form, Input, message, Progress, Radio, Row, Select, Upload } from 'antd';
+import { Button, Col, Form, Input, message, Progress, Row, Select } from 'antd';
 import { CloudUploadOutlined } from '@ant-design/icons';
 import { createDepartment, getStaffByRole, updateDepartment } from '@/services/adminService';
 import useQuery from '@/hooks/useQuery';
 import { uploadAndDeleteToCloudinary } from '@/utils/uploadToCloudinary';
 
-import MarkdownIt from 'markdown-it';
-import MdEditor from 'react-markdown-editor-lite';
-import 'react-markdown-editor-lite/lib/index.css';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CLOUDINARY_FOLDER, STATUS } from '@/constant/value';
 import { ROLE } from '@/constant/role';
+import TextEditor from '@/components/TextEditor/TextEditor';
 const { TextArea } = Input;
 const InsertDepartment = (props) => {
     const [form] = Form.useForm();
@@ -21,9 +19,8 @@ const InsertDepartment = (props) => {
     const [imageUrl, setImageUrl] = useState(""); // Lưu trữ URL ảnh sau khi upload
     let [listDoctors, setListDoctors] = useState([]);
     let { data: doctors } = useQuery(() => getStaffByRole(ROLE.DOCTOR));
-    let mdParser = new MarkdownIt(/* Markdown-it options */);
+    let [isLoadingAction, setIsLoadingAction] = useState(false);
     let [col, setCol] = useState(8);
-    let htmlContent = props?.obUpdate?.departmentDescriptionData?.htmlContent || "";
     useEffect(() => {
         if (doctors && doctors?.DT?.length > 0) {
             let _doctor = doctors.DT.map((item) => {
@@ -45,14 +42,14 @@ const InsertDepartment = (props) => {
                 shortDescription: departmentUpdate?.shortDescription || "",
                 status: departmentUpdate?.status || 1,
                 image: departmentUpdate.image,
-                htmlContent: departmentUpdate?.departmentDescriptionData?.htmlContent || markDownContent,
-                markDownContent: departmentUpdate?.departmentDescriptionData?.markDownContent || ""
+                htmlDescription: departmentUpdate?.htmlDescription || ""
             })
             setImageUrl(departmentUpdate?.image || "");
             setCol(6);
         }
     }, [props.obUpdate])
-    let handleCloseInsert = () => {
+
+    const handleCloseInsert = () => {
         form.resetFields()
         setImageUrl("");
         setDepartmentUpdate(null);
@@ -80,35 +77,33 @@ const InsertDepartment = (props) => {
         }
     };
 
-    let handleInsert = () => {
+    const handleInsert = () => {
         if (!imageUrl) {
             message.error('Vui lòng chọn ảnh khoa!')
             return;
         }
         form.validateFields().then(async (values) => {
+            setIsLoadingAction(true);
             let respone;
             if (departmentUpdate.id) {
-                respone = await updateDepartment({ ...values, image: imageUrl, htmlContent, id: departmentUpdate.id })
+                respone = await updateDepartment({ ...values, image: imageUrl, id: departmentUpdate.id })
             } else {
-                respone = await createDepartment({ ...values, image: imageUrl, htmlContent })
+                respone = await createDepartment({ ...values, image: imageUrl })
             }
-            if (respone?.data?.EC == 0) {
-                message.success(respone?.data?.EM || "Thành công")
+            if (respone?.EC == 0) {
+                message.success(respone?.EM || "Thành công")
                 handleCloseInsert();
             }
             else {
-                message.error(respone?.data?.EM || "Thêm khoa thất bại")
+                message.error(respone?.EM || "Thêm khoa thất bại")
                 return;
             }
         }).catch((error) => {
             console.log(error)
+        }).finally(() => {
+            setIsLoadingAction(false);
         })
     }
-    // Finish!
-    let handleEditorChange = ({ html, text }) => {
-        htmlContent = html;
-        form.setFieldsValue({ markDownContent: text }); // Cập nhật giá trị cho Form.Item
-    };
     return (
         <div className="insert-department">
             <div className="content px-3 py-3">
@@ -123,17 +118,10 @@ const InsertDepartment = (props) => {
                     <Form
                         layout={'horizontal'}
                         form={form}
-                        labelCol={{
-                            span: 24,
-                        }}
-                        wrapperCol={{
-                            span: 24,
-                        }}
-                        initialValues={{
-                        }}
-                        style={{
-                            maxWidth: "100%",
-                        }}
+                        labelCol={{ span: 24, }}
+                        wrapperCol={{ span: 24, }}
+                        initialValues={{}}
+                        style={{ maxWidth: "100%", }}
                     >
                         <Row gutter={[16, 8]}>
                             <Col sm={24} lg={col}>
@@ -240,27 +228,22 @@ const InsertDepartment = (props) => {
                             </Col>
                             <Col sm={24}>
                                 <Form.Item
-                                    name={"markDownContent"}
+                                    name={"htmlDescription"}
                                     label="Mô tả"
                                     rules={[
-                                        {
-                                            required: true,
-                                            message: 'Vui lòng nhập mô tả!',
-                                        },
+                                        { required: true, message: 'Vui lòng nhập mô tả!', },
                                     ]}
                                 >
-                                    <MdEditor style={{
-                                        minHeight: '350px',
-                                        borderRadius: '10px',
-                                        padding: "5px",
-                                    }}
-                                        renderHTML={text => mdParser.render(text)}
-                                        onChange={handleEditorChange} />
+                                    <TextEditor
+                                        value={form.getFieldValue("htmlDescription")}
+                                        onChange={(value) => { form.setFieldsValue({ htmlDescription: value }) }}
+                                        placeholder="Nhập nội dung..."
+                                    />
                                 </Form.Item>
                             </Col>
                             <Col xs={24} style={{ display: 'flex', justifyContent: 'flex-end' }} >
                                 <Form.Item>
-                                    <Button type="primary" htmlType="submit"
+                                    <Button loading={isLoadingAction} type="primary" htmlType="submit"
                                         onClick={() => { handleInsert() }}>{departmentUpdate.id ? "Cập nhật" : "Thêm"}</Button>
                                 </Form.Item>
                             </Col>

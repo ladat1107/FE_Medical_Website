@@ -30,8 +30,8 @@ const SectionLine1 = () => {
     }, [])
     let fetchExampination = async () => {
         let respone = await getStatisticalAppoinment();
-        if (respone?.data?.EC === 0) {
-            let appoinment = respone.data?.DT?.appoinment;
+        if (respone?.EC === 0) {
+            let appoinment = respone?.DT?.appoinment;
             let success = 0, processing = 0, waiting = 0, cancel = 0;
             forEach(appoinment, (item) => {
                 if (item.status === STATUS_BE.DONE) success++;
@@ -41,8 +41,7 @@ const SectionLine1 = () => {
             })
             setExamination({ success, processing, waiting, cancel, all: appoinment.length });
 
-            let medicine = respone.data?.DT?.medicine;
-            console.log(medicine);
+            let medicine = respone?.DT?.medicine;
             let name = [], quantity = [];
             forEach(medicine, (item) => {
                 name.push(item.name);

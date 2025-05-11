@@ -161,6 +161,20 @@
 
         }
 
+        .change-btn{
+            background: #34aa73;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 2px 6px;
+            box-shadow: 2px 2px 4px #e6eaeb;
+            color: white;
+            cursor: pointer;
+
+            &:hover {
+                box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
+            }
+        }
+
         .payment-footer {
             display: flex;
             justify-content: flex-end;

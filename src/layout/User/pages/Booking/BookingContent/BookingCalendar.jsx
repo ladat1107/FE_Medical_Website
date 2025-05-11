@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import userService from "@/services/userService";
 import { useMutation } from "@/hooks/useMutation";
-import { primaryColorHome } from "@/style/variables";
+import { primaryColorHome } from "@/styles//variables";
 import { TIMESLOTS } from "@/constant/value";
 
 const BookingCalendar = (props) => {

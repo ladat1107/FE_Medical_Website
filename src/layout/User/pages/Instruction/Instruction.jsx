@@ -1,13 +1,11 @@
-// src/components/Instruction.jsx
 import React from "react";
-import { Table, Button, Typography } from "antd";
+import { Typography } from "antd";
 import { Link } from "react-router-dom";
-import "./Instruction.scss";
+import Container from "@/components/Container";
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 const Instruction = () => {
-    // Dữ liệu cho tài khoản và vai trò
     const data = [
         {
             key: "1",
@@ -45,14 +43,14 @@ const Instruction = () => {
             password: "123456",
         },
         {
-            key: "5",
+            key: "6",
             role: "Dược sĩ",
             description: "Xem đơn thuốc, thanh toán.",
-            email: "pharmarDuong@gmail.com",
+            email: "receptionist@gmail.com",
             password: "123456",
         },
         {
-            key: "6",
+            key: "7",
             role: "Người dùng",
             description: "Sử dụng website.",
             email: "ladat01626362980@gmail.com",
@@ -60,42 +58,50 @@ const Instruction = () => {
         },
     ];
 
-    // Cột của bảng
-    const columns = [
-        {
-            title: "Vai trò",
-            dataIndex: "role",
-            key: "role",
-        },
-        {
-            title: "Email",
-            dataIndex: "email",
-            key: "email",
-        },
-        {
-            title: "Mật khẩu",
-            dataIndex: "password",
-            key: "password",
-        },
-        {
-            title: "Mô tả",
-            dataIndex: "description",
-            key: "description",
-        },
-
-    ];
-
     return (
-        <div className="instruction">
-            <div className="user-guide">
-                <Title level={2} style={{ color: "#00B5F1" }}><strong>Hướng dẫn sử dụng</strong></Title>
-                <p>Hiện tại, website đang được triển khai phiên bản miễn phí nhằm giới thiệu sản phẩm, với một số tính năng hạn chế. Kết nối backend có thể mất thời gian cho lần đầu tiên. Để trải nghiệm đầy đủ tính năng vui lòng truy cập repository GitHub.</p>
+        <div className="py-16 bg-white">
+            <Container>
+                <div className="mb-6">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary-tw mb-2">
+                        Các tài khoản đăng nhập vào hệ thống
+                    </h1>
+                    <p className="text-gray-700 text-sm sm:text-base">
+                        Website hiện tại đang được triển khai miễn phí, do đó một số tính năng vẫn còn hạn chế và giao diện chưa hoàn toàn tối ưu trên một số thiết bị. 🖥️📱
+                        Chúng tôi đang nỗ lực cải thiện và cập nhật để mang đến trải nghiệm tốt hơn. Rất mong bạn thông cảm và tiếp tục sử dụng!
+                    </p>
+                </div>
 
-                <Title level={4} style={{ color: "#00B5F1", marginTop: "40px" }}>
-                    Các tài khoản đăng nhập vào hệ thống
-                </Title>
-                <Table columns={columns} dataSource={data} pagination={false} />
-            </div>
+                {/* Responsive Table */}
+                <div className="overflow-x-auto rounded-lg shadow-md border text-sm">
+                    <table className="min-w-full text-left text-gray-700">
+                        <thead className="bg-blue-100 text-gray-700 text-sm sm:text-base">
+                            <tr>
+                                <th className="px-3 py-3 whitespace-nowrap">Vai trò</th>
+                                <th className="px-3 py-3 whitespace-nowrap">Email</th>
+                                <th className="px-3 py-3 whitespace-nowrap">Mật khẩu</th>
+                                <th className="px-3 py-3 whitespace-nowrap">Mô tả</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                            {data.map((item) => (
+                                <tr key={item.key} className="border-t">
+                                    <td className="px-3 py-2 font-medium text-gray-900">{item.role}</td>
+                                    <td className="px-3 py-2">{item.email}</td>
+                                    <td className="px-3 py-2">{item.password}</td>
+                                    <td className="px-3 py-2">{item.description}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Link GitHub (tuỳ chọn) */}
+                <div className="text-sm text-right text-primary-tw mt-4">
+                    <Link to="https://github.com/your-repo-url" target="_blank" rel="noopener noreferrer">
+                        Truy cập GitHub →
+                    </Link>
+                </div>
+            </Container>
         </div>
     );
 };

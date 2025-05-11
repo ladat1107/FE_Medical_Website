@@ -1,0 +1,34 @@
+/* variables.css */
+:root {
+    --primary-color: #00B5F1;
+    --secondary-color: #3dac78;
+    --bg-color: #f4f4f4;
+
+    --main-text-color: #003553;
+    --secondary-text-color: #858585;
+
+    --font-size-title-section: 28px;
+    --font-size-small: 16px;
+    --font-size-large: 20px;
+
+
+    /* // font weight  */
+
+    --font-weight-title-section: 700;
+    --font-weight-main-text: 400;
+
+
+    /* //------------ADMIN---------------- */
+    --background-color: #F4F7FE;
+    --background-table-head-admin: #dceff8;
+    --primary-color-admin: #00B5F1;
+    --secondary-color-admin: #003553;
+    --text-head-color-admin: #007BFF;
+    --hover-color-admin: #edf3fc;
+
+    --boder-content-admin: 10px;
+    --box-shadow-content-admin: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+
+    /* // text size */
+    --text-content-size-admin: 0.8em;
+}

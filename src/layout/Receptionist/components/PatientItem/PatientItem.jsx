@@ -5,7 +5,7 @@ import { updateExamination } from '@/services/doctorService';
 import { message } from 'antd';
 import './PatientItem.scss';
 
-const PatientItem = ({ index, id, name, symptom, special, doctor, room, visit_status, downItem, onClickItem, sort }) => {
+const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, visit_status, downItem, onClickItem, sort, status = 0 }) => {
 
   const handleDownItem = async (event) => {
     event.stopPropagation();
@@ -96,8 +96,19 @@ const PatientItem = ({ index, id, name, symptom, special, doctor, room, visit_st
         {SpecialText({ special })}
       </div>
       <div className="col-2">
-        <p className="bold-text">{symptom === "paraclinical" ? "" : "Bác sĩ"}</p>
-        <p className="sub-text">{doctor}</p>
+        {status === 0 ? 
+          <>
+            <p className="bold-text">{symptom === "paraclinical" ? "" : doctor.trim() === '' ? '' : "Bác sĩ"}</p>
+            <p className="sub-text"> {doctor}  </p>
+          </> : <>
+            <p className="sub-text">
+                { status === 4 ? "Đang thanh toán" 
+                : status === 5 ? `Đang chờ khám` 
+                : status === 6 ? `Đang khám bệnh`
+                : `Đang ở đâu đó`}
+            </p>
+          </>
+        }
       </div>
       <div className="col-3 row">
         <div className='col-10'>
@@ -105,10 +116,10 @@ const PatientItem = ({ index, id, name, symptom, special, doctor, room, visit_st
           <p className="sub-text">{cutSuffix(room)}</p>
         </div>
         <div className="col-2 d-flex justify-content-end">
-                  {visit_status === 0 && (
-                    <i className="fa-solid fa-forward-fast fa-rotate-90 color-down" onClick={(event) => handleDownItem(event)}></i>
-                  )}
-                </div>
+          {/* {visit_status === 0 && (
+            <i className="fa-solid fa-forward-fast fa-rotate-90 color-down" onClick={(event) => handleDownItem(event)}></i>
+          )} */}
+        </div>
       </div>
     </div>
   );
@@ -125,5 +136,6 @@ PatientItem.propTypes = {
   downItem: PropTypes.func,
   onClickItem: PropTypes.func,
   sort: PropTypes.bool,
+  status: PropTypes.number
 };
 export default PatientItem;

@@ -1,34 +1,24 @@
 
 
 import React from 'react'
-import classNames from "classnames/bind";
-import styles from "./home.module.scss";
-import SliderComponent from './HomeComponent/Slider';
 import useQuery from '@/hooks/useQuery';
 import userService from '@/services/userService';
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+import { DoctorSwiper } from '@/components/Swiper';
 
 const OurTeam = () => {
-
   const {
     data: doctorData,
+    loading: doctorLoading,
     error: doctorError
   } = useQuery(() => userService.getDoctor())
 
-
   const listDoctor = doctorData?.DT || [];
-
-
   return (
-    <div className={cx('ourTeam')} >
-      <h3 className={cx('ourTeam-title', "title-section")} >
+    <div className='flex flex-col items-center justify-center mt-16 pb-16'>
+      <h3 className="text-3xl font-bold my-10 text-secondaryText-tw" >
         ĐỘI NGŨ BÁC SĨ
       </h3>
-      <div className={cx('wrapper')} >
-        <SliderComponent type='doctor' numberShow={4} dot={false} listData={listDoctor} autoplayProps={true} />
-      </div>
-
+      <DoctorSwiper doctorList={listDoctor} loading={doctorLoading} />
     </div>
   )
 }

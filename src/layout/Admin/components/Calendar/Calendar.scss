@@ -1,5 +1,3 @@
-@import "../../../../style/variables.scss";
-
 .admin-calender {
     .custom-schedule-table {
         background-color: white; // Nền bảng
@@ -15,8 +13,8 @@
 
             // Header
             .ant-table-thead>tr>th {
-                background-color: $background-table-head-admin; // Nền tiêu đề
-                color: $text-head-color-admin; // Màu chữ
+                background-color: var(--background-table-head-admin); // Nền tiêu đề
+                color: var(--text-head-color-admin); // Màu chữ
                 text-align: center; // Canh giữa
                 font-weight: bold;
                 font-size: 1em;
@@ -42,7 +40,7 @@
                         }
 
                         &:hover {
-                            background-color: $hover-color-admin; // Màu khi hover
+                            background-color: var(--hover-color-admin); // Màu khi hover
                         }
                     }
                 }

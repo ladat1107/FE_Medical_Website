@@ -80,6 +80,20 @@
                     box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
                 }
             }
+        }     
+
+        .copy-prescription-btn{
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 5px 10px;
+            box-shadow: 2px 2px 4px #e6eaeb;
+            margin-right: 10px;
+            cursor: pointer;
+    
+            &:hover {
+                box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
+            }
         }
     }
 }

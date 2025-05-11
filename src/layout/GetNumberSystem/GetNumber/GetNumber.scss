@@ -1,0 +1,89 @@
+.get-number-bg {
+    height: 100vh;
+    width: 100vw;
+    background-image: url("https://medpro.vn/_next/static/media/BannerDefaul.4f7c4739.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(206, 198, 198, 0.5); // Làm mờ nền
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .content {
+        transition: 0.3s;
+    }
+
+    .disabled {
+        pointer-events: none; // Chặn thao tác
+        opacity: 0.5; // Làm mờ nội dung
+    }
+
+    .get-number-title {
+        margin: 100px auto;
+    }
+
+    .btn-group {
+        z-index: 2;
+        display: flex;
+        gap: 80px;
+        transform: translateY(-50px);
+
+        .get-number-btn {
+            // background: linear-gradient(36deg, #00b5f1, #00e0ff);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 30px 70px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+
+        .normal {
+            background: linear-gradient(36deg, #00b5f1, #00e0ff);
+
+            &:hover {
+                background-color: darken(#00b5f1, 10%);
+                transform: scale(1.1);
+            }
+        }
+
+        .priority {
+            background: linear-gradient(to right, #ffb45f, #ffc584, #FFD18A);
+
+
+
+            &:hover {
+                background-color: darken(#FFA500, 10%);
+                transform: scale(1.1);
+            }
+        }
+    }
+
+    .bg-hospital {
+        width: 40%;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1;
+    }
+}

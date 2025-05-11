@@ -118,6 +118,16 @@
         }
     }
 
+    .disable-button{
+        background-color: #ccc;
+        cursor: not-allowed; 
+        color: gray;
+
+        &:hover{
+            background-color: #ccc;
+        }
+    }
+
     .save-button {
         font-family: 'Be Vietnam Pro', sans-serif;
         background-color: #3AA472;

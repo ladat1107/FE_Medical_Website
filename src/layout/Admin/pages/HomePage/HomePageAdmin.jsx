@@ -3,6 +3,7 @@ import { Card, Row, Col, List, Alert, Typography, Progress } from "antd";
 import { Bar } from "react-chartjs-2";
 import styles from "./HomePage.module.scss"
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from "chart.js";
+import socket from "@/Socket/socket";
 // Đăng ký các thành phần Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -56,7 +57,6 @@ const AdminHomePage = () => {
                     </Col>
                 ))}
             </Row>
-
             {/* Biểu đồ */}
             <Row gutter={[16, 16]} className={styles.row}>
                 <Col xs={24} md={12}>

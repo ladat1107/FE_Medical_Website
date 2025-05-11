@@ -18,6 +18,7 @@ const ParacModal = ({ isOpen, onClose, onSusscess, paracId, patientData }) => {
 
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     const [data, setData] = useState({
@@ -76,6 +77,8 @@ const ParacModal = ({ isOpen, onClose, onSusscess, paracId, patientData }) => {
     }, [isOpen, patientData]);
 
     const handlePay = async () => {
+        setIsLoading(true);
+        if (isLoading) return; // Ngăn chặn nhiều lần nhấn nút
         try {
             if(result === '') {
                 message.error('Vui lòng nhập kết quả cận lâm sàng!');
@@ -103,6 +106,8 @@ const ParacModal = ({ isOpen, onClose, onSusscess, paracId, patientData }) => {
         } catch (error) {
             console.log(error);
             message.error('Cập nhật bệnh nhân thất bại!');
+        } finally {
+            setIsLoading(false); // Đặt lại trạng thái loading
         }
     };
 
@@ -212,7 +217,7 @@ const ParacModal = ({ isOpen, onClose, onSusscess, paracId, patientData }) => {
                             <p style={{fontWeight: "400"}}>Kết quả:</p>
                         </div>
                         <div className='col-9'>
-                            <input className='input-add-exam' style={{width: "100%"}} maxLength={10}
+                            <input className='input-add-exam' style={{width: "100%"}} maxLength={50}
                                 type='text' value={result} onChange={(e) => setResult(e.target.value)}
                                 placeholder='Nhập kết quả cận lâm sàng...' />
                         </div>
@@ -253,14 +258,21 @@ const ParacModal = ({ isOpen, onClose, onSusscess, paracId, patientData }) => {
                                     )}
                                 </div>
                             </div>
-                            <input type="file" id={`input-upload-${paracId}`} hidden={true} onChange={handleImageChange} />
+                            <input type="file" accept="image/*" id={`input-upload-${paracId}`} hidden={true} onChange={handleImageChange} />
                         </Form.Item>
                         </div>
                     </div>
                 </div>
                 <div className='payment-footer mt-2'>
                     <button className="close-user-btn" onClick={onClose}>Đóng</button>
-                    <button className='payment-btn' onClick={handlePay}>Xác nhận</button>
+                    <button className='payment-btn' onClick={handlePay}>
+                        {isLoading ? (
+                            <>
+                                <i className="fa-solid fa-spinner fa-spin me-2"></i>
+                                Đang xử lý...
+                            </>
+                        ) : 'Hoàn tất'}
+                    </button>
                 </div>
             </div>
         </div>

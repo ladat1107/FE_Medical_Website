@@ -6,7 +6,7 @@ import { createRequestParaclinical, getServiceLaboratory } from '@/services/doct
 import './Paraclinical.scss';
 import { useMutation } from '@/hooks/useMutation';
 
-const Paraclinical = ({ listParaclinicals, examinationId, refresh }) => {
+const Paraclinical = ({ listParaclinicals, examinationId, refresh, isEditMode }) => {
     const [paracDetails, setParacDetails] = useState(listParaclinicals);
 
     const [inputParac, setInputParac] = useState('');
@@ -18,6 +18,8 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh }) => {
     const paraclinicalContainerRef = useRef(null);
     const inputRef = useRef(null);
     const searchResultsRef = useRef(null);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     //Paraclinical options
     let {
@@ -55,16 +57,25 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh }) => {
             listParaclinicals: selectedParaclinicals
         }
 
-        // Gọi API tạo yêu cầu xét nghiệm
-        const response = await createRequestParaclinical(data);
+        setIsLoading(true);
 
-        // console.log("Response:", response);
-        if (response.data && response.data.EC === 0) {
-            message.success('Tạo yêu cầu xét nghiệm thành công!');
-            refresh();
-            setSelectedParaclinicals([]);
-        } else {
-            message.error(response.data.EM);
+        try {
+            // Gọi API tạo yêu cầu xét nghiệm
+            const response = await createRequestParaclinical(data);
+
+            // console.log("Response:", response);
+            if (response.DT && response.EC === 0) {
+                message.success('Tạo yêu cầu xét nghiệm thành công!');
+                refresh();
+                setSelectedParaclinicals([]);
+            } else {
+                message.error(response.EM);
+            }
+        } catch (error) {
+            console.error('Error creating request:', error);
+            message.error('Đã xảy ra lỗi khi tạo yêu cầu xét nghiệm!');
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -154,6 +165,7 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh }) => {
                             style={{ background: '#eeeeee', border: 'none', boxShadow: 'none' }}
                             value={inputParac}
                             onChange={handleInputChange}
+                            readOnly={!isEditMode} 
                             onFocus={() => setShowSearchResults(true)}
                         />
                         {/* Hiển thị danh sách bệnh đi kèm khi có kết quả tìm kiếm */}
@@ -177,7 +189,16 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh }) => {
                 </div>
                 <div className="row">
                     <div className='col-12'>
-                        <button className="add-button" onClick={handleParacRequest}>Thêm xét nghiệm</button>
+                        <button className={`add-button ${!isEditMode ? "disable-button" : ""}`}
+                            disabled={!isEditMode}
+                            onClick={handleParacRequest}>
+                            {isLoading ? (
+                                <>
+                                    <i className="fa-solid fa-spinner fa-spin me-2"></i>
+                                    Đang xử lý...
+                                </>
+                            ) : 'Thêm xét nghiệm'}
+                        </button>
                     </div>
                 </div>
                 <div className="row">
@@ -205,6 +226,7 @@ Paraclinical.propTypes = {
     listParaclinicals: PropTypes.array.isRequired,
     examinationId: PropTypes.number.isRequired,
     refresh: PropTypes.func.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
 };
 
 export default Paraclinical;

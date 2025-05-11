@@ -1,0 +1,81 @@
+.prescription-change-modal{
+    padding: 10px 20px;
+
+    .restore-button{
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 5px 10px;
+        box-shadow: 2px 2px 4px #e6eaeb;
+        margin-right: 10px;
+        cursor: pointer;
+        color: black;
+
+        &:hover {
+            box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
+        }
+    }
+
+    .restore-button.disabled {
+        background-color: #ccc; /* Màu xám khi disabled */
+        cursor: not-allowed; /* Đổi con trỏ thành không thể click */
+        color: gray;
+    }
+
+    .save-button {
+        background: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 5px 15px;
+        box-shadow: 2px 2px 4px #e6eaeb;
+        min-width: 80px;
+        cursor: pointer;
+
+        &:hover {
+            box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
+        }
+    }
+
+    .save-button.disabled {
+        background-color: #ccc; /* Màu xám khi disabled */
+        cursor: not-allowed; /* Đổi con trỏ thành không thể click */
+        color: gray;
+    }
+}
+
+.custom-summary-container {
+    display: flex;
+    flex-direction: column;
+    height: 640px; /* tổng chiều cao bạn muốn */
+    
+    .custom-scroll-area {
+        flex: 1;
+        overflow: auto;
+        padding: 15px;
+    
+        scrollbar-width: none;          /* Firefox */
+        -ms-overflow-style: none;       /* IE & Edge */
+    }
+
+    .custom-scroll-area::-webkit-scrollbar {
+        display: none;                  /* Chrome, Safari */
+    }
+    
+    .summary-fixed-total {
+        padding: 15px;
+        border-top: 1px solid #ddd;
+        background-color: #fff;
+        position: sticky;
+        bottom: 0;
+        text-align: right;
+    }
+    
+    .custom-summary-table .ant-table-thead > tr > th {
+        background-color: #DDEFFE; /* màu vàng nhạt */
+        color: #333;
+    }
+}
+
+  
+  

@@ -1,25 +1,19 @@
 
 
 import React from 'react'
-import classNames from "classnames/bind";
-import styles from "../../BlogList/blogList.module.scss";
-import SliderComponent from '../../BlogList/Components/Slider';
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
-// Tạo instance của classnames với bind styles
+import { HandbookSwiper } from "@/components/Swiper";
+
 
 const BlogRelated = (props) => {
   let { listHandbook } = props;
   return (
-    <div className={cx('body-list-blog')}  >
-
-      <div className={cx('slider-section')} >
-        <div className={cx('title-top')} >
-          <h3>Bài viết liên quan</h3>
-          <span className={cx('line')} ></span>
-        </div>
-        <SliderComponent listData={listHandbook} numberShow={4} dot={false} autoplayProps={true} />
+    <div className='mt-16'>
+      <div className="flex justify-between items-center gap-3" >
+        <span className="w-full block h-[2px] bg-primary-tw"></span>
+        <h3 className="text-2xl font-bold whitespace-nowrap">BÀI VIẾT LIÊN QUAN</h3>
+        <span className="w-full block h-[2px] bg-primary-tw"></span>
       </div>
+      <HandbookSwiper handbookList={listHandbook} />
     </div>
   )
 }

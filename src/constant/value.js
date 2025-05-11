@@ -17,6 +17,7 @@ export const TABLE = {
     ROOM: "ROOM",
     SPECIALTY: "SPECIALTY",
     EXAMINATION: "EXAMINATION",
+    MEDICINE: "MEDICINE"
 }
 export const TAGS = [
     {
@@ -238,6 +239,7 @@ export const CLOUDINARY_FOLDER = {
     HANDBOOK: "Handbook",
     PARACLINICAL: "Paraclinical",
     SPECIALTY: "Specialty",
+    TEST: "Test"
 }
 export const EMIT = {
     EVENT_PROFILE: {
@@ -294,7 +296,9 @@ export const SPECIAL_EXAMINATION = {
         // description: "Người khuyết tật",
     }
 }
+
 export const STATUS_BE = {
+    DONE_INPATIENT: 8,
     DONE: 7, // đã khám xong
     EXAMINING: 6, // đang khám
     PAID: 5, // đã thanh toán chờ để khám
@@ -304,8 +308,41 @@ export const STATUS_BE = {
     ACTIVE: 1,
     INACTIVE: 0
 }
+
 export const PAYMENT_METHOD = {
     MOMO: 1,
     VN_PAY: 2,
     CASH: 3
 }
+
+export const TYPE_NUMBER = {
+    PRIORITY: "priorityNumber",
+    NORMAL: "normalNumber",
+}
+
+export const COVERED = {
+    1: 1,
+    2: 0.95,
+    3: 0.8,
+    4: 1
+}
+
+export const STATUS_MESSAGE = {
+    FAILED: "failed",
+    SENDING: "sending",
+    SENT: "sent",
+    RECEIVED: "received",
+    READ: "read"
+}
+
+export const MEDICAL_TREATMENT_TIER = {
+    INPATIENT: 1,
+    OUTPATIENT: 2,
+    EMERGENCY: 3
+}
+export const PAYMENT_STATUS = {
+    UNPAID: 0,
+    PENDING: 1,
+    PAID: 2
+}
+

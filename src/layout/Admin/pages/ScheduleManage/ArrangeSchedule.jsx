@@ -3,18 +3,37 @@ import "./ScheduleManage.scss";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Button, Col, DatePicker, Form, Input, message, Row } from "antd";
 import dayjs from "dayjs";
-import { primaryColorAdmin } from "@/style/variables";
+import { primaryColorAdmin } from "@/styles//variables";
 import { arrangeSchedule } from "@/services/adminService";
+import useSendNotification from "@/hooks/useSendNotification";
 const ArrangeSchedule = (props) => {
     let [form] = Form.useForm();
+    let { handleSendNoti } = useSendNotification();
+
     let handleArrangeSchedule = () => {
         form.validateFields().then(async (values) => {
             let response = await arrangeSchedule(values);
-            if (response.data.EC === 0) {
+            if (response.EC === 0) {
                 message.success("Xếp lịch thành công!");
                 props.refresh();
+
+                handleSendNoti(
+                    `📆 Thông báo lịch trực`,
+                    `<p>
+                        <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Lịch trực ✨</span> 
+                        Đã có thông tin về lịch trực mới! Các bác sĩ xem thông tin và thực hiện tại  
+                        👉 <a href="http://localhost:3000/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
+                    </p>`,
+                    [],
+                    false,
+                    [...new Set(
+                        response.DT.schedule
+                          .map(item => item?.staffScheduleData?.staffUserData?.id)
+                          .filter(id => id !== undefined)
+                      )] // Chỉ lấy id của người nhận thông báo
+                )
             } else {
-                message.error(response.data.EM);
+                message.error(response.EM);
             }
         }).catch((err) => {
             console.log(err);

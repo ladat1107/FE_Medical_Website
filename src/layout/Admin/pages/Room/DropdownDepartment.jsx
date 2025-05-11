@@ -3,7 +3,7 @@ import React from 'react';
 import { Dropdown, Space } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { primaryColorAdmin } from "@/style/variables";
+import { primaryColorAdmin } from "@/styles//variables";
 import './DropdownDepartment.scss'
 
 const DropdownDepartment = (props) => {

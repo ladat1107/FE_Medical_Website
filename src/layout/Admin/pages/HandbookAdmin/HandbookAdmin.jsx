@@ -1,18 +1,18 @@
 import HandbookItem from "@/components/HandbookItem";
 import "./HandbookAdmin.scss";
-import { Form, Input, Pagination, Select, Spin } from "antd";
+import { Input, Pagination, Select } from "antd";
 import { SearchOutlined } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { STATUS_HOSPITAL, TAGS } from "@/constant/value";
 import { useMutation } from "@/hooks/useMutation";
 import useDebounce from "@/hooks/useDebounce";
 import { getHandbookAdmin } from "@/services/adminService";
-import Loading from "@/components/Loading/Loading";
+import HandbookItemSkeleton from "@/components/HandbookItem/HandbookItemSkeleton";
 const statusArray = Object.values(STATUS_HOSPITAL);
 statusArray.unshift({ value: "", label: "Tất cả" });
 const HandbookAdmin = () => {
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    // let [rowsPerPage, setRowPaper] = useState(10);
     let [totalPages, setTotalPage] = useState(0);
     let [listHandbook, setListHandbook] = useState([]);
     let [search, setSearch] = useState("");
@@ -30,7 +30,7 @@ const HandbookAdmin = () => {
         data: dataHandbook,
         loading: listHandbookLoading,
         execute: fetchHandbooks,
-    } = useMutation((query) => getHandbookAdmin(currentPage, rowsPerPage.id, searchDebounce, status.value, filter.join(',')))
+    } = useMutation((query) => getHandbookAdmin(currentPage, 12, searchDebounce, status.value, filter.join(',')))
     useEffect(() => {
         if (dataHandbook && dataHandbook.DT && dataHandbook.DT.rows && dataHandbook.DT) {
             let handbook = dataHandbook.DT.rows;
@@ -44,7 +44,7 @@ const HandbookAdmin = () => {
     }, [dataHandbook])
     useEffect(() => {
         fetchHandbooks();
-    }, [currentPage, useDebounce(search, 500), rowsPerPage, status, filter]);
+    }, [currentPage, useDebounce(search, 500), status, filter]);
     searchDebounce = useDebounce(search, 500);
     let handleChangeSearch = (event) => {
         setSearch(event.target.value);
@@ -100,20 +100,22 @@ const HandbookAdmin = () => {
 
                         </div>
                     </div>
-                    {listHandbookLoading ? <Loading /> :
-                        <div className="col-12 col-lg-9">
-                            <div className="row">
-                                {listHandbook.length > 0 && listHandbook.map((item, index) => (<HandbookItem
-                                    data={item}
-                                    index={index} />))}
-                            </div>
-                            <div>
-                                <Pagination align="center"
-                                    onChange={(page) => setCurrentPage(page)}
-                                    defaultCurrent={currentPage}
-                                    total={totalPages} />
-                            </div>
-                        </div>}
+                    <div className="col-12 col-lg-9 left-hanbook-admin">
+                        <div className="row">
+                            {
+                                listHandbookLoading ? (<HandbookItemSkeleton />) :
+                                    listHandbook.length > 0 ? listHandbook.map((item, index) => (<HandbookItem
+                                        data={item}
+                                        index={index} />))
+                                        : <div className="text-center w-100 mt-5">Không có dữ liệu</div>}
+                        </div>
+                        <div>
+                            {totalPages > 1 && <Pagination align="center"
+                                onChange={(page) => setCurrentPage(page)}
+                                defaultCurrent={currentPage}
+                                total={totalPages} />}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

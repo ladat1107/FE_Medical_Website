@@ -8,28 +8,23 @@ import { apiService } from "@/services/apiService"
 import { useEffect, useState } from "react"
 import useQuery from "@/hooks/useQuery"
 import userService from "@/services/userService"
+import { OldParaclinicalModal } from "@/components/Modals"
 
 const BookingPersonal = (props) => {
     let [form] = Form.useForm();
-    let profileData = props?.profile ? props.profile : useQuery(() => userService.getUserById({ id: "null" })).data?.DT;
+    let profileData = props?.profile || useQuery(() => userService.getUserById({ id: "null" }))?.data?.DT;
     let messageError = 'Vui lòng nhập thông tin!';
     let listSpecialExamination = Object.values(SPECIAL_EXAMINATION).map((item) => { return { value: item.value, label: item.label + (item?.description ? " (" + item.description + ")" : "") } });
     let currentResidentData = profileData?.currentResident?.split("%") || [];
     let [province, setProvince] = useState([]);
     let [listFolk, setListFolk] = useState([]);
+    let [showOldParaclinicalModal, setShowOldParaclinicalModal] = useState(false);
+    let [oldParaclinical, setOldParaclinical] = useState(null);
     let [currentListDistrict, setCurrentListDistrict] = useState([]);
     let [currentListWard, setCurrentListWard] = useState([]);
-    let [currentProvinceId, setCurrentProvinceId] = useState();
-    let [currentDistrictId, setCurrentDistrictId] = useState();
+    let [currentProvinceId, setCurrentProvinceId] = useState(+currentResidentData[3] || null);
+    let [currentDistrictId, setCurrentDistrictId] = useState(+currentResidentData[2] || null);
     let { data: provinceData } = useQuery(() => apiService.getAllProvince())
-    let { data: currentDistrictList } = useQuery(
-        () => currentProvinceId && apiService.getDistrictByProvinceId(currentProvinceId),
-        [currentProvinceId]
-    );
-    let { data: currentWardList } = useQuery(
-        () => currentDistrictId && apiService.getWardByDistrictId(currentDistrictId),
-        [currentDistrictId]
-    );
     let { data: folkData } = useQuery(() => userService.getFolk());
     useEffect(() => {
         if (provinceData) {
@@ -41,35 +36,47 @@ const BookingPersonal = (props) => {
             })
             setProvince(_province);
             setCurrentProvinceId(+currentResidentData[3]);
+
         }
     }, [provinceData])
+
     useEffect(() => {
-        if (currentDistrictList && currentProvinceId) {
-            let _district = currentDistrictList.data?.map((item) => {
-                return {
-                    value: +item.id,
-                    label: item.full_name
-                }
-            })
-            setCurrentListDistrict(_district);
-            setCurrentDistrictId(+currentResidentData[2]);
+        if (currentProvinceId) {
+            apiService.getDistrictByProvinceId(currentProvinceId).then((districtList) => {
+                let _district = districtList.data?.map((item) => {
+                    return {
+                        value: +item.id,
+                        label: item.full_name
+                    }
+                });
+                setCurrentListDistrict(_district);
+                setCurrentDistrictId(+currentResidentData[2]);
+            }).catch(error => {
+                console.error("Error fetching districts:", error);
+            });
         } else {
             setCurrentListDistrict([]);
         }
-    }, [currentDistrictList])
+    }, [currentProvinceId]);
+
     useEffect(() => {
-        if (currentWardList && currentDistrictId) {
-            let _ward = currentWardList.data?.map((item) => {
-                return {
-                    value: +item.id,
-                    label: item.full_name
-                }
-            })
-            setCurrentListWard(_ward);
+        if (currentDistrictId) {
+            apiService.getWardByDistrictId(currentDistrictId).then((wardList) => {
+                let _ward = wardList.data?.map((item) => {
+                    return {
+                        value: +item.id,
+                        label: item.full_name
+                    }
+                });
+                setCurrentListWard(_ward);
+            }).catch(error => {
+                console.error("Error fetching wards:", error);
+            });
         } else {
             setCurrentListWard([]);
         }
-    }, [currentWardList])
+    }, [currentDistrictId]);
+
     useEffect(() => {
         if (folkData) {
             let _folk = folkData.DT.map((item) => { return { value: +item.id, label: item.name } })
@@ -88,7 +95,6 @@ const BookingPersonal = (props) => {
                 symptom: profile?.symptom || "",
                 gender: +(profile?.gender || 0),
                 phoneNumber: profile?.phoneNumber || "",
-                special: profile?.special || "",
                 folk: profile?.folk || null,
                 province: +currentResidentData[3] || null,
                 district: +currentResidentData[2] || null,
@@ -96,8 +102,10 @@ const BookingPersonal = (props) => {
                 address: currentResidentData[0] || "",
                 special: profile?.special || listSpecialExamination[0].value,
             })
+            setOldParaclinical(profile?.oldParaclinical || null);
         }
     }, [profileData])
+
     const onFinish = async (values) => {
         const obFolk = listFolk.find((item) => item.value === values.folk);
         const obProvince = province.find((item) => item.value === values.province);
@@ -121,6 +129,7 @@ const BookingPersonal = (props) => {
             obDistrict,
             obWard,
             address: values.address,
+            oldParaclinical: oldParaclinical,
         }
         props.next(data);
         form.resetFields();
@@ -128,6 +137,7 @@ const BookingPersonal = (props) => {
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+
     return (
         <>
             <div className="header">
@@ -297,7 +307,8 @@ const BookingPersonal = (props) => {
                                 </Form.Item>
                             </Col>
                             <Col className="mt-2" xs={24}>
-                                <div className="d-flex justify-content-end w-100">
+                                <div className="d-flex flex-wrap justify-content-end w-100 gap-2">
+                                    <Button onClick={() => setShowOldParaclinicalModal(true)} className="btn-old-paraclinical">Thêm phiếu xét nghiệm</Button>
                                     <Button type="primary" htmlType="submit" className="register-button" >
                                         Tiếp theo
                                     </Button>
@@ -307,6 +318,12 @@ const BookingPersonal = (props) => {
                     </Form>
                 </div>
             </div>
+            <OldParaclinicalModal
+                visible={showOldParaclinicalModal}
+                onCancel={() => setShowOldParaclinicalModal(false)}
+                oldParaclinical={oldParaclinical}
+                onSave={(value) => setOldParaclinical(value)}
+            />
 
         </>
     )

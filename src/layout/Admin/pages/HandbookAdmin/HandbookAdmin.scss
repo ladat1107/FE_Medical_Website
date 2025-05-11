@@ -1,25 +1,22 @@
-@import "../../../../style/variables.scss";
-
 .admin-hanbook-content {
     display: flex;
     justify-content: center; // Căn giữa theo chiều ngang
     align-items: center; // Căn giữa theo chiều dọc
     height: 100%;
-
-    background: $background-color;
+    background: var(--background-color);
 
     .container {
         padding: 0 3%;
         margin: 0;
-        background: $background-color;
+        background: var(--background-color);
 
         .filter {
             border-radius: 10px;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
             background: white;
             padding: 5px;
             height: fit-content;
-            color: $primary-color-admin;
+            color: var(--primary-color-admin);
             font-weight: 600;
 
             .list-tag {

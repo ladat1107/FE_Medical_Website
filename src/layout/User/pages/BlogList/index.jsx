@@ -1,8 +1,6 @@
 
 
 import React, { useEffect, useState } from 'react'
-import classNames from "classnames/bind";
-import styles from "./blogList.module.scss";
 import HeadBlogList from './HeadBlogList';
 import Container from '@/components/Container';
 import BodyBlogList from './BodyBlogList';
@@ -10,16 +8,12 @@ import { useLocation, useParams } from 'react-router-dom';
 import userService from '@/services/userService';
 import { TAGS } from '@/constant/value';
 import useQuery from '@/hooks/useQuery';
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+
 
 const BlogList = () => {
    let { id } = useParams();
    let location = useLocation();
    let [listHead, setListHead] = useState([]);
-   let [list1, setList1] = useState([]);
-   let [list2, setList2] = useState([]);
-   let [list3, setList3] = useState([]);
    const {
       data: handbookData,
    } = useQuery(() => userService.getHandbook({ tags: TAGS[2].label + "," + TAGS[4].label + "," + TAGS[5].label, limit: 100 }));
@@ -44,9 +38,6 @@ const BlogList = () => {
          } else {
             setListHead(_list3)
          }
-         setList1(_list1);
-         setList2(_list2);
-         setList3(_list3);
       }
    }, [handbookData, location])
    return (
@@ -55,11 +46,10 @@ const BlogList = () => {
          {listHead?.length > 0 && <HeadBlogList
             list={listHead}
             id={id - 1} />}
-         {list1?.length > 0 && list2?.length > 0 && list3?.length > 0 && <BodyBlogList
-            list1={list1}
-            list2={list2}
-            list3={list3}
-         />}
+         {listHead?.length > 0 &&
+            <BodyBlogList
+               listHandbook={listHead}
+            />}
 
       </Container>
 

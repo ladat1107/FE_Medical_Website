@@ -23,4 +23,52 @@
         margin-left: 5px;
         margin-right: 5px;
     }
+
+    .special-old{
+        background: #ffe3dc;
+        color: #FF7752;
+        text-align: center;
+        border: 1.5px solid #FF7752;
+        border-radius: 8px;
+        width: 70%;
+        font-size: 13px;
+    }
+
+    .special-children{
+        background: #DDFCED;
+        color: #3AA472;
+        text-align: center;
+        border: 1.5px solid #3AA472;
+        border-radius: 8px;
+        width: 70%;
+        font-size: 13px;
+    }
+
+    .special-disabled{
+        background: #DFEFFF;
+        color: #007BFF;
+        text-align: center;
+        border: 1.5px solid #007BFF;
+        border-radius: 8px;
+        width: 70%;
+        font-size: 13px;
+    }
+
+    .special-pregnant{
+        background: #FFD5D8;
+        color: #ff4851;
+        text-align: center;
+        border: 1.5px solid #ff4851;
+        border-radius: 8px;
+        width: 70%;
+        font-size: 13px;
+    }
+
+    .bold-text{
+        font-weight: 600;
+    }
+
+    .sub-text{
+        color: gray;
+    } 
 }

@@ -4,6 +4,16 @@ const axiosInstance = axios.create({
     // baseURL: 'https://api.nosomovo.xyz/',
     withCredentials: false,
 });
+
+axiosInstance.interceptors.response.use(
+    (response) => {
+        return response.data;
+    },
+    async (error) => {
+        console.log("error", error);
+        return Promise.reject(error);
+    }
+);
 export const apiService = {
     // getAllFolk() {
     //     return axiosInstance.get(`https://api.nosomovo.xyz/ethnic/getalllist/`)
@@ -26,4 +36,7 @@ export const apiService = {
     getWardByDistrictId(id) {
         return axiosInstance.get(`https://esgoo.net/api-tinhthanh/3/${id}.htm`)
     },
+    getFullAddress(id) {
+        return axiosInstance.get(`https://esgoo.net/api-tinhthanh/5/${id}.htm`)
+    }
 }

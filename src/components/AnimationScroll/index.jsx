@@ -4,8 +4,8 @@ import './animationScroll.scss';
 const AnimateOnScroll = ({
   children,
   animationClass = 'animate',
-  rootMargin = '-18% 0px -12% 0px', 
-  threshold = 0.5, 
+  rootMargin = '-18% 0px -12% 0px',
+  threshold = 0.5,
 }) => {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);

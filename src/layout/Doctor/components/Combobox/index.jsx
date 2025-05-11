@@ -2,10 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './SelectBox.scss'; 
 
-const SelectBox = ({ options, value, onChange, placeholder }) => {
+const SelectBox = ({ options, value, onChange, placeholder, disabled }) => {
+  // Check if value is null, undefined, or should display placeholder
+  const isPlaceholderVisible = value === null || value === undefined || value === '';
+  
   return (
     <div className="select-box">
-      <select value={value} onChange={onChange} className="select">
+      <select 
+        value={isPlaceholderVisible ? '' : value} 
+        onChange={onChange} 
+        className="select"
+        disabled={disabled}
+      >
+        {placeholder && <option disabled value="">{placeholder}</option>}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
@@ -17,10 +26,20 @@ const SelectBox = ({ options, value, onChange, placeholder }) => {
 };
 
 SelectBox.propTypes = {
-  options: PropTypes.array.isRequired,  // Danh sách các tùy chọn
-  value: PropTypes.string.isRequired,    // Giá trị hiện tại của Select Box
-  onChange: PropTypes.func.isRequired,   // Hàm gọi khi giá trị thay đổi
-  placeholder: PropTypes.string,          // Placeholder cho Select Box
+  options: PropTypes.array.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.oneOf([null])
+  ]),
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  disabled: PropTypes.bool,
+};
+
+// Default props to prevent errors when value is not provided
+SelectBox.defaultProps = {
+  disabled: false
 };
 
 export default SelectBox;

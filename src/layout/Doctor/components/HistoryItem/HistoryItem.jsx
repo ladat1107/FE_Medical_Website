@@ -1,14 +1,24 @@
 import { useState } from "react";
 import PropTypes from 'prop-types';
-import "./HistoryItem.scss";
 import { formatDate } from "@/utils/formatDate";
+import './HistoryItem.scss';
+import { formatCurrency } from "@/utils/formatCurrency";
+import { useSelector } from "react-redux";
 
-const HistoryItem = ({ id, data }) => {
+
+const HistoryItem = ({ id, data, onCopyPrescription }) => {
     const [selectedRadio, setSelectedRadio] = useState(null);
+    let { user } = useSelector((state) => state.authen);
 
     const handleRadioChange = (e) => {
         const value = e.target.value;
         setSelectedRadio((prev) => (prev === value ? null : value));
+    };
+
+    const handleCopyPrescription = () => {
+        if (data.prescriptionExamData && data.prescriptionExamData.length > 0) {
+            onCopyPrescription(data.prescriptionExamData[0]);
+        }
     };
 
     const zoomImage = (image) => {
@@ -19,7 +29,7 @@ const HistoryItem = ({ id, data }) => {
         <>
             <div className="history-item-content row">
                 <div className="col-2 mt-4 text-center border-left" style={{ verticalAlign: 'top' }}>
-                    <p style={{ fontWeight: '600', color: '#00B5F1' }}>{formatDate(data.admissionDate)}</p>
+                    <p style={{ fontWeight: '600', color: '#00B5F1' }}>{formatDate(data.dischargeDate)}</p>
                 </div>
                 <div className="col-10 border-right">
                     <div className="row mt-4">
@@ -67,7 +77,7 @@ const HistoryItem = ({ id, data }) => {
                                 </label>
                             </div>
                         </div>
-                        <div className="radio-content">
+                        <div className="radio-content" style={{paddingBottom: '0px'}}>
                             {selectedRadio === `vitalsign + ${id}` && (
                                 <div className="mt-2">
                                     {data.examinationVitalSignData ? (
@@ -111,7 +121,8 @@ const HistoryItem = ({ id, data }) => {
                                                             <span 
                                                                 onClick={() => zoomImage(item.image)} 
                                                                 style={{ fontStyle: 'italic', textDecoration: 'underline', color: '#007BFF', cursor: 'pointer' }}>Nhấn để xem
-                                                            </span>}
+                                                            </span>
+                                                        }
                                                         </p>
                                                     </div>
                                                     <div className="col-12 col-lg-12">
@@ -131,25 +142,33 @@ const HistoryItem = ({ id, data }) => {
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
                                                 <tr>
-                                                    <th style={headerStyle}>Tên thuốc</th>
-                                                    <th style={headerStyle}>Số lượng</th>
-                                                    <th style={headerStyle}>Giá</th>
-                                                    <th style={headerStyle}>Liều dùng</th>
+                                                    <th>Tên thuốc</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Đơn giá</th>
+                                                    <th>Liều dùng</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {data.prescriptionExamData[0]?.prescriptionDetails.map((item, index) => (
                                                     <tr key={index}>
-                                                        <td style={cellStyle} >{item.name}</td>
-                                                        <td style={cellStyle}>{item.PrescriptionDetail.quantity}</td>
-                                                        <td style={cellStyle}>{item.price} VNĐ</td>
-                                                        <td style={cellStyle}>{item.PrescriptionDetail.dosage}</td>
+                                                        <td>{item.name}</td>
+                                                        <td>{item.PrescriptionDetail.quantity}</td>
+                                                        <td>{formatCurrency(item.price)}</td>
+                                                        <td>{item.PrescriptionDetail.dosage}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     ) : (
                                         <div className="mt-3" style={{ textAlign: 'start' }}>Không có thông tin đơn thuốc</div>
+                                    )}
+                                    
+                                    {(user.role === 3 || user.role ===4) && data.prescriptionExamData && data.prescriptionExamData.length > 0 && (
+                                        <div className="mt-3 text-end">
+                                            <button className="copy-prescription-btn" onClick={handleCopyPrescription}>
+                                                <i className="fa-regular fa-copy"></i> Copy đơn thuốc
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             )}
@@ -161,21 +180,11 @@ const HistoryItem = ({ id, data }) => {
     );
 };
 
-const headerStyle = {
-    border: '1px solid #333',
-    padding: '8px',
-    textAlign: 'center',
-    backgroundColor: '#F4F7FE',
-};
 
-const cellStyle = {
-    border: '1px solid #333',
-    padding: '8px',
-    textAlign: 'center',
-};
 HistoryItem.propTypes = {
     id: PropTypes.number.isRequired,
     data: PropTypes.object.isRequired,
+    onCopyPrescription: PropTypes.func
 };
 
 export default HistoryItem;

@@ -9,6 +9,9 @@ export const handleConfirmUser = (data) => {
 export const handleLogin = (data) => {
     return axios.post(`/api/handleLogin`, data)
 }
+export const handleLogoutService = () => {
+    return axios.post(`/api/handleLogout`)
+}
 export const handleForgotPassword = (data) => {
     return axios.post(`/api/forgotPassword`, data)
 }
@@ -163,3 +166,30 @@ export const arrangeSchedule = (data) => {
 export const getStatisticalAppoinment = (query) => {
     return axios.get(`/api/admin/getStatisticalAppoinment`, { params: query })
 }
+
+// MEDICINE MANAGEMENT
+export const getAllMedicinesAdmin = () => {
+    return axios.get(`/api/admin/getAllMedicinesAdmin`)
+}
+export const createMedicine = (data) => {
+    return axios.post(`/api/admin/createMedicine`, data)
+}
+export const updateMedicine = (data) => {
+    return axios.put(`/api/admin/updateMedicineAdmin`, data)
+}
+export const deleteMedicine = (data) => {
+    return axios.delete(`/api/admin/deleteMedicine`, { data: { id: data.id } })
+}
+export const blockMedicine = (data) => {
+    return axios.put(`/api/admin/blockMedicine`, data)
+}
+
+// EXAMINATION MANAGEMENT
+export const getAllExaminationsAdmin = (query = null) => {
+    return axios.get(`/api/admin/getAllExaminationsAdmin`, { params: query })
+}
+
+export const getExaminationByIdAdmin = (id) => {
+    return axios.get(`/api/admin/getExaminationByIdAdmin?id=${id}`)
+}
+

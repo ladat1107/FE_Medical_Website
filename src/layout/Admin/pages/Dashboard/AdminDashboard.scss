@@ -1,7 +1,4 @@
-@import "/src//style/variables.scss";
-
 .admin-dashboard {
-
 
     .bg-bor15 {
         background: white;
@@ -29,7 +26,7 @@
                 .text-head {
                     font-size: 20px;
                     font-weight: 600;
-                    color: $primary-color-admin;
+                    color: var(--primary-color-admin);
                 }
 
                 .number {

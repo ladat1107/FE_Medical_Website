@@ -1,0 +1,150 @@
+.print-prescription {
+    background: rgb(204, 203, 203);
+    display: flex;
+    justify-content: start;
+    min-height: 100vh;
+
+    .prescription {
+        width: 148mm;
+        min-height: 210mm;
+        margin: 0 auto;
+        padding: 10mm 20px;
+        background: white;
+        font-size: 11pt;
+        line-height: 1.2;
+        font-family: "Times New Roman", Times, serif;
+      
+        &__header {
+            text-align: center;
+            margin-bottom: 12px;
+
+            h1 {
+                font-size: 12pt;
+                font-weight: bold;
+                margin: 0 0 3px;
+            }
+
+            p {
+                margin: 0;
+                font-size: 11pt;
+            }
+        }
+
+        &__title {
+            text-align: center;
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        &__info {
+            margin-bottom: 12px;
+        }
+
+        &__row {
+            margin: 3px 0;
+            display: flex;
+            gap: 4px;
+
+            .label-name {
+                text-transform: uppercase;
+            }
+
+            &--multi {
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+
+                >div {
+                    display: flex;
+                    gap: 4px;
+                }
+            }
+        }
+
+        &__label {
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        &__medications {
+            margin: 12px 0;
+
+            ol {
+                margin: 8px 0;
+                padding: 0 16px;
+
+                li {
+                    margin-bottom: 8px;
+                }
+            }
+        }
+
+        &__med-name {
+            font-weight: 600;
+            font-size: 11pt;
+        }
+
+        &__med-dosage {
+            margin-left: 16px;
+            font-size: 11pt;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        &__med-quantity {
+            text-align: right;
+            font-size: 11pt;
+        }
+
+        &__notes {
+            font-style: italic;
+            margin: 12px 0;
+        }
+
+        &__footer {
+            display: flex;
+            align-items: end;
+            flex-direction: column;
+            margin-top: 6px;
+            font-size: 11pt;
+        }
+
+        &__date {
+            width: 40%;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        &__signature {
+            width: 40%;
+            text-align: center;
+
+            p {
+                margin: 3px 0;
+            }
+        }
+
+        &__signature-note {
+            font-style: italic;
+            font-size: 11pt;
+        }
+
+        &__doctor {
+            margin-top: 50px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        &__footnote {
+            margin-top: 16px;
+            font-style: italic;
+            font-size: 10pt;
+
+            p {
+                margin: 2px 0;
+            }
+        }
+    }
+
+}

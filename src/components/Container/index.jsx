@@ -7,7 +7,7 @@ const cx = classNames.bind(styles);
 import React from "react";
 
 const Container = ({ children }) => {
-  return <div className={cx('container')} >   {children}</div>;
+  return <div className={cx('container')} >{children}</div>;
 };
 
 export default Container;

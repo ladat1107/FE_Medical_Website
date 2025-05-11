@@ -9,8 +9,8 @@ const useQuery = (promise, dependencies = []) => {
     setLoading(true); // get query from where ???
     try {
       const res = await promise(query);
-      if (res?.data) {
-        setData(res?.data || []);
+      if (res) {
+        setData(res || []);
       }
     } catch (error) {
       console.log("error", error);

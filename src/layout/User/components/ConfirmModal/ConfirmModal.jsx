@@ -28,10 +28,10 @@ const ConfirmModal = (props) => {
     let handleDelete = async () => {
         if (props.table === TABLE.EXAMINATION) {
             let response = await userService.cancelAppoinment(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
+            if (response && response.data && response.EC === 0) {
+                susscess(response?.EM || "Thành công")
             } else {
-                message.error(response.data.EM);
+                message.error(response.EM);
             }
         }
 
