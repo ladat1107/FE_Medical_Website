@@ -4,7 +4,7 @@ import ListUser from './listUser'; // Make sure this path is correct
 
 const SelectionItem = forwardRef(({ dataUser, onCheckedUsersChange, checkedUsers }, ref) => {
     const listUserRef = useRef(null);
-
+    
     useImperativeHandle(ref, () => ({
         resetAllChecks: () => {
             if (listUserRef.current && listUserRef.current.resetCheckedUsers) {
@@ -21,7 +21,7 @@ const SelectionItem = forwardRef(({ dataUser, onCheckedUsersChange, checkedUsers
 
     return (
         <div className="selection-item">
-            <ListUser
+            <ListUser 
                 ref={listUserRef}
                 data={dataUser}
                 onCheckedUsersChange={onCheckedUsersChange}

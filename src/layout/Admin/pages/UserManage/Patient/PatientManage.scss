@@ -39,6 +39,7 @@
         .table-responsive {
             border-radius: 10px;
             box-shadow: var(--box-shadow-content-admin);
+            scrollbar-width: none;
 
             .header {
                 width: 100%;

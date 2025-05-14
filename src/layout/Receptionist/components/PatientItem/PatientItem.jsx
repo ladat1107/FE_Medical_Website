@@ -5,7 +5,7 @@ import { updateExamination } from '@/services/doctorService';
 import { message } from 'antd';
 import './PatientItem.scss';
 
-const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, visit_status, downItem, onClickItem, sort, status = 0 }) => {
+const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, visit_status, downItem, onClickItem, sort, status = 0, doctorHeader = 'Bác sĩ' }) => {
 
   const handleDownItem = async (event) => {
     event.stopPropagation();
@@ -98,7 +98,7 @@ const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, vis
       <div className="col-2">
         {status === 0 ? 
           <>
-            <p className="bold-text">{symptom === "paraclinical" ? "" : doctor.trim() === '' ? '' : "Bác sĩ"}</p>
+            <p className="bold-text">{doctorHeader}</p>
             <p className="sub-text"> {doctor}  </p>
           </> : <>
             <p className="sub-text">
@@ -136,6 +136,7 @@ PatientItem.propTypes = {
   downItem: PropTypes.func,
   onClickItem: PropTypes.func,
   sort: PropTypes.bool,
-  status: PropTypes.number
+  status: PropTypes.number,
+  doctorHeader: PropTypes.string,
 };
 export default PatientItem;

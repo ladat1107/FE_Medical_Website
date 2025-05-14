@@ -1,4 +1,4 @@
-import { createMedicine, getAllMedicinesAdmin, updateMedicine } from "@/services/adminService";
+import { createMedicine, getAllMedicinesAdmin, getPrescriptionUsed, updateMedicine } from "@/services/adminService";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetAllMedicinesAdmin = () => {
@@ -8,6 +8,12 @@ export const useGetAllMedicinesAdmin = () => {
         placeholderData: keepPreviousData,
     })
 };
+export const useGetPrescriptionUsed = (query) => {
+    return useQuery({
+        queryKey: ["prescriptionUsed", query],
+        queryFn: () => getPrescriptionUsed(query),
+    })
+}
 
 export const useCreateMedicine = () => {
     return useMutation({

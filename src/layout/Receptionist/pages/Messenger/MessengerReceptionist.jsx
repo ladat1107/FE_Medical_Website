@@ -222,7 +222,7 @@ const MessengerReceptionist = () => {
                             }}
                         >
                             <Header className="flex items-center justify-start gap-2 bg-primary-tw text-white p-4 text-center text-lg font-semibold">
-                                <ArrowLeft className="cursor-pointer" onClick={() => navigate(PATHS.STAFF.DASHBOARD)} />
+                                <ArrowLeft className="cursor-pointer" onClick={() => navigate(PATHS.RECEPTIONIST.DASHBOARD)} />
                                 <span>Danh sách tin nhắn</span>
                             </Header>
                             <div className="p-2 mb-2">

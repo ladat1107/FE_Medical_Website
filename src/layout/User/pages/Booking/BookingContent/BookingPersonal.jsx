@@ -26,6 +26,7 @@ const BookingPersonal = (props) => {
     let [currentDistrictId, setCurrentDistrictId] = useState(+currentResidentData[2] || null);
     let { data: provinceData } = useQuery(() => apiService.getAllProvince())
     let { data: folkData } = useQuery(() => userService.getFolk());
+    
     useEffect(() => {
         if (provinceData) {
             let _province = provinceData.data?.map((item) => {
@@ -52,7 +53,7 @@ const BookingPersonal = (props) => {
                 setCurrentListDistrict(_district);
                 setCurrentDistrictId(+currentResidentData[2]);
             }).catch(error => {
-                console.error("Error fetching districts:", error);
+                console.error("Lỗi khi lấy danh sách quận/huyện:", error);
             });
         } else {
             setCurrentListDistrict([]);
@@ -83,6 +84,7 @@ const BookingPersonal = (props) => {
             setListFolk(_folk);
         }
     }, [folkData])
+   
     useEffect(() => {
         if (profileData) {
             let profile = profileData;

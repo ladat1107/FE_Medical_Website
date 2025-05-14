@@ -233,15 +233,7 @@ const ServiceOfRoom = () => {
                                 <table className="w-100">
                                     <thead className="header">
                                         <tr>
-                                            <th scope="col" className="rounded-top-left p-2">
-                                                <div>
-                                                    <Checkbox
-                                                        checked={checkAll}
-                                                        onChange={() => { handleChangeSelectedAll() }}
-                                                        size="small"
-                                                    />
-                                                </div>
-                                            </th>
+                                            <th scope="col" className=" text-center px-1">#</th>
                                             <th scope="col" className="px-1 name">Tên dịch vụ</th>
                                             <th scope="col" className=" text-end pe-5">Giá</th>
                                             <th scope="col" className=" px-1 ps-3">Mô tả</th>
@@ -255,17 +247,10 @@ const ServiceOfRoom = () => {
                                                 +listServiceType.length > 0 && +totalPages != 0 ?
                                                     <>
                                                         {
-                                                            listServiceType.map((item, index) => {
+                                                            listServiceType.map((item) => {
                                                                 return (
                                                                     <tr key={item.id}>
-                                                                        <td className="p-2">
-                                                                            <div>
-                                                                                <Checkbox
-                                                                                    checked={item.checked}
-                                                                                    onChange={() => { handleChange(item, index) }}
-                                                                                    size="small"
-                                                                                /></div>
-                                                                        </td>
+                                                                        <td className="text-center px-1 py-3">{item?.id || "_"}</td>
                                                                         <td title={item.name} className="px-1 py-3 text-uppercase " >
                                                                             <div className="name "> {item?.name || "Khác"}</div>
                                                                         </td>

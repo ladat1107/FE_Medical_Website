@@ -11,7 +11,7 @@ const Status = (props) => {
         // </div>
         <div className="status-content">
             <span className={`status-${+props?.data === 1 ? "on" : "off"}`}>
-                <span>{+props?.data === 1 ? "Hoạt động" : "Khóa"}</span>
+                <span className="whitespace-nowrap">{+props?.data === 1 ? "Hoạt động" : "Khóa"}</span>
             </span>
         </div>
     )

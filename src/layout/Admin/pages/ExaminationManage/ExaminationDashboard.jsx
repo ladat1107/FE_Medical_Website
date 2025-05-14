@@ -16,8 +16,8 @@ const { Option } = Select
 const ExaminationDashboard = () => {
   const [dateRange, setDateRange] = useState([dayjs().subtract(1, "month"), dayjs()]);
   const [timeFrame, setTimeFrame] = useState("month");
-  const { data: examinationData, isLoading: isLoadingExamination, refetch: refetchExamination, isFetching: isFetchingExamination } = useGetExamination(dateRange ? { startDate: dateRange[0].format("YYYY-MM-DD HH:mm:ss"), endDate: dateRange[1].format("YYYY-MM-DD HH:mm:ss") } : null)
-  const { data: appointmentData, isLoading: isLoadingAppointment, refetch: refetchAppointment, isFetching: isFetchingAppointment } = useGetExamination({ startDate: dayjs().format("YYYY-MM-DD HH:mm:ss"), endDate: dayjs().add(1, "year").format("YYYY-MM-DD HH:mm:ss") })
+  const { data: examinationData, isLoading: isLoadingExamination, refetch: refetchExamination, isFetching: isFetchingExamination } = useGetExamination(dateRange ? { startDate: dateRange[0].format("YYYY-MM-DD 00:00:00"), endDate: dateRange[1].format("YYYY-MM-DD 23:59:59") } : null)
+  const { data: appointmentData, isLoading: isLoadingAppointment, refetch: refetchAppointment, isFetching: isFetchingAppointment } = useGetExamination({ startDate: dayjs().format("YYYY-MM-DD 00:00:00"), endDate: dayjs().add(1, "year").format("YYYY-MM-DD 23:59:59") })
   const [appointments, setAppointments] = useState([]);
   const [activeTab, setActiveTab] = useState("1")
   const [stats, setStats] = useState({
@@ -74,7 +74,7 @@ const ExaminationDashboard = () => {
     refetchExamination()
     refetchAppointment()
   }
-  
+
   const handleTimeFrameChange = (value) => {
     if (value === "today") {
       setDateRange([dayjs(), dayjs()])

@@ -8,6 +8,7 @@ import { message, Pagination } from 'antd';
 import { useSelector } from 'react-redux';
 import { removeExtraSpaces } from '@/utils/formatString';
 import { useNotification } from '@/contexts/NotificationContext';
+import NotificationSkeleton from './Skeletons/NotificationSkeleton';
 
 const Notification = () => {
     let { user } = useSelector((state) => state.authen);
@@ -141,7 +142,7 @@ const Notification = () => {
                         <button
                             className='button'
                             onClick={handleMarkAllAsRead}
-                            disabled={(unreadCount === 0) && (socketUnreadCount === 0) && (notiData?.count === 0)} 
+                            disabled={(unreadCount === 0) && (socketUnreadCount === 0) && (notiData?.count === 0)}
                         >
                             <i className="fa-solid fa-check" ></i>
                             Đánh dấu tất cả đã đọc
@@ -188,30 +189,14 @@ const Notification = () => {
                 <div className="d-flex justify-content-between align-items-center">
                     <div className='text'>Thông báo</div>
                 </div>
-                {loading ? (
-                    <div>
-                        Không có biết nữa...
-                    </div>
-                ) : (
+                {!loading &&
                     <>
-                        {unreadCount === 0 ? (
-                            <div>
-                                Không có thông báo mới nào!
-                            </div>
-                        ) : (
-                            <div>
-                                Bạn có {unreadCount} thông báo chưa đọc!
-                            </div>
-                        )}
-                    </>
-                )}
+                        {unreadCount === 0 ? (<div>Không có thông báo mới nào!</div>)
+                            : (<div>Bạn có {unreadCount} thông báo chưa đọc!</div>)}
+                    </>}
             </div>
             {loading ? (
-                <div className='loading'>
-                    <div className='spinner-border text-primary' role='status'>
-                        <span className='visually-hidden'>Loading...</span>
-                    </div>
-                </div>
+                <NotificationSkeleton />
             ) : (
                 <div className='send-noti-content'>
                     <div className="radio-noti-inputs row">

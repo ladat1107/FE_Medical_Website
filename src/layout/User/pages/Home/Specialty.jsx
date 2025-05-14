@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useQuery from '@/hooks/useQuery';
 import userService from '@/services/userService';
 import { Skeleton } from 'antd';
@@ -21,7 +21,7 @@ const Specialty = () => {
     getItemsToShow(listSpecialty, false)
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       if (!showAll) {
         setItemsToShow(getItemsToShow(listSpecialty, false));
@@ -31,14 +31,14 @@ const Specialty = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [listSpecialty, showAll]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setItemsToShow(getItemsToShow(listSpecialty, showAll));
   }, [showAll, listSpecialty]);
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 pb-12">
       <h2 className="text-2xl md:text-3xl font-bold text-secondaryText-tw mb-8 text-center">
-        Chuyên Khoa
+        CHUYÊN KHOA
       </h2>
 
       <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-4 md:gap-6">

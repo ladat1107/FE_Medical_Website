@@ -1,6 +1,6 @@
 "use client"
 import { useGetExaminationById } from "@/hooks"
-import { Drawer, Tag, Divider, Button, Empty, Statistic, Row, Col, Card, Typography, Collapse } from "antd"
+import { Drawer, Tag, Divider, Button, Empty, Statistic, Row, Col, Card, Typography, Collapse, message } from "antd"
 import {
   User,
   Stethoscope,
@@ -39,6 +39,7 @@ import { useEffect, useState } from "react"
 import { formatDate } from "@/utils/formatDate"
 import PaymentTooltip from "../../components/Tooltip/PaymentTooltip"
 import ExaminationDetailSkeleton from "./Skeletons/ExaminationDetailSkeleton"
+import dayjs from "dayjs"
 const { Title, Text } = Typography
 const { Panel } = Collapse
 
@@ -68,9 +69,10 @@ const getStatusTag = (status) => {
 }
 
 const isSameDay = (date1, date2) => {
-  const d1 = new Date(date1).toISOString().slice(0, 10);
-  const d2 = new Date(date2).toISOString().slice(0, 10);
-  return d1 === d2
+  if (!date1 || !date2) return false
+  const d1 = dayjs(date1)
+  const d2 = dayjs(date2)
+  return d1.isSame(d2, "day")
 }
 
 const getDischargeStatusTag = (status) => {
@@ -502,7 +504,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                       <div className="flex justify-between">
                         <Text type="secondary">Tuyến khám:</Text>
                         <Text>
-                          {examinationData?.isWrongTreatment === 0
+                          {!examinationData?.isWrongTreatment ? "_" : examinationData?.isWrongTreatment === 0
                             ? `Đúng tuyến`
                             : "Trái tuyến"}
                         </Text>

@@ -12,8 +12,8 @@ import { faAddressCard } from '@fortawesome/free-regular-svg-icons';
 import Register from './Register';
 import ForgotPassword from './ForgotPassword';
 import socket, { authenticateSocket } from "@/Socket/socket";
-import { BASE_URL } from "@/constant/environment";
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { BACKEND_URL } from '@/constant/environment';
 const Login = () => {
     const open = {
         login: "login",
@@ -171,7 +171,7 @@ const Login = () => {
                                             rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
                                         >
                                             <Input
-                                                className="border-2 border-primary-tw rounded-lg text-base h-10 px-3"
+                                                className="border-2 border-primary-tw focus:!border-primary-tw-light hover:!border-primary-tw-light rounded-lg text-base h-10 px-3"
                                                 placeholder="Email"
                                                 onFocus={() => setShowSavedAccounts(true)}
                                                 onBlur={() => setTimeout(() => setShowSavedAccounts(false), 200)}
@@ -190,7 +190,7 @@ const Login = () => {
                                 }
 
                                 <Form.Item name="password" rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}>
-                                    <Input.Password className='border-2 border-primary-tw rounded-lg text-base h-10 px-3' placeholder='Mật khẩu' />
+                                    <Input.Password className='border-2 border-primary-tw border-primary-tw focus:!border-primary-tw-light hover:!border-primary-tw-light rounded-lg text-base h-10 px-3' placeholder='Mật khẩu' />
                                 </Form.Item>
                                 <Row>
                                     <Col span={12}>
@@ -201,13 +201,13 @@ const Login = () => {
                                         </Checkbox>
                                     </Col>
                                     <Col span={12}>
-                                        <span className="block text-right text-xs text-secondary-tw cursor-pointer" onClick={() => setIsShow(open.forgotPassword)}>
+                                        <span className="block text-right text-xs text-secondaryText-tw cursor-pointer" onClick={() => setIsShow(open.forgotPassword)}>
                                             Quên mật khẩu?
                                         </span>
                                     </Col>
                                 </Row>
                                 <Button loading={isLoading} type="primary" htmlType="submit"
-                                    className="w-full bg-primary-tw h-10 text-lg rounded-lg mt-4 hover:bg-blue-400 transition-colors">
+                                    className="w-full bg-primary-tw h-10 text-lg rounded-lg mt-4 hover:!bg-primary-tw-light">
                                     Đăng nhập
                                 </Button>
                             </Form>
@@ -215,7 +215,7 @@ const Login = () => {
                             <div className="w-[90%] flex flex-col gap-2.5">
                                 <Button icon={<FontAwesomeIcon icon={faGoogle} />}
                                     className="w-full bg-white text-black border rounded-lg hover:border-primary-tw hover:text-primary-tw transition-colors"
-                                    onClick={() => window.location.href = `${BASE_URL}/auth/google`}>
+                                    onClick={() => window.location.href = `${BACKEND_URL}/auth/google`}>
                                     Đăng nhập với Google
                                 </Button>
                             </div>

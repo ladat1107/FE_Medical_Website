@@ -1,12 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import 'moment/locale/vi';
 import PrescriptionChangeModal from './InpatientModals/PrescriptionChangeModal';
+import { message, Popconfirm } from 'antd';
+import { deletePrescription } from '@/services/doctorService';
 
 const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) => {
     const [showModal, setShowModal] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
+    const [localPresData, setLocalPresData] = useState([]);
+
+    useEffect(() => {
+        setLocalPresData(Array.isArray(prescriptionData) ? [...prescriptionData] : []);
+    }, [prescriptionData]);
     
-    const prescriptionExamData = Array.isArray(prescriptionData) ? prescriptionData : [];
+    const prescriptionExamData = localPresData;
     moment.locale('vi');
     
     // Hàm để hiển thị thứ trong tuần bằng tiếng Việt
@@ -79,6 +87,24 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
     const sortedDates = Object.keys(groupedData).sort((a, b) => {
         return moment(b, 'YYYY-MM-DD').valueOf() - moment(a, 'YYYY-MM-DD').valueOf();
     });
+
+    const handleDeletePrescription = async (id) => {
+        setDeletingId(id);
+        try {
+            const response = await deletePrescription(id);
+            if (response && response.EC === 0) {
+                message.success('Xóa đơn thuốc thành công!');
+                setLocalPresData(prevData => prevData.filter(item => item.id !== id));
+            } else {
+                message.error(response.EM || 'Xóa đơn thuốc thất bại!');
+            }
+        } catch (error) {
+            console.error("Error deleting prescription:", error);
+            message.error('Đã xảy ra lỗi khi xóa đơn thuốc!');
+        } finally {
+            setDeletingId(null);
+        }
+    }
     
     return (
         <div className="inpatient-vitals-content">
@@ -104,9 +130,31 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
                             <div className="flex mb-4" key={prescription.id}>
                                 <div className="inpatient-pres-date" style={{width: '15%'}}>
                                     <p style={{fontSize: '18px', fontWeight: '500'}}>
-                                        {moment(date).format('Từ D [Tháng] M')}
+                                        {prescription.status === 2 ? moment(date).format('D [Tháng] M') : "Đơn mang về"}
                                     </p>
-                                    <p className="gray-p">{getDayOfWeekVi(date)}</p>
+                                    <p className="gray-p">{
+                                        prescription.status === 2 ? getDayOfWeekVi(date) : moment(date).format('Từ D [Tháng] M')
+                                    }</p>
+                                    {prescription.status !== 2 && isEditMode && <>
+                                        <Popconfirm
+                                            title="Xác nhận xóa"
+                                            description="Bạn có chắc chắn muốn xóa xét nghiệm này?"
+                                            onConfirm={() => handleDeletePrescription(prescription.id)}
+                                            okText="Xóa"
+                                            cancelText="Hủy"
+                                        >
+                                            <button 
+                                                className="action-btn action-delete"
+                                                disabled={deletingId === prescription.id}
+                                            >
+                                                {deletingId === prescription.id ? (
+                                                    <i className="fa-solid fa-spinner fa-spin"></i>
+                                                ) : (
+                                                    <i className="fa-solid fa-trash"></i>
+                                                )}
+                                            </button>
+                                        </Popconfirm>
+                                    </>}
                                 </div>
                                 <div className="d-flex flex" style={{width: '85%'}}>
                                     {/* Buổi sáng */}

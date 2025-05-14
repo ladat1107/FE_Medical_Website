@@ -4,7 +4,6 @@ import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { getUser, getUserById } from "@/services/adminService";
-import Checkbox from '@mui/material/Checkbox';
 import PaginateCustom from "@/layout/Admin/components/Paginate/PaginateCustom";
 import DropdownAction from "@/layout/Admin/components/Dropdown/DropdownAction";
 import CreateUserModal from "@/layout/Admin/components/Modal/CreateUserModal";
@@ -24,7 +23,6 @@ const PatientManage = () => {
     let [rowsPerPage, setRowPaper] = useState(10);
     let [listUser, setListUser] = useState([]);
     let [totalPages, setTotalPage] = useState(0);
-    let [checkAll, setCheckAll] = useState(false);
     let [search, setSearch] = useState("");
     let [obUpdate, setObUpdate] = useState(null);
     let [showCreateUserModal, setShowCreateUserModal] = useState(false);
@@ -55,29 +53,12 @@ const PatientManage = () => {
         fetchUsers();
     }, [currentPage, useDebounce(search, 500), rowsPerPage]);
     searchDebounce = useDebounce(search, 500);
-    const handleChange = (item) => {
-        let _listUser = [...listUser];
-        _listUser = _listUser.map(obj =>
-            obj.id === item.id ? { ...obj, checked: !item.checked } : obj
-        );
-        setCheckAll(false);
-        setListUser(_listUser);
-    };
 
-    const handleChangeSelectedAll = () => {
-        let _listUser = [...listUser];
-        setCheckAll(!checkAll);
-        _listUser = _listUser.map(obj =>
-            checkAll === true ? { ...obj, checked: false } : { ...obj, checked: true }
-        );
-        setListUser(_listUser);
-    }
     const handleChangePaginate = (item) => {
         setRowPaper(item);
         setCurrentPage(1);
     }
     const refresh = () => {
-        setCheckAll(false);
         setShowCreateUserModal(false);
         setObUpdate(null);
         setSearch("");
@@ -139,14 +120,8 @@ const PatientManage = () => {
                         <table className="w-100">
                             <thead className="header">
                                 <tr>
-                                    <th scope="col" className="rounded-top-left">
-                                        <div className="">
-                                            <Checkbox
-                                                checked={checkAll}
-                                                onChange={() => { handleChangeSelectedAll() }}
-                                                size="small"
-                                            />
-                                        </div>
+                                    <th scope="col" className=" text-center px-1 py-0 rounded-top-left">
+                                        <div>#</div>
                                     </th>
                                     <th scope="col" className="text-center ps-2 py-0 name">
                                         Họ và tên
@@ -176,13 +151,8 @@ const PatientManage = () => {
                                                 listUser.map((item, index) => {
                                                     return (
                                                         <tr key={index} className="bg-white border-b">
-                                                            <td>
-                                                                <div className="">
-                                                                    <Checkbox
-                                                                        checked={item.checked}
-                                                                        onChange={() => { handleChange(item, index) }}
-                                                                        size="small"
-                                                                    /></div>
+                                                            <td className="text-center px-1 py-3">
+                                                                <div >{item?.id || "_"}</div>
                                                             </td>
                                                             <th scope="row" className="ps-2 py-3 min-content-width g-0" onClick={() => handelPatientClick(item)}>
                                                                 <img className="image" src={item.avatar || LINK.AVATAR_NULL} alt="Jese image" />

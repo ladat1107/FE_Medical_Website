@@ -47,8 +47,8 @@ const Collaboration = () => {
 
   return (
     <div className="flex flex-col items-center justify-center" >
-      <h3 className="text-3xl font-bold my-16 uppercase text-secondaryText-tw" >
-        Được tin tưởng hợp tác và đồng hành
+      <h3 className="text-2xl md:text-3xl px-4 md:px-0 font-bold my-8 md:my-16 uppercase text-secondaryText-tw text-center" >
+        ĐƯỢC TIN TƯỞNG HỢP TÁC VÀ ĐỒNG HÀNH
       </h3>
       <Swiper
         loop={true} // 👈 slide vô tận

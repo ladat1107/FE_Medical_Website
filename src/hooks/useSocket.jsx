@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import { BASE_URL } from '@/constant/environment';
+import { BACKEND_URL } from '@/constant/environment';
 
 const sockets = {};
 const useSocket = (namespace = "") => {
@@ -9,7 +9,7 @@ const useSocket = (namespace = "") => {
     useEffect(() => {
         if (!namespace) return;
 
-        const socketNamespace = namespace ? `${BASE_URL}/${namespace}` : BASE_URL;
+        const socketNamespace = namespace ? `${BACKEND_URL}/${namespace}` : BACKEND_URL;
 
         // Create socket if it doesn't exist for this namespace
         if (!sockets[namespace]) {

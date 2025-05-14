@@ -1,10 +1,6 @@
 import React from "react";
-import { Typography } from "antd";
 import { Link } from "react-router-dom";
 import Container from "@/components/Container";
-
-const { Title } = Typography;
-
 const Instruction = () => {
     const data = [
         {
@@ -18,12 +14,12 @@ const Instruction = () => {
             key: "2",
             role: "Bác sĩ",
             description: "Khám bệnh tạo đơn thuốc, tạo đơn cận lâm sàn.",
-            email: "doctorCuong@gmail.com",
+            email: "doctorTu@gmail.com",
             password: "123456",
         },
         {
             key: "3",
-            role: "Bác sĩ cận lâm sàn",
+            role: "Bác sĩ CLS",
             description: "Thêm kết quả xét nghiệm.",
             email: "doctorLan@gmail.com",
             password: "123456",
@@ -32,14 +28,14 @@ const Instruction = () => {
             key: "4",
             role: "Tiếp nhận",
             description: "Quản lý lịch hẹn, tạo phiếu khám bệnh.",
-            email: "receptionist@gmail.com",
+            email: "receptionist1@gmail.com",
             password: "123456",
         },
         {
             key: "5",
             role: "Thanh toán",
             description: "Thanh toán.",
-            email: "accountant@gmail.com",
+            email: "Test11@gmail.com",
             password: "123456",
         },
         {
@@ -66,8 +62,11 @@ const Instruction = () => {
                         Các tài khoản đăng nhập vào hệ thống
                     </h1>
                     <p className="text-gray-700 text-sm sm:text-base">
-                        Website hiện tại đang được triển khai miễn phí, do đó một số tính năng vẫn còn hạn chế và giao diện chưa hoàn toàn tối ưu trên một số thiết bị. 🖥️📱
+                        Website hiện tại đang được triển khai miễn phí, do đó một số tính năng vẫn còn hạn chế và giao diện <b>chưa hoàn toàn tối ưu</b> trên một số thiết bị. 🖥️📱
                         Chúng tôi đang nỗ lực cải thiện và cập nhật để mang đến trải nghiệm tốt hơn. Rất mong bạn thông cảm và tiếp tục sử dụng!
+                    </p>
+                    <p className="text-gray-700 text-sm sm:text-base font-bold">
+                        Dữ liệu có thể chưa đồng bộ do còn trong quá trình phát triển.
                     </p>
                 </div>
 
@@ -96,9 +95,12 @@ const Instruction = () => {
                 </div>
 
                 {/* Link GitHub (tuỳ chọn) */}
-                <div className="text-sm text-right text-primary-tw mt-4">
-                    <Link to="https://github.com/your-repo-url" target="_blank" rel="noopener noreferrer">
-                        Truy cập GitHub →
+                <div className="flex flex-col items-end text-sm text-right text-primary-tw mt-4">
+                    <Link to="https://github.com/ladat1107/Frontend_Medical_Website_v2.git" target="_blank" rel="noopener noreferrer">
+                        Truy cập GitHub Frontend →
+                    </Link>
+                    <Link to="https://github.com/ladat1107/Backend_Medical_Website.git" target="_blank" rel="noopener noreferrer">
+                        Truy cập GitHub Backend →
                     </Link>
                 </div>
             </Container>

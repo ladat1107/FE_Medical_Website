@@ -223,7 +223,7 @@ export const getListAdvanceMoney = async (page = 1, limit = 20, search ='', stat
     return axios.get(`/api/getListAdvanceMoney?page=${page}&limit=${limit}&search=${search}&statusPay=${statusPay}`);
 }
 
-export const getListInpatients = async (currentDate, toDate, status = 5, currentPage = 1, pageSize = 20, search = '') => {
+export const getListInpatients = async (currentDate = '', toDate = '', status = 5, currentPage = 1, pageSize = 20, search = '') => {
     return axios.get(`/api/getListInpatients?currentDate=${currentDate}&toDate=${toDate}&status=${status}&page=${+currentPage}&limit=${+pageSize}&search=${search}`);
 }
 
@@ -243,10 +243,39 @@ export const deleteVitalSign = async (id) => {
     });
 }
 
+//Chỉ dùng cho nội trú
 export const createPrescription = async (data) => {
     return axios.post(`/api/createPrescription`, data);
 }
 
 export const createAdvanceMoney = async (data) => {
     return axios.post(`/api/createAdvanceMoney`, data);
+}
+
+export const deletePrescription = async (id) => {
+    return axios.delete(`/api/deletePrescription`, {
+        params: {
+            id: id
+        }
+    });
+}
+
+export const getMedicalRecords = async (status, medicalTreatmentTier, page, limit, search) => {
+    return axios.get(`/api/getMedicalRecords?status=${status}&medicalTreatmentTier=${medicalTreatmentTier}&page=${+page}&limit=${+limit}&search=${search}`);
+}
+
+export const createRelative = async (data) => {
+    return axios.post(`/api/createRelative`, data);
+}
+
+export const deleteRelative = async (id) => {
+    return axios.delete(`/api/deleteRelative`, {
+        params: {
+            id: id
+        }
+    });
+}
+
+export const updateInpatientRoom = async (data) => {
+    return axios.post(`/api/updateInpatientRoom`, data);
 }

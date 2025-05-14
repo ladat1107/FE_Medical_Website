@@ -2,6 +2,24 @@
 
     padding-bottom: 10px;
     width: 100%;
+
+    .search-box{
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid rgb(211, 211, 211);  
+        height: 35px;
+        width: 100%;
+        margin-top: 5px;
+        outline: none;
+
+        &:focus{
+            border: 1px solid #007BFF;
+        }
+
+        &:hover{
+            border: 1px solid #007BFF;
+        }
+    }
 }
 
 .inpatient-exam-content{
@@ -202,27 +220,6 @@
                 .vital-actions.visible {
                     opacity: 1;
                 }
-
-                .action-btn {
-                    background: transparent;
-                    border: none;
-                    cursor: pointer;
-                    padding: 5px;
-                    border-radius: 4px;
-                    transition: all 0.2s;
-                }
-
-                .action-btn:hover {
-                    background-color: rgba(0, 0, 0, 0.05);
-                }
-
-                .action-btn i {
-                    color: #007bff;
-                }
-
-                .action-delete i {
-                    color: #F44343;
-                }
             }
         }
 
@@ -309,6 +306,27 @@
         &:hover {
             box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
         }
+    }
+
+    .action-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .action-btn i {
+        color: #007bff;
+    }
+
+    .action-delete i {
+        color: #F44343;
     }
 
     .restore-button.disabled {

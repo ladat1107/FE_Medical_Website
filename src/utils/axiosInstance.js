@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL } from "@/constant/environment";
+import { BACKEND_URL } from "@/constant/environment";
 import { message } from "antd";
 import { store } from "@/redux/store";
 import { logout, setToken } from "@/redux/authenSlice";
@@ -10,7 +10,7 @@ const handLogout = async () => {
   window.location.href = "/login";
 }
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: BACKEND_URL,
   withCredentials: true
 });
 axiosInstance.interceptors.request.use(

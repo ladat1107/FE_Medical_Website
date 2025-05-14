@@ -2,12 +2,12 @@
 import { Modal, Form, Select, message, Button } from 'antd';
 
 import { formatDate } from "@/utils/formatDate";
-import { primaryColorAdmin } from '@/styles//variables';
 import { ROLE } from '@/constant/role';
 import { useEffect, useState } from 'react';
 import { createSchedule } from '@/services/adminService';
 import "./Modal.scss";
 import useSendNotification from '@/hooks/useSendNotification';
+import { FRONTEND_URL } from '@/constant/environment';
 
 const ScheduleModal = (props) => {
     let date = formatDate(props?.data?.date);
@@ -80,7 +80,7 @@ const ScheduleModal = (props) => {
                     `<p>
                         <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Lịch trực ✨</span> 
                         Đã có thông báo về lịch trực mới! Các bác sĩ xem thông tin và thực hiện tại  
-                        👉 <a href="http://localhost:3000/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
+                        👉 <a href="${FRONTEND_URL}/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
                     </p>`,
                     [],
                     false,
@@ -119,6 +119,7 @@ const ScheduleModal = (props) => {
             maskClosable={false}
         >
             <Form
+                className='px-3'
                 form={form}
                 labelCol={{
                     span: 24,

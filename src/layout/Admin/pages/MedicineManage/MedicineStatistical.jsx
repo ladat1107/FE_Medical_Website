@@ -13,14 +13,15 @@ import {
     Pie,
     Cell,
     Legend,
-    Line,
-    ComposedChart,
+    BarChart,
 } from "recharts"
 import { AlertTriangle, TrendingDown, DollarSign, Activity } from "lucide-react"
 import dayjs from "dayjs"
 import "dayjs/locale/vi"
 import MedicineTable from "./MedicineTable"
 import ResponsiveCards from "./ResponsiveCards"
+import { useGetPrescriptionUsed } from "@/hooks"
+import EmptyChartFallback from "@/components/Empty/EmptyChartFallback"
 
 dayjs.locale("vi")
 
@@ -34,12 +35,13 @@ const COLORS = [
 ];
 
 const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, isLoadingMedicineData }) => {
+    const { data: prescriptionUsed } = useGetPrescriptionUsed({ startDate: dayjs().format("YYYY-MM-DD 00:00:00"), endDate: dayjs().format("YYYY-MM-DD 23:59:59") })
     const [expiringMedicines, setExpiringMedicines] = useState([])
     const [lowStockMedicines, setLowStockMedicines] = useState([])
     const [medicinesByGroup, setMedicinesByGroup] = useState([])
     const [totalMedicines, setTotalMedicines] = useState(0)
     const [newMedicines, setNewMedicines] = useState(0)
-
+    const [prescriptionUsedData, setPrescriptionUsedData] = useState([])
     const expiringTableRef = useRef(null)
     const lowStockTableRef = useRef(null)
 
@@ -102,6 +104,21 @@ const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, 
             setNewMedicines(_newMedicines)
         }
     }, [medicineData])
+
+    useEffect(() => {
+        if (prescriptionUsed?.EC === 0) {
+            const data = prescriptionUsed?.DT?.flatMap((prescription) =>
+                prescription?.prescriptionDetails?.map((item) => ({
+                    name: item?.name || "",
+                    quantityUsed: item?.PrescriptionDetail?.quantity || 0,
+                    unit: item?.unit || "",
+                    expirationDate: dayjs(item?.exp || "").format("DD/MM/YYYY"),
+                    inventory: item?.inventory || 0,
+                }))
+            ) || [];
+            setPrescriptionUsedData(data);
+        }
+    }, [prescriptionUsed])
 
 
     // Cột cho bảng thuốc sắp hết hạn
@@ -224,27 +241,31 @@ const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, 
                         className="!shadow-table-admin hover:shadow-md h-full rounded-xl [&_.ant-card-body]:p-0"
                     >
                         <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={medicinesByGroup}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        outerRadius={90}
-                                        fill={COLORS[1]}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                    >
-                                        {medicinesByGroup.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Legend />
-                                    <RechartsTooltip formatter={(value) => [`${value} thuốc`, ""]} />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            {medicinesByGroup.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={medicinesByGroup}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            outerRadius={90}
+                                            fill={COLORS[1]}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                        >
+                                            {medicinesByGroup.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Legend />
+                                        <RechartsTooltip formatter={(value) => [`${value} thuốc`, ""]} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <EmptyChartFallback message="Không có dữ liệu để hiển thị" />
+                            )}
                         </div>
                     </Card>
                 </Col>
@@ -254,50 +275,40 @@ const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, 
                         title={
                             <div className="flex items-center">
                                 <DollarSign size={18} className="mr-2 text-green-500" />
-                                <span className="font-bold">Thống kê thuốc theo số lượng và hạn sử dụng</span>
+                                <span className="font-bold">Thống kê thuốc đã sử dụng trong hôm nay</span>
                             </div>
                         }
-                        bordered={false}
                         className="!shadow-table-admin hover:shadow-md h-full rounded-xl [&_.ant-card-body]:p-0"
                     >
                         <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart
-                                    data={expiringMedicines}
-                                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis yAxisId="left" orientation="left" stroke={COLORS[1]} />
-                                    <YAxis yAxisId="right" orientation="right" stroke={COLORS[0]} />
-                                    <RechartsTooltip
-                                        formatter={(value, name, props) => {
-                                            if (name === "Số lượng") {
-                                                const unit = props.payload.unit || ''
-                                                return [`${value} ${unit}`, name]
-                                            }
-                                            return [`${value} ngày`, name]
-                                        }}
-                                    />
-                                    <Legend />
-                                    <Bar yAxisId="left" dataKey="inventory" name="Số lượng" fill={COLORS[1]} barSize={25} />
-                                    <Line
-                                        yAxisId="right"
-                                        type="monotone"
-                                        dataKey={(record) => {
-                                            const expDate = new Date(record.exp)
-                                            const now = new Date()
-                                            const diffTime = expDate.getTime() - now.getTime()
-                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-                                            return diffDays
-                                        }}
-                                        name="Hạn sử dụng (ngày)"
-                                        stroke={COLORS[0]}
-                                        strokeWidth={3}
-                                        activeDot={{ r: 8 }}
-                                    />
-                                </ComposedChart>
-                            </ResponsiveContainer>
+                            {prescriptionUsedData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={prescriptionUsedData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="name" />
+                                        <YAxis />
+                                        <RechartsTooltip
+                                            content={({ active, payload }) => {
+                                                if (active && payload && payload.length) {
+                                                    const { name, quantityUsed, unit, expirationDate, inventory } = payload[0].payload;
+                                                    return (
+                                                        <div className="bg-white p-2 border rounded shadow text-sm">
+                                                            <p><strong>{name}</strong></p>
+                                                            <p>SL đã dùng: {quantityUsed} {unit}</p>
+                                                            <p>HSD: {expirationDate}</p>
+                                                            <p>Tồn kho: {inventory}</p>
+                                                        </div>
+                                                    );
+                                                }
+                                                return null;
+                                            }}
+                                        />
+                                        <Bar dataKey="quantityUsed" fill="#00B5F1" radius={[5, 5, 0, 0]} maxBarSize={40} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <EmptyChartFallback message="Không có đơn thuốc nào được sử dụng trong khoảng thời gian này" />
+                            )}
                         </div>
                     </Card>
                 </Col>

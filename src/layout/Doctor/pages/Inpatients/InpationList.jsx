@@ -34,7 +34,6 @@ const InpatientList = () => {
         if (dataInpatients) {
             setTotal(dataInpatients.DT.totalItems);
             setListInpatient(dataInpatients.DT.examinations);
-            console.log(dataInpatients);
         }
     }, [dataInpatients]);
 
@@ -79,10 +78,10 @@ const InpatientList = () => {
                             </div>
                         </>
                     )}
-                    <div className="col-6">
+                    <div className="col-4">
                         <p className="search-title">Tìm kiếm đơn khám</p>
                         <input type="text" className="search-box" 
-                            placeholder="Nhập tên bệnh nhân để tìm kiếm..." 
+                            placeholder="Nhập tên bệnh nhân, SĐT, CCCD để tìm kiếm..." 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}/>
                     </div>
@@ -104,10 +103,12 @@ const InpatientList = () => {
                                     name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
                                     symptom={'Triệu chứng: ' + item.symptom}
                                     special={item.special}
+                                    doctor={item.userExaminationData.cid || ''}
                                     room={item.roomName}
                                     visit_status={item.visit_status}
                                     onClickItem={()=>handleClickRow(item.id)}
                                     sort={false}
+                                    doctorHeader={'CCCD'}
                                 />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">

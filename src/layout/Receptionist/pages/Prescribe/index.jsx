@@ -116,11 +116,11 @@ const Prescribe = () => {
                                         key={item.id}
                                         index={index + 1}
                                         id={item.id}
-                                        name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
+                                        name={`${item?.userExaminationData?.lastName} ${item?.userExaminationData?.firstName}`}
                                         symptom={"Lấy thuốc"}
                                         special={item.special}
                                         room={'Phòng lấy thuốc'}
-                                        doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
+                                        doctor={`${item?.examinationStaffData?.staffUserData?.lastName} ${item?.examinationStaffData?.staffUserData?.firstName}`}
                                         downItem={downItem}
                                         visit_status={item.name}
                                         onClickItem={()=>handleParac(item.id)}

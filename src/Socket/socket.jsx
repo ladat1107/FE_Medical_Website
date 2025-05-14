@@ -1,9 +1,8 @@
-import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
-import { BASE_URL } from "@/constant/environment";
+import { BACKEND_URL } from "@/constant/environment";
 
 // Create the socket instance
-const socket = io(BASE_URL, {
+const socket = io(BACKEND_URL, {
   withCredentials: true,
   reconnection: true,
   reconnectionAttempts: Infinity,

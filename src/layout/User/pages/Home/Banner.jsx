@@ -23,11 +23,11 @@ const Banner = () => {
   return (
     <div className="flex flex-col items-center py-8 md:py-12">
       <div className="w-full md:w-4/5 lg:w-3/4 xl:w-2/3 text-center px-4 mb-8 md:mb-16">
-        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-secondaryText-tw mb-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-secondaryText-tw mb-2 md:mb-4">
           Kết nối Người Dân với Cơ sở & Dịch vụ Y tế hàng đầu
         </h2>
 
-        <div className="relative w-full my-5">
+        <div className="relative w-full my-1 md:my-5">
           <input
             type="text"
             placeholder="Tìm kiếm"
@@ -37,7 +37,7 @@ const Banner = () => {
           <SearchIcon className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500" size={20} />
         </div>
 
-        <h4 className="text-2xl font-bold text-secondaryText-tw mt-4">
+        <h4 className="hidden md:block text-2xl font-bold text-secondaryText-tw mt-4">
           Đặt khám nhanh - Lấy số thứ tự trực tuyến - Tư vấn sức khỏe từ xa
         </h4>
       </div>
@@ -60,7 +60,7 @@ const Banner = () => {
             <SwiperSlide key={index} >
               <div className="w-[150px] h-[150px] bg-white rounded-2xl p-3 flex flex-col items-center justify-center">
                 <img src={item.icon} alt="" />
-                <p className="text-secondaryText-tw">{item.title}</p>
+                <p className="text-secondaryText-tw text-center">{item.title}</p>
               </div>
             </SwiperSlide>
           ))}

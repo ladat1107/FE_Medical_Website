@@ -2,7 +2,7 @@ import { message } from 'antd';
 import { PropTypes } from 'prop-types';
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { checkOutParaclinical, updateExamination, updateListPayParaclinicals } from '@/services/doctorService';
+import { checkOutExamination, checkOutParaclinical, updateExamination, updateListPayParaclinicals } from '@/services/doctorService';
 import './PayModal.scss';
 import { PAYMENT_METHOD, STATUS_BE } from '@/constant/value';
 import MoneyInput from '@/components/Input/MoneyInput';
@@ -13,10 +13,10 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
     const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD.CASH);
     const [isLoading, setIsLoading] = useState(false);
     const [amount, setAmount] = useState(
-        patientData?.advanceMoneyExaminationData?.length 
-            ?  patientData.advanceMoneyExaminationData.reduce((sum, item) => sum + item.amount, 0) 
+        patientData?.advanceMoneyExaminationData?.length
+            ? patientData.advanceMoneyExaminationData.reduce((sum, item) => sum + item.amount, 0)
             : ""
-    );      
+    );
     const [selectedRoom, setSelectedRoom] = useState(patientData?.examinationRoomData || null);
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -48,13 +48,13 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
     }, [isOpen]);
 
     const handlePay = async () => {
-        if(amount === "" || amount === 0) {
+        if (amount === "" || amount === 0) {
             message.error('Vui lòng nhập số tiền tạm ứng!');
             return;
         }
 
-        if(+amount < 1000) {
-            message.error('Số tiền tạm ứng tối thiểu là 1.000đ!');
+        if (+amount < 1) {
+            message.error('Số tiền tạm ứng tối thiểu là 1.000.000đ!');
             return;
         }
 
@@ -193,9 +193,9 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                             }}>Loại phòng: </p>
                         </div>
                         <div className='col-3 d-flex align-items-center'>
-                            <p  className='text-start' 
+                            <p className='text-start'
                                 style={{ fontWeight: "400", width: '100%' }}>
-                                    {selectedRoom?.serviceData[0]?.id === 3 ? 'Phòng thường' : 
+                                {selectedRoom?.serviceData[0]?.id === 3 ? 'Phòng thường' :
                                     selectedRoom?.serviceData[0]?.id === 4 ? 'Phòng VIP' : ''}
                             </p>
                         </div>
@@ -216,16 +216,16 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                             }
                         </div>
                     </div>
-                    <hr className='mt-2'/>
+                    <hr className='mt-2' />
                     <div className='col-12 d-flex flex-row mt-3 mb-2'>
                         <div className='col-3 d-flex align-items-center'>
                             <p style={{ fontWeight: "400" }}>Số BHYT:</p>
                         </div>
                         <div className='col-3'>
-                            <input 
-                                className='input-add-exam' 
+                            <input
+                                className='input-add-exam'
                                 style={{ width: "100%" }} maxLength={10}
-                                type='text' value={patientData?.insuranceCode} 
+                                type='text' value={patientData?.insuranceCode}
                                 readOnly
                                 placeholder='Nhập số BHYT...' />
                         </div>
@@ -253,7 +253,7 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                             <p style={{ fontWeight: "600" }}>Tạm ứng:</p>
                         </div>
                         <div className='col-3' style={{ color: "#008EFF", fontWeight: '600', border: "none" }}>
-                            <MoneyInput value={amount} onChange={handleAmountChange}/>
+                            <MoneyInput value={amount} onChange={handleAmountChange} />
                         </div>
                         <div className='col-1' />
                         <div className='col-5 d-flex'>
@@ -288,7 +288,7 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                     {+patientData?.status >= STATUS_BE.PAID ? <></>
                         :
                         <button className='payment-btn' onClick={handlePay}>
-                        {isLoading ? (
+                            {isLoading ? (
                                 <>
                                     <i className="fa-solid fa-spinner fa-spin me-2"></i>
                                     Đang xử lý...

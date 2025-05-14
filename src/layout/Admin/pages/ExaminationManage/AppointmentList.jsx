@@ -6,6 +6,7 @@ import { PlusOutlined, EditOutlined, EyeOutlined, DeleteOutlined, SearchOutlined
 import ExaminationForm from "./ExaminationForm"
 import ExaminationDrawer from "./ExaminationDetail"
 import { STATUS_BE, TIMESLOTS } from "@/constant/value"
+import dayjs from "dayjs"
 
 const { RangePicker } = DatePicker
 const { Option } = Select
@@ -39,8 +40,8 @@ const AppointmentList = ({ appointmentList }) => {
 
     if (dateRange) {
       filteredData = filteredData.filter((item) => {
-        const itemDate = new Date(item.admissionDate)
-        return itemDate >= dateRange[0].toDate() && itemDate <= dateRange[1].toDate()
+        const itemDate = dayjs(item.admissionDate).format("YYYY-MM-DD 00:00:00")
+        return itemDate >= dateRange[0].format("YYYY-MM-DD 00:00:00") && itemDate <= dateRange[1].format("YYYY-MM-DD 23:59:59")
       })
     }
     if (searchText) {

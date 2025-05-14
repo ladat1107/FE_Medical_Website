@@ -308,7 +308,7 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                                 wordWrap: "break-word", // Cho phép từ dài được xuống dòng
                                 overflowWrap: "break-word", // Tương tự wordWrap, hỗ trợ trình duyệt cũ
                                 whiteSpace: "normal" // Cho phép văn bản xuống dòng
-                            }}>{data?.infoPres?.note || "Không có"}</p>
+                            }}>{data?.infoPres?.note || ""}</p>
                         </div>
                     </div>
                     <div className='col-12 d-flex flex-row mt-3 mb-2'>

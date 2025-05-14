@@ -29,7 +29,7 @@ const HomePage = () => {
         </Container>
       </div>
 
-      <div className="my-10">
+      <div className="my-3 md:my-10">
         <Container>
           <Collaboration />
         </Container>
@@ -55,12 +55,12 @@ const HomePage = () => {
         <VideoComponent />
       </Container>
 
-      <div className="bg-gradient-to-b from-white via-bgHomePage to-white py-6 mt-10">
+      <div className="bg-gradient-to-b from-white via-bgHomePage to-white py-6 mt-0 md:mt-10">
         <Container>
           <Blog />
         </Container>
       </div>
-      <div className="bg-bgHomePage py-16">
+      <div className="bg-bgHomePage py-6 md:py-16">
         <Container>
           <Statistical />
         </Container>

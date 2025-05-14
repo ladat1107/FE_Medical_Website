@@ -309,9 +309,9 @@ const ReceptionistDashboard = () => {
 
     const handleClickItem = (id) => {
         const selectedPatient = listExam.find(item => item.id === id);
-        console.log("Selected Patient:", selectedPatient);
         if (selectedPatient) {
             setExamId(id);
+            setSelectedTimeSlot(null);
             setIsEditMode(true);
             setPatientData(selectedPatient);
             setIsModalOpen(true);
@@ -392,7 +392,8 @@ const ReceptionistDashboard = () => {
                             />
                         ))
                     )}
-                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" onClick={() => openAddExam(time.value)}>
+                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" 
+                        onClick={() => openAddExam(time.value)}>
                         <div className="flex justify-center items-center">
                             <i className="fa-solid mr-2 fa-plus"></i>
                             <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>

@@ -79,7 +79,7 @@ const OldParaclinacalModal = ({ visible, onCancel, oldParaclinical, onSave }) =>
                     <Button key="back" onClick={onCancel}>
                         Close
                     </Button>,
-                    user.role === ROLE.PATIENT && <Button key="save" type="primary" onClick={handleSave}>Save</Button>
+                    user?.role === ROLE.PATIENT && <Button key="save" type="primary" onClick={handleSave}>Save</Button>
                 ]}
             >
                 <Row gutter={[16, 16]} style={{ marginTop: 16, padding: "0 16px" }}>
@@ -101,7 +101,7 @@ const OldParaclinacalModal = ({ visible, onCancel, oldParaclinical, onSave }) =>
                         </Col>
 
                     ))}
-                    {user.role === ROLE.PATIENT && <Col xs={24} sm={12} md={8} lg={6}>
+                    {user?.role === ROLE.PATIENT && <Col xs={24} sm={12} md={8} lg={6}>
                         <Upload
                             listType="picture-card"
                             showUploadList={false}

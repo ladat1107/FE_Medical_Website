@@ -171,6 +171,9 @@ export const getStatisticalAppoinment = (query) => {
 export const getAllMedicinesAdmin = () => {
     return axios.get(`/api/admin/getAllMedicinesAdmin`)
 }
+export const getPrescriptionUsed = (query) => {
+    return axios.get(`/api/admin/getPrescriptionUsed`, { params: query })
+}
 export const createMedicine = (data) => {
     return axios.post(`/api/admin/createMedicine`, data)
 }
@@ -191,5 +194,10 @@ export const getAllExaminationsAdmin = (query = null) => {
 
 export const getExaminationByIdAdmin = (id) => {
     return axios.get(`/api/admin/getExaminationByIdAdmin?id=${id}`)
+}
+
+// PAYMENT MANAGEMENT
+export const getPaymentAdmin = (query = null) => {
+    return axios.get(`/api/admin/getPaymentAdmin`, { params: query })
 }
 

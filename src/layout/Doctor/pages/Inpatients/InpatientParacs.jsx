@@ -317,7 +317,6 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
                                                 </div>
                                             ))}
                                         </div>
-                                        {/* Input tìm kiếm bệnh đi kèm */}
                                         <input
                                             ref={inputRef}
                                             className='input-add-prac'

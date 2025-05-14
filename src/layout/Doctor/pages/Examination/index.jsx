@@ -164,7 +164,8 @@ const Examination = () => {
                                         {examinationData?.oldParaclinical &&
                                             <button className="old-paraclinical-button" onClick={() => setIsShowOldParaclinicalModal(true)}>
                                                 Phiếu xét nghiệm cũ
-                                            </button>}
+                                            </button>
+                                        }
                                         <button
                                             onClick={showModal}
                                             className='history-button'>

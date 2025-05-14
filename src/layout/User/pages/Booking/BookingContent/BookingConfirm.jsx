@@ -19,7 +19,6 @@ const BookingConfirm = (props) => {
     let doctor = props?.doctor;
     let schedule = props?.schedule;
     let [isLoading, setIsLoading] = useState(false);
-    console.log("profile", profile);
     const confirm = async () => {
         setIsLoading(true);
         try {

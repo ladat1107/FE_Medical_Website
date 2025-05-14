@@ -9,6 +9,7 @@ import { uploadAndDeleteToCloudinary, } from '@/utils/uploadToCloudinary';
 import { useSelector } from 'react-redux';
 import TextEditor from '@/components/TextEditor/TextEditor';
 import useSendNotification from '@/hooks/useSendNotification';
+import { FRONTEND_URL } from '@/constant/environment';
 
 const CreateHandbook = (props) => {
     const [form] = Form.useForm();
@@ -102,7 +103,7 @@ const CreateHandbook = (props) => {
                                 `<p>
                                     <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Tin mới ✨</span> 
                                     Cẩm nang chăm sóc sức khỏe đã lên sóng! Quản trị viên xem và duyệt tại 💪  
-                                    👉 <a href="http://localhost:3000/handbookDetail/${response.DT.id}" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem ngay</a>
+                                    👉 <a href="${FRONTEND_URL}/handbookDetail/${response.DT.id}" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem ngay</a>
                                 </p>` || response.DT?.htmlDescription,
                                 [],
                                 true,

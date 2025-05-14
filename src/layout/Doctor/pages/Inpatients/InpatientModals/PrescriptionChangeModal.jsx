@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Modal, message } from 'antd';
+import { Modal, Select, message } from 'antd';
 import 'moment/locale/vi';
 import { createPrescription, getAllMedicinesForExam } from '@/services/doctorService';
 import { useMutation } from '@/hooks/useMutation';
@@ -7,6 +7,7 @@ import EnhancedSelectBox from '@/components/EnhancedSelectBox/EnhancedSelectBox'
 import Presdetail from '../../Examination/Presdetail';
 import './PrescriptionChangeModal.scss';
 import moment from 'moment';
+import SelectBox2 from '@/layout/Doctor/components/Selectbox';
 
 const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, examinationId }) => {
 
@@ -20,6 +21,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
     const [note, setNote] = useState('');
     const [loading, setLoading] = useState(false);
     const [prescriptionPrice, setPrescriptionPrice] = useState(0);
+    const [prescriptionType, setPrescriptionType] = useState(1);
 
     // Function to copy prescription details from prescriptionData
     const handleCopyPrescription = () => {
@@ -189,6 +191,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                 dose: detail.dose
             })),
             oldPresId: prescriptionData[0]?.id || null,
+            prescriptionType: prescriptionType,
         };
 
         setLoading(true);
@@ -217,6 +220,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
         setNextId(1);
         setNote('');
         setPrescriptionPrice(0);
+        setPrescriptionType(1);
     };
 
     return (
@@ -237,9 +241,8 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                     <div className="info-section mb-2">
                         <p>Đơn thuốc cũ sẽ được chốt với ngày kết thúc là {moment(yesterday).format('DD/MM/YYYY')}</p>
                         <p>Đơn thuốc mới sẽ có ngày bắt đầu là {moment(today).format('DD/MM/YYYY')}</p>
-                        <p style={{fontStyle: 'italic', color: 'black'}}>*Lưu ý: Chỉ kê đơn thuốc đủ dùng trong ngày</p>
                     </div>
-                    <div className='row padding mb-3'>
+                    <div className='row padding mb-2'>
                         <div className='col-5'>
                             <EnhancedSelectBox
                                 className="select-box2"
@@ -248,6 +251,20 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                                 placeholder="Nhập tên thuốc"
                                 disabled={false}
                                 onChange={handleMedicineChange}
+                            />
+                        </div>
+                        <div className='col-2 ps-0'>
+                            <SelectBox2
+                                placeholder="Chọn loại đơn thuốc"
+                                options={[
+                                    { value: 1, label: 'Cấp toa điều trị' },
+                                    { value: 2, label: 'Cấp toa xuất viện' },
+                                ]}
+                                allowClear={false}
+                                value={prescriptionType}
+                                onChange={
+                                    (value) => setPrescriptionType(value)
+                                }
                             />
                         </div>
                         <div className='col-5 p-0'>
@@ -267,6 +284,9 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                             </button>
                         </div>
                     </div>
+                    {prescriptionType === 1 && (
+                        <p style={{fontStyle: 'italic', color: 'black'}}>*Lưu ý: Chỉ kê đơn thuốc đủ dùng trong ngày</p>
+                    )}
                     <>
                         <div className="row p-2 padding gap">
                             {sortedPresDetails.length > 0 ? (

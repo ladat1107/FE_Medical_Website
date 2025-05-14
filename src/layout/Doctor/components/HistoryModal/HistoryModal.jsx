@@ -161,7 +161,7 @@ const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescripti
                                         key={index} 
                                         id={index} 
                                         data={item} 
-                                        onCopyPrescription={handleCopyPrescription}
+                                        onCopyPrescription={onCopyPrescription ? handleCopyPrescription : null}
                                     />
                                 ))}
                             </div>

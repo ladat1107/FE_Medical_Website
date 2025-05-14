@@ -11,7 +11,6 @@ import RoomSelectionModal from '@/layout/Doctor/components/RoomOptionModal/RoomS
 import { motion, AnimatePresence } from 'framer-motion';
 
 const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditMode, examId, patientData, comorbiditiesOptions, specialtyOptions, dataQRCode }) => {
-
     const [selectedComorbidities, setSelectedComorbidities] = useState([]);
     const [inputComorbidity, setInputComorbidity] = useState('');
     const [shakeId, setShakeId] = useState(null);
@@ -583,13 +582,15 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                                     placeholder="Chọn loại KCB"
                                     optionFilterProp="label"
                                     options={[
-                                        { label: 'Khám bệnh', value: 1 },
                                         { label: 'Khám bệnh ngoại trú', value: 2 },
+                                        { label: 'Khám bệnh nội trú', value: 1 },
+                                        { label: 'Cấp cứu', value: 3 },
                                     ]}
                                     style={{ width: '100%' }}
                                     value={medicalTreatmentTier}
                                     className='select-add-exam'
                                     onChange={(value) => setMedicalTreatmentTier(value)}
+                                    open={timeSlot ? false : undefined}
                                 />
                             </div>
                         </div>

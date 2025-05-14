@@ -1,10 +1,11 @@
-import { getListAdvanceMoney, getListToPay, sendNotification } from "@/services/doctorService";
+import { getListAdvanceMoney, getListInpatients, getListToPay, sendNotification } from "@/services/doctorService";
 import React, { useEffect, useState } from 'react'
 import { useMutation } from "@/hooks/useMutation";
 import { message, Pagination, Select, Spin } from "antd";
 import PatientItem from "@/layout/Receptionist/components/PatientItem/PatientItem";
 import PayModal from "../../components/PayModal/PayModal";
 import AdvanceModal from "../../components/PayModal/AdvanceModal";
+import SummaryModal from "@/layout/Doctor/pages/Inpatients/InpatientModals/InpatientSumary";
 
 const Cashier = () => {
     const today = new Date().toISOString();
@@ -14,18 +15,22 @@ const Cashier = () => {
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState('');
 
-    const [listExam, setListExam] = useState([]);
     const [statusPay, setStatus] = useState(4);
+    const [listExam, setListExam] = useState([]);
     const [listAdvance, setListAdvance] = useState([]);
+    const [listInpatient, setListInpatient] = useState([]);
     const [medicalTreatmentTier, setMedicalTreatmentTier] = useState(2);
 
     const [patientData, setPatientData] = useState({});
+    const [examData, setExamData] = useState({})
     const [examId, setExamId] = useState(0);
     const [type, setType] = useState('examination');
     const isAppointment = 0;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAdvanceModalOpen, setIsAdvanceModalOpen] = useState(false);
+    const [isModelSummaryOpen, setIsModelSummaryOpen] = useState(false);
+
 
     const handlePay = (index) => {
         if(medicalTreatmentTier === 2) {
@@ -40,7 +45,7 @@ const Cashier = () => {
                 // Xử lý trường hợp không tìm thấy bệnh nhân
                 message.error('Không tìm thấy thông tin bệnh nhân');
             }
-        } else {
+        } else if(medicalTreatmentTier === 1) {
             const selectedPatient = listAdvance[index];
 
             if (selectedPatient) {
@@ -49,6 +54,13 @@ const Cashier = () => {
             } else {
                 // Xử lý trường hợp không tìm thấy bệnh nhân
                 message.error('Không tìm thấy thông tin bệnh nhân');
+            }
+        } else {
+            const selectedPatient = listInpatient[index];
+
+            if(selectedPatient){
+                setExamData(selectedPatient);
+                handleOpenSummaryModal();
             }
         }
     }
@@ -92,11 +104,20 @@ const Cashier = () => {
         execute: fetchAdvanceMoney,
     } = useMutation(() => getListAdvanceMoney(currentPage, pageSize, search, statusPay == 4 ? 1 : 2 ))
 
+    const {
+        data: dataInpatients,
+        loading: loadingInpatients,
+        error: errorInpatients,
+        execute: fetchInpatients,
+    } = useMutation(() => getListInpatients('', '', statusPay == 4 ? 7 : 8, currentPage, pageSize, search))
+
     useEffect(() => {
         if(+medicalTreatmentTier === 2) 
             fetchExaminations();
-        else 
+        else if(+medicalTreatmentTier === 1)
             fetchAdvanceMoney();
+        else 
+            fetchInpatients();
     }, [statusPay, search, currentPage, pageSize, medicalTreatmentTier]);
 
     useEffect(() => {
@@ -113,12 +134,32 @@ const Cashier = () => {
         }
     }, [dataAdvanceMoney]);
 
+    useEffect(() => {
+        if (dataInpatients) {
+            setTotal(dataInpatients.DT.totalItems);
+            setListInpatient(dataInpatients.DT.examinations);
+        }
+    }, [dataInpatients]);
+
     const handelSelectChange = (value) => {
         setStatus(value);
     }
 
     const handelTreatmentTierChange = (value) => {
         setMedicalTreatmentTier(+value);
+    }
+
+    const handleCloseSummaryModal = () => {
+        setIsModelSummaryOpen(false);
+    }
+
+    const handleOpenSummaryModal = () => {
+        setIsModelSummaryOpen(true);
+    }
+
+    const handlePaySusscess = () => {
+        setIsModelSummaryOpen(false);
+        fetchInpatients();
     }
 
     // #endregion
@@ -132,6 +173,7 @@ const Cashier = () => {
                         <Select className="select-box" defaultValue="2" onChange={handelTreatmentTierChange}>
                             <Select.Option value="2">Ngoại trú</Select.Option>
                             <Select.Option value="1">Nội trú</Select.Option>
+                            <Select.Option value="3">Xuất viện</Select.Option>
                         </Select>
                     </div>
                     <div className="col-2">
@@ -191,6 +233,7 @@ const Cashier = () => {
                                             visit_status={item.data.visit_status}
                                             onClickItem={() => handlePay(index)}
                                             sort={false}
+                                            doctorHeader=""
                                         />
                                     ) : null}
                                 </div>
@@ -201,7 +244,7 @@ const Cashier = () => {
                             )
                             )}
                         </>
-                    ) : (
+                    ) : +medicalTreatmentTier === 1 ? (
                         <>
                             {loadingAdvanceMoney ? (
                                 <div className="loading">
@@ -217,11 +260,43 @@ const Cashier = () => {
                                         symptom={item?.symptom}
                                         special={item?.special}
                                         room={item?.roomName}
-                                        doctor={`${item.data?.examinationStaffData?.staffUserData.lastName} ${item.data?.examinationStaffData?.staffUserData.firstName}`}
+                                        doctor={`${item?.userExaminationData?.phoneNumber}`}
                                         downItem={downItem}
                                         visit_status={item?.visit_status}
                                         onClickItem={() => handlePay(index)}
                                         sort={false}
+                                        doctorHeader="Số điện thoại"
+                                    />
+                                </div>
+                            )) : (
+                                <div className="no-patient d-flex justify-content-center mt-2">
+                                    <p>Không tìm thấy bệnh nhân!</p>
+                                </div>
+                            )
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            {loadingInpatients ? (
+                                <div className="loading">
+                                    <Spin />
+                                </div>
+                            ) : (listInpatient && listInpatient.length > 0 ? listInpatient.map((item, index) => (
+                                <div key={index}>
+                                    <PatientItem
+                                        key={item.id + index}
+                                        index={index + 1}
+                                        id={item.id}
+                                        name={`${item?.userExaminationData.lastName} ${item?.userExaminationData.firstName}`}
+                                        symptom={item?.userExaminationData?.cid}
+                                        special={item?.special}
+                                        room={item?.roomName}
+                                        doctor={`${item?.treatmentResult}`}
+                                        downItem={downItem}
+                                        visit_status={item?.visit_status}
+                                        onClickItem={() => handlePay(index)}
+                                        sort={false}
+                                        doctorHeader="Kết quả điều trị"
                                     />
                                 </div>
                             )) : (
@@ -264,6 +339,14 @@ const Cashier = () => {
                         onClose={closeAdvancePay}
                         onPaySusscess={onAdvanceSusscess}
                         patientData={patientData}
+                    />
+                }
+                {+medicalTreatmentTier === 3 && listInpatient.length > 0 &&
+                    <SummaryModal
+                        open={isModelSummaryOpen}
+                        onCancel={handleCloseSummaryModal}
+                        examinationId={examData.id}
+                        onPaySusscess={handlePaySusscess}
                     />
                 }
             </div>

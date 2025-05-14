@@ -26,11 +26,16 @@ export default {
     "./src/layout/User/pages/ProfileUser/**/*.{js,jsx,ts,tsx}",
     "./src/components/Profile/**/*.{js,jsx,ts,tsx}",
     "./src/layout/Admin/components/Tooltip/**/*.{js,jsx,ts,tsx}",
+    "./src/layout/Doctor/pages/Notification/Skeletons/**/*.{js,jsx,ts,tsx}",
+    "./src/components/Empty/**/*.{js,jsx,ts,tsx}",
+    "./src/layout/Admin/pages/Dashboard/**/*.{js,jsx,ts,tsx}",
+    "./src/layout/Admin/pages/RevenueManage/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
         'primary-tw': '#00B5F1',
+        'primary-tw-light': '#4dcbf5',
         'secondary-tw': '#3dac78',
         'background-tw': '#f4f4f4',
         'mainText-tw': '#00B5F1',
