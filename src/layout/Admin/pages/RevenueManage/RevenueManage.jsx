@@ -150,7 +150,7 @@ const RevenueManage = () => {
             <HeaderDashboard handleRefetch={handleRefetch} handleDateRangeChange={handleDateRangeChange} handleTimeFrameChange={handleTimeFrameChange} dateRange={dateRange} timeFrame={timeFrame} />
             <CardRevenue {...cardRevenue} />
             <ChartRevenue chartRevenue={chartRevenue} />
-            <TableRevenue tableRevenue={paymentData?.DT} isLoading={isLoadingPayment || isFetchingPayment} />
+            <TableRevenue tableRevenue={paymentData?.DT?.filter(item => item.amount !== 0) || []} isLoading={isLoadingPayment || isFetchingPayment} />
         </div>
     );
 }
