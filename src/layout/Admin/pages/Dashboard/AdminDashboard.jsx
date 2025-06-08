@@ -10,7 +10,7 @@ import ExamCard from "./Section/ExamCard";
 import { useGetExamination } from "@/hooks";
 import ExamTable from "./Section/ExamTable";
 import PrescriptionUsed from "./Section/PrescriptionUsed";
-import CommonDisease from "./Section/commonDisease";
+import CommonDisease from "./Section/CommonDisease";
 import { diffDate } from "@/utils/formatDate";
 
 const AdminDashboard = () => {
