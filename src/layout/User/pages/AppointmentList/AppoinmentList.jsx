@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { message, Skeleton, Tabs, Badge, Empty, DatePicker, Pagination } from "antd"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faAddressCard, faCalendarCheck, faCircleUser, faClock, faEnvelope } from "@fortawesome/free-regular-svg-icons"
+import { faAddressCard, faCalendarCheck, faCircleUser, faClock, faEnvelope, faMoneyBill1 } from "@fortawesome/free-regular-svg-icons"
 import {
     faBriefcaseMedical,
     faLocationDot,
@@ -13,9 +13,7 @@ import {
     faCircleCheck,
     faCircleXmark,
     faHourglassHalf,
-    faMoneyBill,
     faFileCirclePlus,
-    faBan,
 } from "@fortawesome/free-solid-svg-icons"
 import dayjs from "dayjs"
 import Container from "@/components/Container"
@@ -27,12 +25,12 @@ import userService from "@/services/userService"
 import ConfirmModal from "../../components/ConfirmModal/ConfirmModal"
 import { OldParaclinicalModal } from "@/components/Modals"
 import "./AppoimentList.css"
+import { formatCurrency } from "@/utils/formatCurrency"
 const AppointmentList = () => {
     const [show, setShow] = useState(false)
     const [showOldParaclinicalModal, setShowOldParaclinicalModal] = useState(false)
     const [obAppoinment, setObAppoinment] = useState(null)
     const [listAppoinment, setListAppoinment] = useState([])
-    const [isLoading, setIsLoading] = useState(null)
     const [activeTab, setActiveTab] = useState("all")
     const [dateFilter, setDateFilter] = useState("all")
     const [expandedCard, setExpandedCard] = useState(null)
@@ -69,6 +67,10 @@ const AppointmentList = () => {
     }, [])
 
     useEffect(() => {
+        setCurrentPage(1)
+    }, [activeTab])
+
+    useEffect(() => {
         getAppoinment()
     }, [location])
 
@@ -79,24 +81,10 @@ const AppointmentList = () => {
         }
     }, [appoinmentData])
 
-    const handleCheckOut = async (profile) => {
-        setIsLoading(profile.id)
-        try {
-            const response = await userService.checkOutAppointment({ id: profile.id })
-            if (response?.EC === 0) {
-                window.location.href = response?.DT?.shortLink
-            } else {
-                message.error(response?.EM)
-            }
-        } catch (e) {
-            console.log(e)
-        } finally {
-            setIsLoading(null)
-        }
-    }
-
     const refresh = () => {
         setObAppoinment(null)
+        setShowOldParaclinicalModal(false)
+        setShow(false)
         getAppoinment()
     }
 
@@ -225,21 +213,17 @@ const AppointmentList = () => {
 
     const getStatusColor = (profile) => {
         if (profile.status === STATUS_BE.INACTIVE) return "bg-red-500"
-        if (profile.status !== STATUS_BE.INACTIVE && profile.status !== STATUS_BE.PENDING) return "bg-green-500"
-        if (profile.status === STATUS_BE.PENDING) {
-            if (profile.paymentId) return "bg-blue-500"
-            return "bg-yellow-500"
-        }
+        if (profile.status === STATUS_BE.ACTIVE || profile.status === STATUS_BE.PENDING) return "bg-blue-400"
+        if (profile.status === STATUS_BE.EXAMINING || profile.status === STATUS_BE.PAID || profile.status === STATUS_BE.WAITING) return "bg-pink-400"
+        if (profile.status === STATUS_BE.DONE || profile.status === STATUS_BE.DONE_INPATIENT) return "bg-green-500"
         return "bg-gray-500"
     }
 
     const getStatusText = (profile) => {
-        if (profile.status === STATUS_BE.INACTIVE) return profile.paymentId ? "Đã hoàn tiền" : "Đã hủy"
-        if (profile.status !== STATUS_BE.INACTIVE && profile.status !== STATUS_BE.PENDING) return "Đã hoàn thành"
-        if (profile.status === STATUS_BE.PENDING) {
-            if (profile.paymentId) return "Đã thanh toán"
-            return "Chờ thanh toán"
-        }
+        if (profile.status === STATUS_BE.INACTIVE) return "Đã hủy"
+        if (profile.status === STATUS_BE.PENDING || profile.status === STATUS_BE.ACTIVE) return "Chờ xác nhận"
+        if (profile.status === STATUS_BE.EXAMINING || profile.status === STATUS_BE.PAID || profile.status === STATUS_BE.WAITING) return "Đang khám"
+        if (profile.status === STATUS_BE.DONE || profile.status === STATUS_BE.DONE_INPATIENT) return "Đã hoàn thành"
         return "Không xác định"
     }
 
@@ -250,7 +234,7 @@ const AppointmentList = () => {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div className="animate-fadeIn">
                             <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center">
-                                <span className="bg-[#00B5F1] text-white p-2 rounded-lg mr-3">
+                                <span className="bg-primary-tw text-white p-2 rounded-lg mr-3">
                                     <FontAwesomeIcon icon={faCalendarCheck} />
                                 </span>
                                 Lịch hẹn khám bệnh
@@ -273,7 +257,7 @@ const AppointmentList = () => {
                                             }
                                         }}
                                         className={`px-3 py-1.5 text-sm rounded-full transition-all duration-300 ${dateFilter === option.key
-                                            ? "bg-[#00B5F1] text-white shadow-md"
+                                            ? "bg-primary-tw text-white shadow-md"
                                             : "bg-white text-gray-600 hover:bg-gray-100"
                                             }`}
                                     >
@@ -325,7 +309,7 @@ const AppointmentList = () => {
                                         {paginatedAppointments.map((profile, index) => (
                                             <div
                                                 key={index}
-                                                className={`bg-white rounded-xl border border-gray-100 shadow-md overflow-hidden transition-all duration-500 animate-fadeIn ${expandedCard === profile.id ? "ring-2 ring-[#00B5F1]" : "hover:shadow-lg"
+                                                className={`bg-white rounded-xl border border-gray-100 shadow-md overflow-hidden transition-all duration-500 animate-fadeIn ${expandedCard === profile.id ? "ring-2 ring-primary-tw" : "hover:shadow-lg"
                                                     }`}
                                                 style={{ animationDelay: `${index * 100}ms` }}
                                             >
@@ -342,7 +326,7 @@ const AppointmentList = () => {
                                                     <div className="flex-1">
                                                         <div className="flex flex-col md:flex-row md:items-center justify-between">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-[#00B5F1]">
+                                                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-primary-tw">
                                                                     <FontAwesomeIcon icon={faCircleUser} size="lg" />
                                                                 </div>
                                                                 <div>
@@ -363,14 +347,14 @@ const AppointmentList = () => {
                                                             {/* Improved responsive design for status and time */}
                                                             <div className="mt-2 md:mt-0 flex flex-wrap gap-2">
                                                                 <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
-                                                                    <FontAwesomeIcon icon={faClock} className="text-[#00B5F1] text-xs" />
+                                                                    <FontAwesomeIcon icon={faClock} className="text-primary-tw text-xs" />
                                                                     <span className="text-xs font-medium text-blue-700">
                                                                         {TIMESLOTS[profile?.time - 1].label}
                                                                     </span>
                                                                 </div>
 
                                                                 <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-full">
-                                                                    <FontAwesomeIcon icon={faCalendarDays} className="text-[#00B5F1] text-xs" />
+                                                                    <FontAwesomeIcon icon={faCalendarDays} className="text-primary-tw text-xs" />
                                                                     <span className="text-xs font-medium text-blue-700">
                                                                         {formatDate(profile?.admissionDate || new Date())}
                                                                     </span>
@@ -418,7 +402,7 @@ const AppointmentList = () => {
                                                             <div className="space-y-3">
                                                                 <div className="flex items-start">
                                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                                                                        <FontAwesomeIcon icon={faAddressCard} className="text-[#00B5F1]" />
+                                                                        <FontAwesomeIcon icon={faAddressCard} className="text-primary-tw" />
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-sm text-gray-500">CCCD/CMND</p>
@@ -430,7 +414,7 @@ const AppointmentList = () => {
 
                                                                 <div className="flex items-start">
                                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                                                                        <FontAwesomeIcon icon={faEnvelope} className="text-[#00B5F1]" />
+                                                                        <FontAwesomeIcon icon={faEnvelope} className="text-primary-tw" />
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-sm text-gray-500">Email</p>
@@ -442,7 +426,7 @@ const AppointmentList = () => {
 
                                                                 <div className="flex items-start">
                                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                                                                        <FontAwesomeIcon icon={faMobileScreen} className="text-[#00B5F1]" />
+                                                                        <FontAwesomeIcon icon={faMobileScreen} className="text-primary-tw" />
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-sm text-gray-500">Số điện thoại</p>
@@ -459,32 +443,42 @@ const AppointmentList = () => {
                                                             <h4 className="font-semibold text-gray-700 border-b pb-2">Thông tin cuộc hẹn</h4>
 
                                                             <div className="space-y-3">
+                                                                {profile?.medicalTreatmentTier === 2 && (
+                                                                    <div className="flex items-start">
+                                                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
+                                                                            <FontAwesomeIcon icon={faBriefcaseMedical} className="text-[#00B5F1]" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-sm text-gray-500">
+                                                                                {profile?.examinationStaffData?.positon || "Bác sĩ"}
+                                                                            </p>
+                                                                            <p className="font-medium text-gray-800">
+                                                                                {profile?.examinationStaffData?.staffUserData?.lastName +
+                                                                                    " " +
+                                                                                    profile?.examinationStaffData?.staffUserData?.firstName}
+                                                                            </p>
+                                                                            <p className="text-sm text-blue-600 mt-1">
+                                                                                Chuyên khoa: {profile?.examinationStaffData?.staffSpecialtyData?.name}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                                 <div className="flex items-start">
                                                                     <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                                                                        <FontAwesomeIcon icon={faBriefcaseMedical} className="text-[#00B5F1]" />
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="text-sm text-gray-500">
-                                                                            {profile?.examinationStaffData?.positon || "Bác sĩ"}
-                                                                        </p>
-                                                                        <p className="font-medium text-gray-800">
-                                                                            {profile?.examinationStaffData?.staffUserData?.lastName +
-                                                                                " " +
-                                                                                profile?.examinationStaffData?.staffUserData?.firstName}
-                                                                        </p>
-                                                                        <p className="text-sm text-blue-600 mt-1">
-                                                                            Chuyên khoa: {profile?.examinationStaffData?.staffSpecialtyData?.name}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="flex items-start">
-                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
-                                                                        <FontAwesomeIcon icon={faLocationDot} className="text-[#00B5F1]" />
+                                                                        <FontAwesomeIcon icon={faLocationDot} className="text-primary-tw" />
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-sm text-gray-500">Phòng khám</p>
                                                                         <p className="font-medium text-gray-800">{profile?.roomName || "Chưa cập nhật"}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center">
+                                                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3 mt-0.5">
+                                                                        <FontAwesomeIcon icon={faMoneyBill1} className="text-primary-tw" />
+                                                                    </div>
+                                                                    <div className="flex flex-wrap gap-2 items-center justify-center">
+                                                                        <p className="text-sm text-gray-500">Giá khám</p>
+                                                                        <p className="font-medium text-gray-800">{profile?.coveredPrice !== null ? formatCurrency(profile?.coveredPrice || 0) : formatCurrency(profile?.price || 0)}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -497,7 +491,7 @@ const AppointmentList = () => {
                                                             <h4 className="font-semibold text-gray-700 mb-2 flex items-center">
                                                                 <svg
                                                                     xmlns="http://www.w3.org/2000/svg"
-                                                                    className="h-5 w-5 mr-2 text-[#00B5F1]"
+                                                                    className="h-5 w-5 mr-2 text-primary-tw"
                                                                     fill="none"
                                                                     viewBox="0 0 24 24"
                                                                     stroke="currentColor"
@@ -511,72 +505,29 @@ const AppointmentList = () => {
                                                                 </svg>
                                                                 Triệu chứng
                                                             </h4>
-                                                            <p className="text-[#00B5F1] font-medium">{profile?.symptom || "Chưa cập nhật"}</p>
+                                                            <p className="text-primary-tw font-medium">{profile?.symptom || "Chưa cập nhật"}</p>
                                                         </div>
                                                     </div>
 
                                                     {/* Actions Section */}
                                                     {profile?.status === STATUS_BE.PENDING && (
                                                         <div className="px-6 pb-6 flex flex-wrap justify-end gap-3">
-                                                            {!profile?.paymentId && (
+                                                            {!dayjs(profile?.admissionDate).isBefore(dayjs().add(1, "day").endOf("day")) &&
                                                                 <button
-                                                                    disabled={isLoading === profile?.id}
-                                                                    className="bg-[#00B5F1] text-white px-4 py-2 rounded-xl font-medium transition-all hover:bg-[#0095c8] hover:shadow-md disabled:opacity-70 flex items-center group text-sm"
+                                                                    className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium transition-all hover:from-purple-600 hover:to-purple-700 hover:shadow-md flex items-center group text-sm"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation()
-                                                                        handleCheckOut(profile)
+                                                                        setObAppoinment(profile)
+                                                                        setShowOldParaclinicalModal(true)
                                                                     }}
                                                                 >
-                                                                    {isLoading === profile?.id ? (
-                                                                        <span className="flex items-center">
-                                                                            <svg
-                                                                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                                fill="none"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <circle
-                                                                                    className="opacity-25"
-                                                                                    cx="12"
-                                                                                    cy="12"
-                                                                                    r="10"
-                                                                                    stroke="currentColor"
-                                                                                    strokeWidth="4"
-                                                                                ></circle>
-                                                                                <path
-                                                                                    className="opacity-75"
-                                                                                    fill="currentColor"
-                                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                                ></path>
-                                                                            </svg>
-                                                                            Thanh toán
-                                                                        </span>
-                                                                    ) : (
-                                                                        <>
-                                                                            <FontAwesomeIcon
-                                                                                icon={faMoneyBill}
-                                                                                className="mr-2 transform group-hover:scale-110 transition-transform"
-                                                                            />
-                                                                            Thanh toán
-                                                                        </>
-                                                                    )}
+                                                                    <FontAwesomeIcon
+                                                                        icon={faFileCirclePlus}
+                                                                        className="mr-2 transform group-hover:scale-110 transition-transform"
+                                                                    />
+                                                                    Thêm phiếu xét nghiệm
                                                                 </button>
-                                                            )}
-
-                                                            <button
-                                                                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium transition-all hover:from-purple-600 hover:to-purple-700 hover:shadow-md flex items-center group text-sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setObAppoinment(profile)
-                                                                    setShowOldParaclinicalModal(true)
-                                                                }}
-                                                            >
-                                                                <FontAwesomeIcon
-                                                                    icon={faFileCirclePlus}
-                                                                    className="mr-2 transform group-hover:scale-110 transition-transform"
-                                                                />
-                                                                Thêm phiếu xét nghiệm
-                                                            </button>
+                                                            }
 
                                                             {!dayjs(profile?.admissionDate).isBefore(dayjs().add(1, "day").startOf("day")) && (
                                                                 <button
@@ -587,10 +538,6 @@ const AppointmentList = () => {
                                                                         setShow(true)
                                                                     }}
                                                                 >
-                                                                    <FontAwesomeIcon
-                                                                        icon={faBan}
-                                                                        className="mr-2 transform group-hover:scale-110 transition-transform"
-                                                                    />
                                                                     Hủy lịch hẹn
                                                                 </button>
                                                             )}

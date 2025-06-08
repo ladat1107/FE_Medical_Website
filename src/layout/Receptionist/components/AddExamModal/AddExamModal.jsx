@@ -27,7 +27,7 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
     const [medicalTreatmentTier, setMedicalTreatmentTier] = useState(2);
 
     const comorbidityContainerRef = useRef(null);
-    const inputRef = useRef(null);
+    const inputref = useRef(null);
     const searchResultsRef = useRef(null);
     const [loading, setLoading] = useState(false);
     const [isSearched, setIsSearched] = useState(false);
@@ -406,8 +406,10 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                     insuranceCode: insurance,
                     
                     comorbidities: selectedComorbidities ? selectedComorbidities.map(item => item.id).join(',') : null,
-                    status: patientData?.paymentId ? STATUS_BE.PAID : STATUS_BE.WAITING,
-                    // is_appointment: 0, -->bỏ nhe. để thống kê
+                    status: patientData?.paymentId ? STATUS_BE.PAID : 
+                            +medicalTreatmentTier === 3 ? STATUS_BE.PAID : 
+                            STATUS_BE.WAITING,
+       
                     isWrongTreatment: isWrongTreatment,
                     medicalTreatmentTier: medicalTreatmentTier,
                     roomId: selectedRoomData ? selectedRoomData.id : null,
@@ -436,7 +438,9 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                     comorbidities: selectedComorbidities ? selectedComorbidities.map(item => item.id).join(',') : null,
                     time: timeSlot ? timeSlot : null,
                     is_appointment: timeSlot ? 1 : 0,
-                    status: timeSlot ? STATUS_BE.PENDING : STATUS_BE.WAITING,
+                    status: timeSlot ? STATUS_BE.PENDING : 
+                            +medicalTreatmentTier === 3 ? STATUS_BE.PAID : 
+                            STATUS_BE.WAITING,
                     isWrongTreatment: isWrongTreatment,
                     medicalTreatmentTier: medicalTreatmentTier,
 
@@ -468,7 +472,7 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
 
     return (
         <div className="add-exam-container">
-            <div className="add-exam-content">
+            <div className={`add-exam-content ${isUserModalOpen ? 'dimmed' : ''}`}>
                 {isEditMode ? (
                     <div className='add-exam-header'>
                         Hồ sơ khám bệnh
@@ -694,7 +698,7 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                             </div>
                             {/* Input tìm kiếm bệnh đi kèm */}
                             <input
-                                ref={inputRef}
+                                ref={inputref}
                                 className='input-add-exam'
                                 type='text'
                                 placeholder='Thêm bệnh đi kèm...'
@@ -771,6 +775,7 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                     onClose={handleModalClose}
                     onRoomSelect={handleRoomSelect}
                     selected={selectedRoom}
+                    medicalTreatmentTier={+medicalTreatmentTier}
                 />
             )}
         </div>

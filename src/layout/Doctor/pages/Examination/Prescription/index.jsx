@@ -7,20 +7,19 @@ import PropTypes from 'prop-types';
 import { message, notification, Spin } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constant/path';
 import EnhancedSelectBox from '@/components/EnhancedSelectBox/EnhancedSelectBox.jsx';
 
 // Update the props to include copiedPrescriptionData and clearCopiedData
-const Prescription = ({ 
-    examinationId, 
-    isEditMode, 
-    prescriptionData, 
+const Prescription = ({
+    examinationId,
+    isEditMode,
+    prescriptionData,
     refresh,
     copiedPrescriptionData,
     clearCopiedData
 }) => {
-    
+
     const [presDetails, setPresDetails] = useState([]);
     const [medicineOptions, setMedicineOptions] = useState([]);
     const [note, setNote] = useState('');
@@ -33,18 +32,17 @@ const Prescription = ({
     const [medicineId, setMedicineId] = useState(0);
     let [loading, setLoading] = useState(false);
 
-    let navigation = useNavigate();
 
     const handleMedicineChange = (value) => {
         setMedicineId(value);
     };
-    
+
     useEffect(() => {
         if (medicineId) {
             handleAddPresdetail();
         }
     }, [medicineId]);
-    
+
 
     //#region get medicine
     let {
@@ -76,25 +74,25 @@ const Prescription = ({
     //#endregion
 
     useEffect(() => {
-      
+
         if (prescriptionData && prescriptionData.length > 0) {
             const prescription = prescriptionData[0]; // Lấy phần tử đầu tiên
-        
+
             if (prescription.prescriptionDetails) {
                 const details = prescription.prescriptionDetails.map((detail, index) => ({
-                    id: index,  
+                    id: index,
                     medicineId: detail.id,
                     name: detail.name,
                     quantity: detail.PrescriptionDetail.quantity,
                     unit: detail.PrescriptionDetail.unit,
                     price: detail.PrescriptionDetail.price,
                     dosage: detail.PrescriptionDetail.dosage,
-                    session: detail.PrescriptionDetail.session 
-                        ? detail.PrescriptionDetail.session.split(',') 
+                    session: detail.PrescriptionDetail.session
+                        ? detail.PrescriptionDetail.session.split(',')
                         : [],
                     dose: detail.PrescriptionDetail.dose
                 }));
-        
+
                 setPresDetails(details);
                 setNote(prescription.note || ""); // Đảm bảo `note` không bị undefined
                 setPrescriptionPrice(prescription.totalMoney || 0);
@@ -118,12 +116,12 @@ const Prescription = ({
                         unit: detail.PrescriptionDetail.unit,
                         price: detail.PrescriptionDetail.price,
                         dosage: detail.PrescriptionDetail.dosage,
-                        session: detail.PrescriptionDetail.session 
-                            ? detail.PrescriptionDetail.session.split(',') 
+                        session: detail.PrescriptionDetail.session
+                            ? detail.PrescriptionDetail.session.split(',')
                             : [],
                         dose: detail.PrescriptionDetail.dose
                     }));
-                    
+
                     setPresDetails(details);
                     setNote(copiedPrescriptionData.note || "");
                     setPrescriptionPrice(copiedPrescriptionData.totalMoney || 0);
@@ -141,10 +139,10 @@ const Prescription = ({
     const selectedMedicine = useMemo(() => {
         return medicineOptions.find(option => option.value === medicineId);
     }, [medicineId, medicineOptions]);
-    
+
     const handleAddPresdetail = useCallback(() => {
         if (!selectedMedicine) return;
-    
+
         setPresDetails(prevDetails => [
             ...prevDetails,
             {
@@ -213,7 +211,7 @@ const Prescription = ({
         setLoading(true);
         try {
             const response = await upsertPrescription(data);
-           
+
             if (response && response.EC === 0 && response.DT === true) {
                 message.success('Lưu đơn thuốc thành công!');
                 refresh();
@@ -267,34 +265,34 @@ const Prescription = ({
                                     <button className={`save-button ${!isEditMode ? "disable-button" : ""}`}
                                         disabled={!isEditMode}
                                         onClick={handleSaveButton}>Lưu</button>
-                                    <button className='print-button' onClick={() => navigation(PATHS.SYSTEM.PRECRIPTION_PDF + "/" + examinationId)}>
+                                    <button className='print-button' onClick={() => window.open(PATHS.SYSTEM.PRECRIPTION_PDF + "/" + examinationId)}>
                                         <FontAwesomeIcon icon={faPrint} className='me-2' />
                                         Xuất </button>
                                 </div>
                             </div>
-                            
-                                <>
-                                    <div className="row padding gap">
-                                        {sortedPresDetails.length > 0 ? (
-                                            sortedPresDetails.map(detail => (
-                                                <Presdetail
-                                                    key={detail.id}
-                                                    id={detail.id}
-                                                    options={medicineOptions}
-                                                    presdetailData={detail}
-                                                    onDelete={() => handleDeletePresdetail(detail.id)}
-                                                    onChange={handlePresdetailChange}
-                                                    isEditMode={isEditMode}
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="empty-list-message">
-                                                <p>Đơn thuốc trống</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </>
-                            
+
+                            <>
+                                <div className="row padding gap">
+                                    {sortedPresDetails.length > 0 ? (
+                                        sortedPresDetails.map(detail => (
+                                            <Presdetail
+                                                key={detail.id}
+                                                id={detail.id}
+                                                options={medicineOptions}
+                                                presdetailData={detail}
+                                                onDelete={() => handleDeletePresdetail(detail.id)}
+                                                onChange={handlePresdetailChange}
+                                                isEditMode={isEditMode}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="empty-list-message">
+                                            <p>Đơn thuốc trống</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+
                             <hr className='mt-2' style={{
                                 borderStyle: 'dashed',
                                 borderWidth: '1px',

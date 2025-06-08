@@ -18,9 +18,9 @@ export const PATHS = {
     },
     STAFF: {
         DASHBOARD: "/doctor",
-        APPOINTMENT: "/doctorAppointment",
+        APPOINTMENT: "/examination",
         PARACLINICAL: "/doctorParaclinical",
-        EXAMINATION: "/doctorExamination/:examId",
+        EXAMINATION: "/examination/:examId",
         HANDBOOK: "/doctorHandbook",
         SCHEDULE: "/doctorSchedule",
         PROFILE: "/doctorProfile",
@@ -51,6 +51,7 @@ export const PATHS = {
         INSTRUCTION: "/instruction",
         LOGIN: "/login",
         NOTIFICATION: "/notification",
+        NUMERICAL: "/numerical",
     },
     SYSTEM: {
         GET_NUMBER: "/getNumber",

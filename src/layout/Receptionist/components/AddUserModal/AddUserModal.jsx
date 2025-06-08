@@ -179,7 +179,7 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
                 </div>
                 <div className="relative">
                     {loading && (
-                        <div className="loading absolute inset-0 bg-black/20 flex items-center justify-center z-10">
+                        <div className="loading absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center z-10">
                             <Spin size="large" />
                         </div>
                     )}

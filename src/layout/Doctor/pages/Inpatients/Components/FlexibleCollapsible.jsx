@@ -25,7 +25,7 @@ const FlexibleCollapsible = ({
   }, [isOpen, children]);
   
   return (
-    <div className="flexible-collapsible-box">
+    <div className="flexible-collapsible-box mt-auto">
       <button
         className="flexible-collapsible-toggle"
         onClick={onToggle}

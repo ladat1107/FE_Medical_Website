@@ -48,9 +48,8 @@ import Notification from "./layout/Doctor/pages/Notification/notification";
 import NotificationAdmin from "./layout/Admin/pages/Notification/notificationAdmin";
 import NotificationUser from "./layout/User/pages/Notification/notification";
 import { NotificationProvider } from './contexts/NotificationContext.jsx';
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { deleteAssistantForCustomer } from "./services/doctorService";
 import MedicineManage from "./layout/Admin/pages/MedicineManage/MedicineMange";
 import ExaminationManage from "./layout/Admin/pages/ExaminationManage/ExaminationManage";
@@ -58,6 +57,9 @@ import InpatientList from "./layout/Doctor/pages/Inpatients/InpationList";
 import InpatientDetail from "./layout/Doctor/pages/Inpatients/InpatientDetail";
 import RevenueManage from "./layout/Admin/pages/RevenueManage/RevenueManage";
 import MedicalRecord from "./layout/Receptionist/pages/Dashboard/medicalRecord";
+import Numerical from "./layout/User/pages/Numerical/Numerical";
+import { clearBooking, setCurrentContent } from "./redux/bookingSlice";
+import { BOOKING_CONTENT } from "./constant/value";
 
 function App() {
   const location = useLocation();
@@ -81,10 +83,17 @@ function App() {
 
 
   const { token } = useSelector((state) => state.authen);
+  const dispatch = useDispatch()
+  const { currentContent } = useSelector(state => state.booking)
+
+  useEffect(() => {
+    if (!currentContent) {
+      dispatch(setCurrentContent(BOOKING_CONTENT.SPECIALTY));
+    }
+  }, [])
 
   // Handle socket connection
   useEffect(() => {
-    // Connect and authenticate socket
     connectSocket(token);
 
     // Clean up function to properly disconnect socket
@@ -95,6 +104,9 @@ function App() {
 
 
   useEffect(() => {
+    if (previousPath.current === PATHS.HOME.BOOKING && location.pathname !== PATHS.HOME.BOOKING) {
+      dispatch(clearBooking())
+    }
     if (previousPath.current === PATHS.STAFF.CONSULTANT && location.pathname !== PATHS.STAFF.CONSULTANT) {
       handleDeleteAssistantForCustomer();
     }
@@ -115,14 +127,17 @@ function App() {
             <Route path={`${PATHS.HOME.DOCTOR_DETAIL}/:id`} element={<DoctorDetail />} />
             <Route path={PATHS.HOME.DOCTOR_LIST} element={<DoctorList />} />
             <Route path={PATHS.HOME.DEPARTMENT_LIST} element={<DepartmentList />} />
-            <Route path={PATHS.HOME.BOOKING} element={<Booking />} />
             <Route path={`${PATHS.HOME.HANDBOOK_LIST}/:id`} element={<BlogList />} />
-            <Route path={PATHS.HOME.PROFILE} element={<ProfileUser />} />
-            <Route path={PATHS.HOME.APPOINTMENT_LIST} element={<AppointmentList />} />
             <Route path={`${PATHS.HOME.HANDBOOK_DETAIL}/:id`} element={<BlogDetail />} />
             <Route path={`${PATHS.HOME.DEPARTMENT_DETAIL}/:id`} element={<DepartmentDetail />} />
             <Route path={PATHS.HOME.INSTRUCTION} element={<Instruction />} />
-            <Route path={`${PATHS.HOME.NOTIFICATION}`} element={<NotificationUser />} />
+            <Route element={<PrivateRoute />}>
+              <Route path={PATHS.HOME.NUMERICAL} element={<Numerical />} />
+              <Route path={PATHS.HOME.BOOKING} element={<Booking />} />
+              <Route path={PATHS.HOME.PROFILE} element={<ProfileUser />} />
+              <Route path={PATHS.HOME.APPOINTMENT_LIST} element={<AppointmentList />} />
+              <Route path={`${PATHS.HOME.NOTIFICATION}`} element={<NotificationUser />} />
+            </Route>
           </Route>
           <Route path={PATHS.SYSTEM.GET_NUMBER} element={<GetNumber />} />
           <Route path={`${PATHS.SYSTEM.PRECRIPTION_PDF}/:id`} element={<PrintPrescription />} />
@@ -164,7 +179,6 @@ function App() {
             </Route>
           </Route>
         </Routes>
-        {/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
       </QueryClientProvider>
     </NotificationProvider>
   );

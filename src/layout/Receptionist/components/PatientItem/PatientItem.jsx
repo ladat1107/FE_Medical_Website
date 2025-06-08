@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import { cutSuffix } from '@/utils/numberSeries';
 import { updateExamination } from '@/services/doctorService';
 import { message } from 'antd';
-import './PatientItem.scss';
+import './PatientItem.scss'
+import { SOS } from '@/components/TypeFile/typefile';
 
-const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, visit_status, downItem, onClickItem, sort, status = 0, doctorHeader = 'Bác sĩ' }) => {
+const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, visit_status, downItem, onClickItem, sort, status = 0, doctorHeader = 'Bác sĩ', isEmergency =false }) => {
 
   const handleDownItem = async (event) => {
     event.stopPropagation();
@@ -119,6 +120,11 @@ const PatientItem = ({ index, id, name, symptom, special, doctor = '', room, vis
           {/* {visit_status === 0 && (
             <i className="fa-solid fa-forward-fast fa-rotate-90 color-down" onClick={(event) => handleDownItem(event)}></i>
           )} */}
+          {isEmergency && (
+            <div className="emergency-icon">
+              <SOS/>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -138,5 +144,6 @@ PatientItem.propTypes = {
   sort: PropTypes.bool,
   status: PropTypes.number,
   doctorHeader: PropTypes.string,
+  isEmergency: PropTypes.bool,
 };
 export default PatientItem;

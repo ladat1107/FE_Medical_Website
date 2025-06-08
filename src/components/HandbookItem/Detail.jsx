@@ -53,7 +53,6 @@ const DetailHandbook = (props) => {
             setIsLoadingAction(status);
             let response = await updateHandbook({ id: dataHandbook.DT.id, status });
             if (response?.EC === 0) {
-                console.log(response);
                 message.success(response?.EM || "Thành công");
                 navigate(-1);
 

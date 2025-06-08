@@ -24,14 +24,18 @@ const InsertDepartment = (props) => {
     useEffect(() => {
         if (doctors && doctors?.DT?.length > 0) {
             let _doctor = doctors.DT.map((item) => {
+                let _fullName = (item?.staffUserData?.lastName || '') + ' ' + (item?.staffUserData?.firstName || '')
+                let _department = item?.staffDepartmentData?.name || ''
                 return {
                     value: item.id,
-                    label: item?.staffUserData?.lastName + ' ' + item?.staffUserData?.firstName
+                    fullName: _fullName,
+                    department: _department
                 }
             })
             setListDoctors(_doctor);
         }
     }, [doctors])
+
     useEffect(() => {
         if (departmentUpdate?.id) {
             setDepartmentUpdate(props.obUpdate);
@@ -46,6 +50,7 @@ const InsertDepartment = (props) => {
             })
             setImageUrl(departmentUpdate?.image || "");
             setCol(6);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [props.obUpdate])
 
@@ -95,7 +100,7 @@ const InsertDepartment = (props) => {
                 handleCloseInsert();
             }
             else {
-                message.error(respone?.EM || "Thêm khoa thất bại")
+                message.error(respone?.EM || "Thất bại")
                 return;
             }
         }).catch((error) => {
@@ -151,21 +156,24 @@ const InsertDepartment = (props) => {
                                 <Form.Item
                                     name="deanId"
                                     label="Trưởng khoa"
-                                    rules={[
-                                        {
-                                            required: true,
-                                            message: 'Vui lòng chọn trưởng khoa!',
-                                        },
-                                    ]}
                                 >
                                     <Select
                                         placeholder="Chọn trưởng khoa"
                                         showSearch
+                                        allowClear
                                         optionFilterProp="label"
                                         filterSort={(optionA, optionB) =>
-                                            (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                                            (optionA?.fullName ?? '').toLowerCase().localeCompare((optionB?.fullName ?? '').toLowerCase())
                                         }
-                                        options={listDoctors}
+                                        options={listDoctors.map((item) => {
+                                            return {
+                                                label: <div className='d-flex justify-content-start align-items-center gap-3'>
+                                                    <span className='font-bold'>{item.fullName}</span>
+                                                    <span className='text-gray-400'>{item.department}</span>
+                                                </div>,
+                                                value: item.value
+                                            }
+                                        })}
                                     >
                                     </Select>
                                 </Form.Item>
@@ -192,12 +200,11 @@ const InsertDepartment = (props) => {
                             <Col sm={24} lg={8}>
                                 <Form.Item
                                     name={"image"}
-                                    label="Ảnh khoa"
-
+                                    label={<div><span className='text-red-500'>*</span> Ảnh khoa</div>}
                                 >
                                     <div className='image-upload' htmlFor={"input-upload"}
                                         onClick={() => document.getElementById('input-upload').click()}>
-                                        <input type="file" id='input-upload' hidden={true} onChange={handleImageChange} />
+                                        <input type="file" id='input-upload' accept='image/*' hidden={true} onChange={handleImageChange} />
                                         {imageUrl ?
                                             <div className='img-department' style={{
                                                 backgroundImage: `url(${imageUrl})`,

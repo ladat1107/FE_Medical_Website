@@ -3,8 +3,7 @@ import DropdownPaginate from "../../components/Dropdown/DropdownPaginate";
 import PaginateCustom from "../../components/Paginate/PaginateCustom";
 import { CirclePlus, Upload as UploadIcon, ChevronUp, ChevronDown, Filter } from "lucide-react";
 import { SearchOutlined } from "@mui/icons-material";
-import { Button, Input, Badge, Select, Tooltip, Dropdown, DatePicker, message } from "antd";
-import Status from "../../components/Status";
+import { Button, Input, Badge, Select, Tooltip, DatePicker, message } from "antd";
 import { formatCurrency } from "@/utils/formatCurrency";
 import MedicineManageSkeleton from "./MedicineManageSkeleton";
 import { convertDateTime } from "@/utils/formatDate";
@@ -154,6 +153,7 @@ const MedicineTable = ({ medicines, refetch, isRefetchingMedicineData, isLoading
 
     const handleCloseInsertModal = () => {
         setOpenInsertModal(false);
+        refetch();
         setImportedRows([]);
     }
 

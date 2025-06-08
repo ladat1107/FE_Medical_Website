@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Table, Tag, Button, Input, Space, Select, DatePicker, Modal, Tooltip, message } from "antd"
-import { PlusOutlined, EditOutlined, EyeOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons"
-import ExaminationForm from "./ExaminationForm"
+import { EyeOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons"
 import ExaminationDrawer from "./ExaminationDetail"
 import { STATUS_BE, TIMESLOTS } from "@/constant/value"
 import dayjs from "dayjs"
@@ -104,19 +103,6 @@ const AppointmentList = ({ appointmentList }) => {
   const handleDetailModalCancel = () => {
     setIsDetailModalVisible(false)
     setCurrentAppointment(null)
-  }
-
-  const handleSave = (values) => {
-    // Handle save logic here
-    if (currentAppointment?.id) {
-      // Update existing appointment
-      message.success("Cập nhật lịch hẹn thành công")
-    } else {
-      // Create new appointment
-      message.success("Tạo lịch hẹn mới thành công")
-    }
-    setIsModalVisible(false)
-    fetchAppointments()
   }
 
   const handleDelete = (id) => {
@@ -253,14 +239,14 @@ const AppointmentList = ({ appointmentList }) => {
 
         </div>
         <div>
-          <Button
+          {/* <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => showModal()}
             style={{ backgroundColor: "#00B5F1" }}
           >
             Tạo lịch hẹn mới
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -274,17 +260,6 @@ const AppointmentList = ({ appointmentList }) => {
         scroll={{ x: 1200 }}
         size="middle"
       />
-
-      {/* Appointment Form Modal */}
-      <Modal
-        title={currentAppointment?.id ? "Cập nhật lịch hẹn" : "Tạo lịch hẹn mới"}
-        open={isModalVisible}
-        onCancel={handleModalCancel}
-        footer={null}
-        width={800}
-      >
-        <ExaminationForm initialValues={currentAppointment} onSave={handleSave} onCancel={handleModalCancel} />
-      </Modal>
 
       {currentAppointment &&
         <ExaminationDrawer open={isDetailModalVisible}

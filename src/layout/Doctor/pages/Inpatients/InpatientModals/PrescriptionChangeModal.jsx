@@ -32,14 +32,14 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
 
         const prescription = prescriptionData[0];
         setNote(prescription.note || '');
-        
+
         // Create a new array of prescription details
         const copiedDetails = prescription.prescriptionDetails.map((medicine, index) => {
             // Parse the session string into an array
-            const sessionArray = medicine.PrescriptionDetail.session 
-                ? medicine.PrescriptionDetail.session.split(',').map(String) 
+            const sessionArray = medicine.PrescriptionDetail.session
+                ? medicine.PrescriptionDetail.session.split(',').map(String)
                 : [];
-            
+
             return {
                 id: nextId + index,
                 medicineId: medicine.id,
@@ -52,16 +52,16 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                 dose: medicine.PrescriptionDetail.dose
             };
         });
-        
+
         // Update the next ID for future additions
         setNextId(nextId + copiedDetails.length);
-        
+
         // Set the prescription details
         setPresDetails(copiedDetails);
-        
+
         // Calculate and set the total price
         setPrescriptionPrice(prescription.totalMoney);
-        
+
         message.success('Đã sao chép đơn thuốc thành công');
     };
 
@@ -84,7 +84,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
 
         const isDuplicate = presDetails.some(item => item.medicineId === selectedMedicine.value);
         if (isDuplicate) return;
-    
+
         setPresDetails(prevDetails => [
             ...prevDetails,
             {
@@ -101,7 +101,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
         ]);
         setNextId(prevId => prevId + 1);
     }, [nextId, selectedMedicine]);
-    
+
     //#region get medicine
     let {
         data: dataMedicines,
@@ -157,13 +157,13 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
 
     const handleSaveButton = async () => {
 
-        if(presDetails.length === 0) {
+        if (presDetails.length === 0) {
             message.warning('Đơn thuốc trống, không thể lưu!');
             return;
         }
 
         for (const detail of presDetails) {
-            if (!detail.medicineId || !detail.quantity || !detail.unit || !detail.price || !detail.session || !detail.dose) {
+            if (!detail.medicineId || !detail.quantity || !detail.unit || !detail.price || detail.session.length === 0 || !detail.dose) {
                 message.warning('Vui lòng điền đầy đủ thông tin thuốc!');
                 return;
             }
@@ -197,7 +197,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
         setLoading(true);
         try {
             const response = await createPrescription(data);
-           
+
             if (response && response.EC === 0) {
                 message.success('Lưu đơn thuốc thành công!');
                 if (onSave) {
@@ -236,7 +236,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
             cancelText="Hủy"
             confirmLoading={loading}
         >
-            <div style={{ maxHeight: '75vh', minHeight: '75vh' , overflowY: 'auto' }}>
+            <div style={{ maxHeight: '75vh', minHeight: '75vh', overflowY: 'auto' }}>
                 <div className="prescription-change-modal">
                     <div className="info-section mb-2">
                         <p>Đơn thuốc cũ sẽ được chốt với ngày kết thúc là {moment(yesterday).format('DD/MM/YYYY')}</p>
@@ -268,7 +268,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                             />
                         </div>
                         <div className='col-5 p-0'>
-                            <button 
+                            <button
                                 className='save-button me-2'
                                 onClick={handleCopyPrescription}
                                 disabled={!prescriptionData || !prescriptionData.length}
@@ -276,7 +276,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                                 <i className="fa-solid fa-copy me-2"></i>
                                 Lấy đơn thuốc gần nhất
                             </button>
-                            <button 
+                            <button
                                 className='restore-button'
                                 onClick={clearModal}
                             >
@@ -285,7 +285,7 @@ const PrescriptionChangeModal = ({ visible, onCancel, onSave, prescriptionData, 
                         </div>
                     </div>
                     {prescriptionType === 1 && (
-                        <p style={{fontStyle: 'italic', color: 'black'}}>*Lưu ý: Chỉ kê đơn thuốc đủ dùng trong ngày</p>
+                        <p style={{ fontStyle: 'italic', color: 'black' }}>*Lưu ý: Chỉ kê đơn thuốc đủ dùng trong ngày</p>
                     )}
                     <>
                         <div className="row p-2 padding gap">

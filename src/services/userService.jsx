@@ -26,6 +26,9 @@ const userService = {
   getDoctorDetail(query = "") {
     return axiosInstance.get(`api/getUserById`, { params: query })
   },
+  getDoctorBookingById(query = "") {
+    return axiosInstance.get(`api/getDoctorBookingById`, { params: query })
+  },
   getHandbook(query = "") {
     return axiosInstance.get(`api/getHandBookHome`, { params: query })
   },
@@ -58,9 +61,6 @@ const userService = {
       params: { id: data.id },
     });
   },
-  checkOutAppointment(query = "") {
-    return axiosInstance.get(`/api/paymentAppoinmentMomo`, { params: query });
-  },
   sendMessage(data) {
     return axiosInstance.post(`/api/messageSystem`, data);
   },
@@ -75,6 +75,12 @@ const userService = {
   },
   getUserByQRCode(query = "") {
     return axiosInstance.get(`/api/getUserByQrCode`, { params: query });
+  },
+  createInsuarance(data) {
+    return axiosInstance.post(`/api/createInsuarance`, data);
+  },
+  updateInsuarance(data) {
+    return axiosInstance.put(`/api/updateInsuarance`, data);
   }
 };
 

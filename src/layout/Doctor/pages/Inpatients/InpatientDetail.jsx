@@ -7,14 +7,14 @@ import MultiSelect from '../../components/MultiSelect';
 import SelectBox2 from '../../components/Selectbox';
 import { useParams } from 'react-router-dom';
 import { useMutation } from '@/hooks/useMutation';
-import { createAdvanceMoney, getAllDisease, getExaminationById, updateExamination, updateInpatientRoom } from '@/services/doctorService';
-import { message, Spin, Tooltip } from 'antd';
+import { createAdvanceMoney, deleteAdvanceMoney, getAllDisease, getExaminationById, updateExamination, updateInpatientRoom } from '@/services/doctorService';
+import { message, Popconfirm, Spin, Tooltip } from 'antd';
 import { convertDateTime } from '@/utils/formatDate';
 import { DISCHARGE_OPTIONS } from '@/constant/options';
 import CustomDatePicker from '@/components/DatePicker';
 import CustomDatePickerWithHighlights from '@/components/DatePicker/CustomDatePickerWithHighlights';
 import { useSelector } from 'react-redux';
-import { STATUS_BE, TIMESLOTS } from '@/constant/value';
+import { PAYMENT_STATUS, STATUS_BE, TIMESLOTS } from '@/constant/value';
 import SummaryModal from './InpatientModals/InpatientSumary';
 import MoneyInput from '@/components/Input/MoneyInput';
 import FlexibleCollapsible from './Components/FlexibleCollapsible';
@@ -41,7 +41,7 @@ const InpatientDetail = () => {
     
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);   
-
+    const [deletingId, setDeletingId] = useState(null);
 
     const handleAmountChange = (value) => {
         setAmount(value);
@@ -455,6 +455,25 @@ const InpatientDetail = () => {
         }
     }
 
+    const handleDeleteAdvance = async (id) => {
+        try {
+            setDeletingId(id);
+            const response = await deleteAdvanceMoney(id);
+            
+            if (response && response.EC === 0) {
+                message.success('Xóa tạm ứng thành công!');
+                refresh();
+            } else {
+                message.error(response.EM);
+            }
+        } catch (error) {
+            console.error("Error deleting advance money:", error.response || error.message);
+            message.error('Xóa tạm ứng thất bại.');
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     return (
         <>
             {examinationLoading ? (
@@ -473,9 +492,20 @@ const InpatientDetail = () => {
                                 Lịch sử khám bệnh
                             </button>
                         </div>
-                        <p className='mt-2' style={{fontSize: '20px', fontWeight: '500'}}>
-                            {examData?.userExaminationData?.lastName} {examData?.userExaminationData?.firstName}
-                        </p>
+                        <div className='flex'>
+                            <p className='mt-2' style={{fontSize: '20px', fontWeight: '500'}}>
+                                {examData?.userExaminationData?.lastName} {examData?.userExaminationData?.firstName}
+                            </p>
+                            {examData?.medicalTreatmentTier === 3 && (
+                            <div className='mt-auto ms-3'
+                                style={{fontSize: '14px', fontWeight: '500', color: '#FF0000',
+                                    backgroundColor: '#ffd1d7', padding: '1px 10px', borderRadius: '30px',
+                                    border: '1px solid #FF0000', marginLeft: '10px'
+                                }}>
+                                    Cấp cứu
+                                </div>
+                            )}
+                        </div>
                         <div className='gray-text flex mt-2'>
                             <p className='me-3'>#{examData.id}</p>
                             <p className='me-3'>•</p>
@@ -497,7 +527,7 @@ const InpatientDetail = () => {
                         </div>
                         <hr className='mt-4'/>
                     </div>
-                    <div className="inpatient-exam-content__body flex mt-4">
+                    <div className="inpatient-exam-content__body flex mt-4 ">
                         <div className='col-6'>
                             <p className='title mb-2'>Thông tin nhập viện</p>
                             <div className='flex mt-2'>
@@ -513,7 +543,7 @@ const InpatientDetail = () => {
                                 <div className='col-7' style={{fontWeight: '500'}}>{examData?.examinationRoomData?.name}</div>
                                 <div className='col-1' style={{fontWeight: '500'}}>
                                     {isEditMode && (
-                                        <Tooltip title="Chuyển phòng" color='white' overlayInnerStyle={{ color: 'black' }}> 
+                                        <Tooltip title="Chuyển phòng" color='white' styles={{ body: { color: 'black' } }}> 
                                             <button className='safe-button' style={{borderRadius: '50%'}} onClick={() => setIsModalVisible(true)}>
                                                 <i className="fa-solid fa-arrows-rotate"></i>
                                             </button>
@@ -533,7 +563,7 @@ const InpatientDetail = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className='flex mt-3'>
+                            {/* <div className='flex mt-2'>
                                 <div>                  
                                     <button className='save-button me-2' onClick={handleOpenSummaryModal}>Báo cáo bệnh án</button>         
                                 </div>   
@@ -547,10 +577,30 @@ const InpatientDetail = () => {
                                         examData.advanceMoneyExaminationData.map((item, index) => (
                                             <div className="flex mb-2" key={index}>
                                                 <p className="me-1">Ngày: {convertDateTime(item?.date)} -</p>
-                                                <p>Tạm ứng: {item.amount?.toLocaleString()} đ</p>
-                                                {item.status=== 1 ?
-                                                    <p className="ms-2" style={{color: '#FF8C00'}}>Chờ thanh toán</p> : 
-                                                    item.status === 2 ?
+                                                <p>Tạm ứng: {item.amount?.toLocaleString() || 0}đ</p>
+                                                {item.status=== PAYMENT_STATUS.PENDING ?
+                                                    <>
+                                                        <p className="ms-2" style={{color: '#FF8C00'}}>Chờ thanh toán</p>
+                                                        <Popconfirm
+                                                            title="Xác nhận xóa"
+                                                            description="Bạn có chắc chắn muốn xóa tạm ứng này?"
+                                                            onConfirm={() => handleDeleteAdvance(item.id)}
+                                                            okText="Xóa"
+                                                            cancelText="Hủy"
+                                                        >
+                                                            <button 
+                                                                className="action-btn action-delete pt-0 pb-0 ms-1"
+                                                                disabled={deletingId === item.id}
+                                                            >
+                                                                {deletingId === item.id ? (
+                                                                    <i className="fa-solid fa-spinner fa-spin"></i>
+                                                                ) : (
+                                                                    <i className="fa-solid fa-trash"></i>
+                                                                )}
+                                                            </button>
+                                                        </Popconfirm>
+                                                    </> : 
+                                                    item.status === PAYMENT_STATUS.PAID ?
                                                         <p className="ms-2" style={{color: '#008000'}}>Đã thanh toán</p> :
                                                         <p className="ms-2" style={{color: '#FF0000'}}>Đã hủy</p>                                                
                                                 }
@@ -576,7 +626,7 @@ const InpatientDetail = () => {
                                         </>
                                     )}
                                 </FlexibleCollapsible>      
-                            </div>
+                            </div> */}
                         </div>
                         <div className='col-6'>
                             <p className='title mb-2'>Thông tin xuất viện</p>
@@ -687,7 +737,7 @@ const InpatientDetail = () => {
                                     </>
                                 )}
                             </div>
-                            <div className='flex mt-3'>
+                            {/* <div className='flex'>
                                 {isEditMode ? <>
                                     {dataExamination?.DT?.status === 7 && <>
                                         <button style={{ background: "#F44343", color: 'white' }}  
@@ -729,7 +779,116 @@ const InpatientDetail = () => {
                                         Chỉnh sửa
                                     </button>  
                                 </>}  
-                            </div>
+                            </div> */}
+                        </div>
+                    </div>
+                    <div className="flex mt-3" style={{gap: '10px'}}>
+                        <div className='col-6 flex'>
+                            <div>                  
+                                <button className='save-button me-2' onClick={handleOpenSummaryModal}>Báo cáo bệnh án</button>         
+                            </div>   
+                            <FlexibleCollapsible
+                                isOpen={isOpen}
+                                onToggle={() => setIsOpen(!isOpen)}
+                                expandedText="Thu gọn"
+                                collapsedText="Xem chi tiết tạm ứng"
+                            >
+                                {examData?.advanceMoneyExaminationData?.length > 0 ? (
+                                    examData.advanceMoneyExaminationData.map((item, index) => (
+                                        <div className="flex mb-2" key={index}>
+                                            <p className="me-1">Ngày: {convertDateTime(item?.date)} -</p>
+                                            <p>Tạm ứng: {item.amount?.toLocaleString() || 0}đ</p>
+                                            {item.status=== PAYMENT_STATUS.PENDING ?
+                                                <>
+                                                    <p className="ms-2" style={{color: '#FF8C00'}}>Chờ thanh toán</p>
+                                                    <Popconfirm
+                                                        title="Xác nhận xóa"
+                                                        description="Bạn có chắc chắn muốn xóa tạm ứng này?"
+                                                        onConfirm={() => handleDeleteAdvance(item.id)}
+                                                        okText="Xóa"
+                                                        cancelText="Hủy"
+                                                    >
+                                                        <button 
+                                                            className="action-btn action-delete pt-0 pb-0 ms-1"
+                                                            disabled={deletingId === item.id}
+                                                        >
+                                                            {deletingId === item.id ? (
+                                                                <i className="fa-solid fa-spinner fa-spin"></i>
+                                                            ) : (
+                                                                <i className="fa-solid fa-trash"></i>
+                                                            )}
+                                                        </button>
+                                                    </Popconfirm>
+                                                </> : 
+                                                item.status === PAYMENT_STATUS.PAID ?
+                                                    <p className="ms-2" style={{color: '#008000'}}>Đã thanh toán</p> :
+                                                    <p className="ms-2" style={{color: '#FF0000'}}>Đã hủy</p>                                                
+                                            }
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>0 đ</div>
+                                )}
+                                {isEditMode && (
+                                    <>
+                                        <MoneyInput onChange={handleAmountChange}/>
+                                        <div className="flex">
+                                            <button className="ml-auto save-button mt-2"
+                                                onClick={handleAddAdvanceMoney}>
+                                                {isLoadingAddAdvance ? (
+                                                    <>
+                                                        <i className="fa-solid fa-spinner fa-spin me-2"></i>
+                                                        Đang xử lý...
+                                                    </>
+                                                ) : 'Thêm tạm ứng'}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </FlexibleCollapsible>      
+                        </div>
+                        <div className='col-6 flex'>
+                            {isEditMode ? <>
+                                {dataExamination?.DT?.status === 7 && <>
+                                    <button style={{ background: "#F44343", color: 'white' }}  
+                                            className='restore-button' 
+                                            onClick={() => {
+                                                setIsEditMode(false);
+                                                resetFormData();
+                                            }}>
+                                        Hủy
+                                    </button>  
+                                </>} 
+                                <>
+                                    <div style={{fontWeight: '500'}}>
+                                        <button className={`restore-button ${!isEditMode ? 'disabled' : ''}`} 
+                                                disabled={!isEditMode}  onClick={handleDischargedExam}>
+                                            {isLoadingDischarged ? (
+                                                <>
+                                                    <i className="fa-solid fa-spinner fa-spin me-2"></i>
+                                                    Đang xử lý...
+                                                </>
+                                            ) : 'Lưu xuất viện'}
+                                        </button>               
+                                    </div>
+                                    { formData.dischargeStatus === 4 && formData.dischargeDate && (
+                                        <div className='col-3' style={{fontWeight: '500'}}>
+                                            <button className='safe-button' onClick={handleReExam}>
+                                                {isLoadingReExam ? (
+                                                    <>
+                                                        <i className="fa-solid fa-spinner fa-spin me-2"></i>
+                                                        Đang xử lý...
+                                                    </>
+                                                ) : 'Lưu cùng lịch hẹn'}
+                                            </button>                        
+                                        </div>
+                                    )}      
+                                </>
+                            </> : <>
+                                <button className='restore-button' onClick={() => setIsEditMode(true)}>
+                                    Chỉnh sửa
+                                </button>  
+                            </>}  
                         </div>
                     </div>
                     <div className="inpatient-exam-content__body mt-2">
@@ -788,7 +947,7 @@ const InpatientDetail = () => {
                         <div className='flex mt-2'>
                         {isEditMode && 
                             <div style={{fontWeight: '500', marginLeft: 'auto'}}>
-                                <button className={`restore-button ${!isEditMode ? 'disabled' : ''}`} 
+                                <button className={`restore-button ${!isEditMode ? 'disabled' : ''} me-0`} 
                                             disabled={!isEditMode} 
                                     onClick={handleUpdateInfoExamination}
                                 >

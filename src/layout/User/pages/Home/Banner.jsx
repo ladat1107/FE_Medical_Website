@@ -2,16 +2,63 @@ import React from "react";
 import { Search as SearchIcon } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useMobile } from "@/hooks/useMobile";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { clearBooking, setCurrentContent } from "@/redux/bookingSlice";
+import { PATHS } from "@/constant/path";
+import { BOOKING_CONTENT, TAGS } from "@/constant/value";
 
 const Banner = () => {
   const isMobile = useMobile();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const listService = [
-    { title: "Đặt khám theo bác sĩ ", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2F488715df-05ff-42ef-bf6b-27d91d132158-bacsi.png&w=64&q=75" },
-    { title: "Tư vấn khám qua video", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2F9fdd77eb-9baa-4f3b-a108-d91e136a0bf9-tele.png&w=64&q=75" },
-    { title: "Đặt lịch xét nghiệm", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn.medpro.vn%2Fprod-partner%2Fc193937f-8c0f-479e-be31-5610db6f7df1-dat-lich-xet-nghiem.png&w=64&q=75" },
-    { title: "Gói khám sức khỏe", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2Fb4181f19-f965-40b8-a4c5-2996cb960104-goi_kham.png&w=64&q=75" },
-    { title: "Đặt khám theo bác sĩ ", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2F488715df-05ff-42ef-bf6b-27d91d132158-bacsi.png&w=64&q=75" },
-    { title: "Tư vấn khám qua video", icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2F9fdd77eb-9baa-4f3b-a108-d91e136a0bf9-tele.png&w=64&q=75" },
+    {
+      title: "Đặt khám theo chuyên khoa",
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn.medpro.vn%2Fprod-partner%2Fe3b1924c-c9f6-4cc8-9e4c-fd457815b378-dat-kham-chuyen-khoa.png&w=128&q=75",
+      handleClick: () => {
+        dispatch(clearBooking())
+        dispatch(setCurrentContent(BOOKING_CONTENT.SPECIALTY))
+        navigate(PATHS.HOME.BOOKING)
+      }
+    },
+    {
+      title: "Đặt khám theo bác sĩ ",
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn.medpro.vn%2Fprod-partner%2F4681bfd1-db5b-4364-a52a-5b0355abf607-bs.png&w=128&q=75",
+      handleClick: () => {
+        dispatch(clearBooking())
+        dispatch(setCurrentContent(BOOKING_CONTENT.DOCTOR))
+        navigate(PATHS.HOME.BOOKING)
+      }
+    },
+    {
+      title: `<span>Số khám <br /> hiện tại </span>`,
+      handleClick: () => {
+        navigate(PATHS.HOME.NUMERICAL)
+      },
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn.medpro.vn%2Fprod-partner%2Faf579b7d-d040-436e-992a-0bb9c6374785-dat-kham-tai-co-so.webp&w=128&q=75"
+    },
+    {
+      title: `<span>Đơn khám <br /> bệnh </span>`,
+      handleClick: () => {
+        navigate(PATHS.HOME.APPOINTMENT_LIST)
+      },
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn.medpro.vn%2Fprod-partner%2Fc874863c-34ce-469f-b209-895b45e4166a-tt.png&w=128&q=75"
+    },
+    {
+      title: "Tin tức",
+      handleClick: () => {
+        navigate(`${PATHS.HOME.HANDBOOK_LIST}/${TAGS[2].value}`)
+      },
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn-pkh.longvan.net%2Fprod-partner%2Ffa0b00be-d554-404a-bf9a-4a5f216ee978-chaam_saac_taaoa_i_nhaa.png&w=128&q=75"
+    },
+    {
+      title: "Thông báo",
+      handleClick: () => {
+        navigate(PATHS.HOME.NOTIFICATION)
+      },
+      icon: "https://medpro.vn/_next/image?url=https%3A%2F%2Fprod-partner.s3-hcm-r1.longvan.net%2F9fdd77eb-9baa-4f3b-a108-d91e136a0bf9-tele.png&w=64&q=75"
+    },
   ]
   const breakpoints = {
     0: { slidesPerView: 2, spaceBetween: 10, },
@@ -42,11 +89,11 @@ const Banner = () => {
         </h4>
       </div>
       {isMobile ?
-        <div className="bg-white rounded-2xl shadow-card-doctor grid grid-cols-3 sm:grid-cols-4 gap-4 p-3">
+        <div className="bg-white rounded-2xl shadow-card-doctor grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-4 p-3" >
           {listService.map((item, index) => (
-            <div key={index} className="w-[110px] h-[110px] flex flex-col items-center justify-center">
-              <img src={item.icon} alt="" />
-              <p className="text-secondaryText-tw text-center text-sm">{item.title}</p>
+            <div key={index} className="w-[110px] h-[110px] flex flex-col items-center justify-center cursor-pointer" onClick={item.handleClick}>
+              <img className="h-[40px]" src={item.icon} alt="" />
+              <p className="text-secondaryText-tw text-center text-sm mt-2" dangerouslySetInnerHTML={{ __html: item.title }}></p>
             </div>
           ))}
         </div>
@@ -58,9 +105,9 @@ const Banner = () => {
         >
           {listService.map((item, index) => (
             <SwiperSlide key={index} >
-              <div className="w-[150px] h-[150px] bg-white rounded-2xl p-3 flex flex-col items-center justify-center">
-                <img src={item.icon} alt="" />
-                <p className="text-secondaryText-tw text-center">{item.title}</p>
+              <div className="group w-[150px] h-[150px] bg-white rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer" onClick={item.handleClick}>
+                <img className="h-[50px] group-hover:scale-110 transition-all duration-300" src={item.icon} alt="" />
+                <p className="text-secondaryText-tw text-center h-[30px] mt-3 group-hover:text-primary-tw" dangerouslySetInnerHTML={{ __html: item.title }}></p>
               </div>
             </SwiperSlide>
           ))}

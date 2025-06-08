@@ -18,7 +18,7 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
     const [localParacData, setLocalParacData] = useState([]);
     const [deletingId, setDeletingId] = useState(null);
     const paraclinicalContainerRef = useRef(null);
-    const inputRef = useRef(null);
+    const inputref = useRef(null);
     const searchResultsRef = useRef(null);
 
     useEffect(() => {
@@ -318,7 +318,7 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
                                             ))}
                                         </div>
                                         <input
-                                            ref={inputRef}
+                                            ref={inputref}
                                             className='input-add-prac'
                                             type='text'
                                             placeholder='Thêm yêu cầu cận lâm sàng...'

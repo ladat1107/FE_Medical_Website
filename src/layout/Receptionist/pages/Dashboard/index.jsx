@@ -6,7 +6,6 @@ import { getAllDisease, getExaminations, getPatienSteps, getSpecialties } from "
 import PatientItem from "../../components/PatientItem/PatientItem";
 import { TIMESLOTS, TYPE_NUMBER } from "@/constant/value";
 import { convertDateTime } from "@/utils/formatDate";
-import DropdownSpecialty from "../../components/Dropdown/DropdownSpecialty";
 import userService from "@/services/userService";
 import Loading from "@/components/Loading/Loading";
 import dayjs from "dayjs";
@@ -38,7 +37,7 @@ const ReceptionistDashboard = () => {
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState(2);
     const [listExam, setListExam] = useState([]);
-    const [listStep, setListStep] = useState([]);
+    const [listStep, setListStep] = useState({});
 
     const [totalPatient, setTotalPatient] = useState(0);
     const [totalAppointment, setTotalAppointment] = useState(0);
@@ -51,7 +50,7 @@ const ReceptionistDashboard = () => {
     const { data: dataUserByQRCode, refetch: refetchUserByQRCode } = useGetUserByQRCode({ qrCode: scannedQR });
     const [dataQRCode, setDataQRCode] = useState(null);
     // QR Code scanning refs
-    const hiddenInputRef = useRef(null);
+    const hiddeninputref = useRef(null);
     const lastScanTimeRef = useRef(0);
     const scanningInProgressRef = useRef(false);
     const qrTimeoutRef = useRef(null);
@@ -94,7 +93,7 @@ const ReceptionistDashboard = () => {
                     const activeElement = document.activeElement;
                     const isInputElement = activeElement.tagName === 'INPUT' ||
                         activeElement.tagName === 'TEXTAREA';
-                    const isOurHiddenInput = activeElement === hiddenInputRef.current;
+                    const isOurHiddenInput = activeElement === hiddeninputref.current;
 
                     // Start QR scan mode if scanner detected AND:
                     // 1. We're not in an input field, OR
@@ -110,7 +109,7 @@ const ReceptionistDashboard = () => {
 
                             // Focus our hidden input
                             if (!isOurHiddenInput) {
-                                hiddenInputRef.current.focus();
+                                hiddeninputref.current.focus();
                             }
 
                             // Recreate the start of the QR code from our keystroke buffer
@@ -120,7 +119,7 @@ const ReceptionistDashboard = () => {
                                 .join('');   // Join them into a string
 
                             // Set the hidden input value to include the start of the QR code
-                            hiddenInputRef.current.value = qrPrefix;
+                            hiddeninputref.current.value = qrPrefix;
 
                             // Prevent this keystroke from being processed elsewhere
                             e.preventDefault();
@@ -133,9 +132,9 @@ const ReceptionistDashboard = () => {
                     if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current);
                     qrTimeoutRef.current = setTimeout(() => {
                         // QR scan completed
-                        if (hiddenInputRef.current.value) {
-                            setScannedQR(hiddenInputRef.current.value);
-                            hiddenInputRef.current.value = "";
+                        if (hiddeninputref.current.value) {
+                            setScannedQR(hiddeninputref.current.value);
+                            hiddeninputref.current.value = "";
                         }
 
                         // Clean up state
@@ -143,7 +142,7 @@ const ReceptionistDashboard = () => {
                         keystrokeSequenceRef.current = [];
 
                         // Restore focus
-                        if (previousActiveElementRef.current && previousActiveElementRef.current !== hiddenInputRef.current) {
+                        if (previousActiveElementRef.current && previousActiveElementRef.current !== hiddeninputref.current) {
                             try {
                                 previousActiveElementRef.current.focus();
                             } catch (err) {
@@ -293,6 +292,7 @@ const ReceptionistDashboard = () => {
     const handleSelectChange = (value) => {
         setStatus(value === 'appointment' ? 2 : 4);
         setIsAppointment(value === 'appointment' ? 1 : 0);
+        setTime(null);
     };
 
     const handleTimeChange = (value) => {
@@ -490,24 +490,38 @@ const ReceptionistDashboard = () => {
                     <div className="grid grid-cols-7 md:grid-cols-7">
                         <div className="col-span-5 md:col-span-7 lg:col-span-5">
                             <div className="text-gray-500">
-                                <p className="m-0 ml-1.5 text-sm text-gray-500">
-                                    {type === TYPE_NUMBER.NORMAL ? "Số khám thường" : "Số khám ưu tiên"}
-                                    <DropdownSpecialty value={type} setValue={(value) => { setType(value) }} />
-                                </p>
+                                <div className="m-0 ml-1.5 text-sm text-gray-500 flex items-center">
+                                    <p style={{width: '120px'}}>{type === TYPE_NUMBER.NORMAL ? "Số khám thường" : "Số khám ưu tiên"}</p>
+                                    <button 
+                                        className='flex items-center justify-center bg-[#ffffff] text-white transition-all duration-200 hover:shadow-md hover:scale-105' 
+                                        style={{
+                                            borderRadius: '50%',
+                                            width: '25px', 
+                                            height: '25px', 
+                                            padding: '0',
+                                            border: '1px solid #e5e7eb' 
+                                        }}
+                                        onClick={() => {
+                                            setType(type === TYPE_NUMBER.NORMAL ? TYPE_NUMBER.PRIORITY : TYPE_NUMBER.NORMAL);
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-arrows-rotate" style={{color: '#FF7A56'}}></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div className="ms-2 text-[#3AA472] text-3xl font-semibold">
+                            <div className="ms-2 text-[#FF7A56] text-3xl font-semibold">
                                 <p className="m-0 ml-2.5 text-3xl">{type === TYPE_NUMBER.NORMAL ? currentNumber?.normalNumberCurrent : currentNumber?.priorityNumberCurrent}</p>
                             </div>
                             <div className="text-gray-500">
                                 <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {convertDateTime(new Date())}</p>
                             </div>
                         </div>
-                        <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#3AA472] flex justify-center">
+                        <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#FF7A56] flex justify-center">
                             <div
-                                className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#ddfced] hover:scale-105"
+                                className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#FFE3DD] hover:scale-105"
                                 onClick={() => handleGeneralNumber(type)}
                             >
-                                {loading ? <Loading /> :
+                                {loading ? <Spin tip="Loading..." />  :
                                     <i className="text-2xl fa-solid fa-user-plus"></i>
                                 }
                             </div>
@@ -535,18 +549,20 @@ const ReceptionistDashboard = () => {
                                 </Select>
                             </Form.Item>
                         </div>
-                        <div className="w-fit lg:w-48">
-                            <Form.Item className="m-0">
-                                <Select
-                                    className="w-full"
-                                    allowClear
-                                    placeholder="Chọn khung giờ"
-                                    onChange={handleTimeChange}
-                                    value={time}
-                                    options={TIMESLOTS}
-                                />
-                            </Form.Item>
-                        </div>
+                        {isAppointment === 1 && (
+                            <div className="w-fit lg:w-48">
+                                <Form.Item className="m-0">
+                                    <Select
+                                        className="w-full"
+                                        allowClear
+                                        placeholder="Chọn khung giờ"
+                                        onChange={handleTimeChange}
+                                        value={time}
+                                        options={TIMESLOTS}
+                                    />
+                                </Form.Item>
+                            </div>
+                        )}
                         <div className="w-fit lg:w-64">
                             <Form.Item className="m-0">
                                 <Input
@@ -569,7 +585,7 @@ const ReceptionistDashboard = () => {
             </Form>
 
             <input
-                ref={hiddenInputRef}
+                ref={hiddeninputref}
                 type="text"
                 className="opacity-0 h-0 w-0 absolute pointer-events-none"
                 autoComplete="off"

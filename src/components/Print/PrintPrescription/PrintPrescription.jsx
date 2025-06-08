@@ -16,11 +16,13 @@ const PrintPrescription = () => {
       fetchPrescription(id);
     }
   }, [location]);
+  
   useEffect(() => {
     if (prescription?.id) {
       window.print();
     }
   }, [prescription])
+
   const fetchPrescription = async (id) => {
     const response = await getExaminationById(id);
     if (response && response.EC === 0) {

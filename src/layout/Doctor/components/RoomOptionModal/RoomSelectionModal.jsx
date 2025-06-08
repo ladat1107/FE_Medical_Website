@@ -7,7 +7,7 @@ import { getAvailableRooms } from '@/services/doctorService';
 
 const { Option } = Select;
 
-const RoomSelectionModal = ({ isVisible, onClose, onRoomSelect, selected }) => {
+const RoomSelectionModal = ({ isVisible, onClose, onRoomSelect, selected, medicalTreatmentTier }) => {
     const [selectedRoom, setSelectedRoom] = useState(selected || null); 
     const [rooms, setRooms] = useState([]);
     const [filteredRooms, setFilteredRooms] = useState([]);
@@ -24,14 +24,14 @@ const RoomSelectionModal = ({ isVisible, onClose, onRoomSelect, selected }) => {
         loading: availableRoomsLoading, 
         error: availableRoomsError,
         execute: fetchAvailableRooms,
-    } = useMutation(() => getAvailableRooms());
+    } = useMutation(() => getAvailableRooms(medicalTreatmentTier));
 
     useEffect(() => {
         if (isVisible) {
             setLoading(true);
             fetchAvailableRooms();
         }
-    }, [isVisible]);
+    }, [isVisible, medicalTreatmentTier]);
 
     useEffect(() => {
         if (dataAvailableRooms?.DT) {
@@ -62,7 +62,7 @@ const RoomSelectionModal = ({ isVisible, onClose, onRoomSelect, selected }) => {
                         .map(room => JSON.stringify({
                             id: room.serviceData[0].id,
                             name: room.serviceData[0].id === 3 ? 'Phòng thường' : 
-                                  room.serviceData[0].id === 4 ? 'Phòng VIP' : 'Không xác định'
+                                  room.serviceData[0].id === 4 ? 'Phòng VIP' : 'Phòng cấp cứu'
                         }))
                 )
             ).map(str => JSON.parse(str));
@@ -179,7 +179,8 @@ const RoomSelectionModal = ({ isVisible, onClose, onRoomSelect, selected }) => {
                     <span>
                         {serviceType === 3 ? 'Phòng thường' 
                         : serviceType === 4 ? 'Phòng VIP'
-                        : 'Không xác định'}
+                        : serviceType === 6 ? 'Phòng cấp cứu'
+                        : 'Phòng khác'}
                     </span>
                 );
             },
@@ -284,6 +285,7 @@ RoomSelectionModal.propTypes = {
     onClose: PropTypes.func.isRequired,
     onRoomSelect: PropTypes.func.isRequired,
     selected: PropTypes.object,
+    medicalTreatmentTier: PropTypes.number,
 };
 
 export default RoomSelectionModal;

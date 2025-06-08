@@ -10,6 +10,7 @@ import { EMIT } from "@/constant/value";
 import emitter from "@/utils/eventEmitter";
 import { useSelector } from "react-redux";
 import userService from "@/services/userService";
+import InsuranceCard from "./section/InsuaranceCard";
 
 const Profile = () => {
     let { user } = useSelector((state) => state.authen);
@@ -19,6 +20,7 @@ const Profile = () => {
     let { data: folkdata } = useQuery(() => userService.getFolk())
     let [specialty, setSpecailty] = useState([]);
     let { data: specialtyData } = useQuery(() => getSpecialtySelect())
+    let [insurance, setInsurance] = useState(null);
     let {
         data: dataProfile,
         loading: listProfileLoading,
@@ -45,6 +47,13 @@ const Profile = () => {
     useEffect(() => {
         if (dataProfile && dataProfile.DT) {
             setProfile(dataProfile.DT)
+            setInsurance({
+                ...dataProfile.DT?.userInsuranceData,
+                avatar: user?.avatar,
+                fullName: (dataProfile.DT?.lastName || "") + " " + (dataProfile.DT?.firstName || ""),
+                gender: dataProfile.DT?.gender === 1 ? "Nữ" : "Nam",
+                dob: dataProfile.DT?.dob,
+            })
         }
     }, [dataProfile])
     let handleEvent = (event) => {
@@ -60,7 +69,6 @@ const Profile = () => {
 
     }, []);
     let refresh = (value) => {
-        dataProfile = null;
         setSelectedItem(value);
         fetchProfile();
     }
@@ -89,7 +97,21 @@ const Profile = () => {
                         data={profile}
                         key={Date.now() + profile.id}
                     />}
-                    {selectedItem === EMIT.EVENT_PROFILE.insurance && <div>Bảo hiểm</div>}
+                    {selectedItem === EMIT.EVENT_PROFILE.insurance && <InsuranceCard
+                        refresh={refresh}
+                        id={insurance?.id}
+                        avatar={insurance?.avatar}
+                        fullName={insurance?.fullName}
+                        gender={insurance?.gender}
+                        dob={insurance?.dob}
+                        insuranceCode={insurance?.insuranceCode}
+                        dateOfIssue={insurance?.dateOfIssue}
+                        exp={insurance?.exp}
+                        benefitLevel={insurance?.benefitLevel}
+                        residentialCode={insurance?.residentialCode}
+                        initialHealthcareRegistrationCode={insurance?.initialHealthcareRegistrationCode}
+                        continuousFiveYearPeriod={insurance?.continuousFiveYearPeriod}
+                    />}
                     {selectedItem === EMIT.EVENT_PROFILE.notifications && <Notification />}
                 </div>
             </div>

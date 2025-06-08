@@ -17,7 +17,8 @@ const Presdetail = ({ id, presdetailData, onDelete, isEditMode, onChange }) => {
     const SessionOptions = [{ value: '1', label: 'Sáng' }, { value: '2', label: 'Trưa' }, { value: '3', label: 'Chiều' }, { value: '4', label: 'Tối' }];
 
     const DoseOptions = [
-        `1 lần 1 ${medicineUnit}`, 
+        `1 lần 1/2 ${medicineUnit}`,
+        `1 lần 1 ${medicineUnit}`,
         `1 lần 2 ${medicineUnit}`,
         `1 lần 3 ${medicineUnit}`,
         `1 lần 4 ${medicineUnit}`,
@@ -27,11 +28,11 @@ const Presdetail = ({ id, presdetailData, onDelete, isEditMode, onChange }) => {
         `1 lần 8 ${medicineUnit}`,
         `1 lần 9 ${medicineUnit}`
     ];
-    
+
     const handleSessionChange = (value) => {
         setSession(value);
     }
-    
+
     const handleDoseChange = (value) => {
         setDose(value);
     }
@@ -57,90 +58,90 @@ const Presdetail = ({ id, presdetailData, onDelete, isEditMode, onChange }) => {
         onChange(id, medicineId, quantity, medicineUnit, selectedPrice, dosage, session, dose);
     }, [id, medicineId, quantity, medicineUnit, selectedPrice, dosage, onChange]);
 
-  const handleDosageChange = (value) => {
-    setDosage(value);
-  };
+    const handleDosageChange = (value) => {
+        setDosage(value);
+    };
 
     return (
         <div className="presdetail-container">
-        {/* Header row */}
-        <div className="medicine-row">
-            <div className="medicine-name">
-                <p className="title">Tên thuốc</p>
+            {/* Header row */}
+            <div className="medicine-row">
+                <div className="medicine-name">
+                    <p className="title">Tên thuốc</p>
+                </div>
+                <div className="medicine-info">
+                    <p className="title">Số lượng</p>
+                    <p className="title"></p>
+                    <p className="title">Đơn giá</p>
+                </div>
+                <div className="medicine-timing">
+                    <p className="title">Buổi dùng</p>
+                </div>
+                <div className="medicine-dosage">
+                    <p className="title">Liều dùng</p>
+                </div>
             </div>
-            <div className="medicine-info">
-                <p className="title">Số lượng</p>
-                <p className="title"></p>
-                <p className="title">Đơn giá</p>
-            </div>
-            <div className="medicine-timing">
-                <p className="title">Buổi dùng</p>
-            </div>
-            <div className="medicine-dosage">
-                <p className="title">Liều dùng</p>
+
+            {/* Content row */}
+            <div className="medicine-row">
+                <div className="medicine-name">
+                    <p className="suptext">{medicineName}</p>
+                </div>
+                <div className="medicine-info">
+                    <div>
+                        <input
+                            type="text"
+                            className="input"
+                            placeholder="SL"
+                            readOnly={!isEditMode}
+                            value={quantity}
+                            onChange={(e) => {
+                                // Kiểm tra nếu giá trị nhập vào chỉ chứa số
+                                const value = e.target.value;
+                                // Chấp nhận chuỗi rỗng hoặc chỉ chứa số
+                                if (value === '' || /^[0-9]+$/.test(value)) {
+                                    handleQuantityChange(value);
+                                }
+                            }}
+                            onKeyPress={(e) => {
+                                // Ngăn người dùng nhập ký tự không phải số
+                                if (!/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                }
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <p className="suptext">{medicineUnit}</p>
+                    </div>
+                    <div>
+                        <p className="suptext">{selectedPrice.toLocaleString()}</p>
+                    </div>
+                </div>
+                <div className="medicine-timing">
+                    <MultiSelect
+                        options={SessionOptions}
+                        value={session}
+                        placeholder="Chọn buổi dùng"
+                        onChange={handleSessionChange}
+                        disabled={!isEditMode}
+                    />
+                </div>
+                <div className="medicine-dosage">
+                    <FreeTextInputWithSuggestions
+                        options={DoseOptions}
+                        value={dose}
+                        onChange={handleDoseChange}
+                        placeholder="Nhập liều dùng..."
+                        disabled={!isEditMode}
+                        maxSuggestions={5}
+                    />
+                </div>
+                {isEditMode && (
+                    <i className="fa-solid fa-trash delete-btn" onClick={onDelete}></i>
+                )}
             </div>
         </div>
-  
-    {/* Content row */}
-    <div className="medicine-row">
-        <div className="medicine-name">
-            <p className="suptext">{medicineName}</p>   
-        </div>
-        <div className="medicine-info">
-            <div>
-                <input
-                    type="text"
-                    className="input"
-                    placeholder="SL"
-                    readOnly={!isEditMode}
-                    value={quantity}
-                    onChange={(e) => {
-                        // Kiểm tra nếu giá trị nhập vào chỉ chứa số
-                        const value = e.target.value;
-                        // Chấp nhận chuỗi rỗng hoặc chỉ chứa số
-                        if (value === '' || /^[0-9]+$/.test(value)) {
-                            handleQuantityChange(value);
-                        }
-                    }}
-                    onKeyPress={(e) => {
-                        // Ngăn người dùng nhập ký tự không phải số
-                        if (!/[0-9]/.test(e.key)) {
-                            e.preventDefault();
-                        }
-                    }}
-                />
-            </div>
-            <div>
-                <p className="suptext">{medicineUnit}</p>
-            </div>
-            <div>
-                <p className="suptext">{selectedPrice.toLocaleString()}</p>
-            </div>
-        </div>
-        <div className="medicine-timing">
-            <MultiSelect
-                options={SessionOptions}
-                value={session} 
-                placeholder="Chọn buổi dùng"
-                onChange={handleSessionChange}
-                disabled={!isEditMode}
-            />
-        </div>
-        <div className="medicine-dosage">    
-            <FreeTextInputWithSuggestions
-                options={DoseOptions}
-                value={dose}
-                onChange={handleDoseChange}
-                placeholder="Nhập liều dùng..."
-                disabled={!isEditMode}
-                maxSuggestions={5}
-            />
-        </div>
-        {isEditMode && (
-            <i className="fa-solid fa-trash delete-btn" onClick={onDelete}></i>
-        )}
-        </div>
-    </div>
     );
 };
 

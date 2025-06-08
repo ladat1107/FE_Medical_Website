@@ -4,7 +4,6 @@ import { handleConfirmUser, handleLogin } from '@/services/adminService';
 import { useDispatch, useSelector } from 'react-redux';
 import { login, addRememberLogin, removeRememberAccount } from '@/redux/authenSlice';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ROLE } from '@/constant/role';
 import { PATHS } from '@/constant/path';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -14,6 +13,7 @@ import ForgotPassword from './ForgotPassword';
 import socket, { authenticateSocket } from "@/Socket/socket";
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { BACKEND_URL } from '@/constant/environment';
+import { urlAuthorization } from '@/utils/urlAuthorization';
 const Login = () => {
     const open = {
         login: "login",
@@ -31,6 +31,7 @@ const Login = () => {
     const [showSavedAccounts, setShowSavedAccounts] = useState(false);
     const [rememberMe, setRememberMe] = useState(rememberLogins.length > 0 ? true : false);
     const [isLoading, setIsLoading] = useState(false);
+    const { user } = useSelector((state) => state.authen);
     useEffect(() => {
         let confirmToken = queryParams.get('confirm');
         if (confirmToken !== null) {
@@ -48,10 +49,15 @@ const Login = () => {
         if (loginGoogle !== null) {
             let dataLogin = JSON.parse(loginGoogle);
             dispatch(login(dataLogin));
-            redirect(dataLogin.user.role);
         }
         setLoading(false);
     }, []);
+    
+    useEffect(() => {
+        if (user && user?.role) {
+            navigate(urlAuthorization(user?.role));
+        }
+    }, [user])
 
     const handleSelectAccount = (account) => {
         form.setFieldsValue({
@@ -76,7 +82,6 @@ const Login = () => {
                     }
                     dispatch(addRememberLogin(remember));
                 }
-                redirect(response.DT.user.role);
             } else {
                 message.error(response?.EM || 'Đăng nhập thất bại')
             }
@@ -90,25 +95,6 @@ const Login = () => {
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
-    const redirect = (roleUser) => {
-        if (roleUser) {
-            if (roleUser === ROLE.ADMIN) {
-                navigate(PATHS.ADMIN.DASHBOARD);
-            } else if (roleUser === ROLE.PATIENT) {
-                navigate(PATHS.HOME.HOMEPAGE);
-            } else if (roleUser === ROLE.DOCTOR) {
-                navigate(PATHS.STAFF.APPOINTMENT);
-            } else if (roleUser === ROLE.RECEPTIONIST) {
-                navigate(PATHS.RECEPTIONIST.DASHBOARD);
-            } else if (roleUser === ROLE.PHARMACIST) {
-                navigate(PATHS.RECEPTIONIST.PRESCRIBE);
-            } else if (roleUser === ROLE.ACCOUNTANT) {
-                navigate(PATHS.RECEPTIONIST.CASHIER);
-            } else {
-                navigate(PATHS.HOME.HOMEPAGE);
-            }
-        }
-    }
 
     return (
         <div className='w-full min-h-screen flex items-center justify-center bg-cover bg-center'
@@ -147,7 +133,7 @@ const Login = () => {
                                         color='white'
                                         title={
                                             showSavedAccounts && rememberLogins.length > 0 ? (
-                                                <div className="w-full">
+                                                <div className="w-full max-h-[200px] overflow-y-auto scrollbar-hide">
                                                     {rememberLogins.map((account, index) => (
                                                         <div
                                                             key={index}
@@ -162,17 +148,16 @@ const Login = () => {
                                         }
                                         open={showSavedAccounts}
                                         placement="bottom"
-                                        overlayClassName="w-[300px]"
+                                        classNames={{ root: "w-[300px]" }}
                                         onOpenChange={(visible) => setShowSavedAccounts(visible)}
                                     >
-
                                         <Form.Item
                                             name="email"
-                                            rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+                                            rules={[{ required: true, message: 'Vui lòng nhập thông tin!' }]}
                                         >
                                             <Input
                                                 className="border-2 border-primary-tw focus:!border-primary-tw-light hover:!border-primary-tw-light rounded-lg text-base h-10 px-3"
-                                                placeholder="Email"
+                                                placeholder="Email hoặc Căn cước công dân"
                                                 onFocus={() => setShowSavedAccounts(true)}
                                                 onBlur={() => setTimeout(() => setShowSavedAccounts(false), 200)}
                                                 onClick={() => setShowSavedAccounts(true)}
@@ -180,11 +165,11 @@ const Login = () => {
                                         </Form.Item>
                                     </Tooltip> : <Form.Item
                                         name="email"
-                                        rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
+                                        rules={[{ required: true, message: 'Vui lòng nhập thông tin!' }]}
                                     >
                                         <Input
                                             className="border-2 border-primary-tw rounded-lg text-base h-10 px-3"
-                                            placeholder="Email"
+                                            placeholder="Email hoặc Căn cước công dân"
                                         />
                                     </Form.Item>
                                 }

@@ -18,20 +18,21 @@ import { STATUS_MESSAGE } from "@/constant/value"
 import EmptyContent from "./Skeleton/EmptyContent"
 import { uploadFileToCloudinary, uploadToCloudinary } from "@/utils/uploadToCloudinary"
 import AttachedFile from "@/layout/Doctor/pages/Notification/NotiItem/attachedFile"
-import { useConversation, useConversationForStaff, useCreateMessage } from "@/hooks/useConversations"
+import { useConversation, useConversationForStaff, useCreateMessage, useGetConversationFromSearch, useSearchConversation } from "@/hooks/useConversations"
 import TooltipMessage from "@/components/Tooltip/TooltipMessage"
 import EmojiPicker from "emoji-picker-react"
 import { useMobile } from "@/hooks/useMobile"
+import useDebounce from "@/hooks/useDebounce"
 
 const { Header, Sider, Content } = Layout
 const { TextArea } = Input
 
 const MessengerReceptionist = () => {
-    const { user, isLogin } = useSelector((state) => state.authen)
+    const { user, isLoggedIn } = useSelector((state) => state.authen)
     const navigate = useNavigate()
     const [form] = Form.useForm()
     const { data: conversationSidebar, isLoading: conversationSidebarLoading } = useConversationForStaff({
-        enabled: isLogin,
+        enabled: isLoggedIn,
     })
     const [conversationSelected, setConversationSelected] = useState(null)
     const {
@@ -39,15 +40,17 @@ const MessengerReceptionist = () => {
         isLoading: conversationLoading,
         isPending: conversationPending,
         refetch: refetchConversationData,
-    } = useConversation({ receiverId: conversationSelected?.patientId, enabled: isLogin })
+    } = useConversation({ receiverId: conversationSelected?.patientId, enabled: isLoggedIn })
     const { mutate: createMessage, isPending: isCreatingMessage } = useCreateMessage()
+    const { mutate: getConversationFromSearch, isPending: isGettingConversationFromSearch } = useGetConversationFromSearch()
 
     const [hovered, setHovered] = useState(null)
 
-    const [isShowUploadFile, setIsShowUploadFile] = useState(false)
+    const [isShowUploadFile, setIsShowUploadFile] = useState(true)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [search, setSearch] = useState("")
     const [conversations, setConversations] = useState([])
+    const [listSearchConversation, setListSearchConversation] = useState([])
     const [showScrollDown, setShowScrollDown] = useState(false)
     const [messages, setMessages] = useState([])
     const [isUploading, setIsUploading] = useState(false)
@@ -57,8 +60,9 @@ const MessengerReceptionist = () => {
     const isMobile = useMobile()
 
     const chatContentRef = useRef(null)
-    const inputRef = useRef(null)
+    const inputref = useRef(null)
     const emojiPickerRef = useRef(null)
+    const { data: searchConversationData, isLoading: searchConversationLoading } = useSearchConversation(useDebounce(search, 500))
 
     const scrollToBottom = () => {
         chatContentRef.current?.scrollTo({ top: chatContentRef.current.scrollHeight, behavior: "smooth" })
@@ -95,8 +99,16 @@ const MessengerReceptionist = () => {
     }, [conversationData])
 
     useEffect(() => {
+        if (searchConversationData?.EC === 0) {
+            setListSearchConversation(searchConversationData?.DT?.map((item) => item.patientData))
+        } else {
+            setListSearchConversation([])
+        }
+    }, [searchConversationData])
+
+    useEffect(() => {
         scrollToBottom()
-        if (inputRef.current) inputRef.current.focus() // Tự động focus vào ô input khi mở chat
+        if (inputref.current) inputref.current.focus() // Tự động focus vào ô input khi mở chat
     }, [messages, isUploading, uploadProgress, isCreatingMessage])
 
     // Theo dõi vị trí thanh cuộn và hiển thị nút cuộn xuống nếu cần
@@ -177,6 +189,7 @@ const MessengerReceptionist = () => {
         }
         setMessages((pre) => [...pre, message])
         form.resetFields()
+        setIsShowUploadFile(true)
         createMessage(message, {
             onSuccess: () => {
                 refetchConversationData()
@@ -190,7 +203,7 @@ const MessengerReceptionist = () => {
             message: currentMessage + emojiData.emoji,
         })
         // Focus lại vào input sau khi chọn emoji
-        inputRef.current?.focus()
+        inputref.current?.focus()
     }
     const handleBackToList = () => {
         setConversationSelected(null)
@@ -201,8 +214,22 @@ const MessengerReceptionist = () => {
         handleBackToList()
     }
 
-
-
+    const handleClickSearchConversation = (item) => {
+        let conversation = searchConversationData?.DT?.find((conversation) => conversation.patientData.id === item.id)
+        if (conversation) {
+            getConversationFromSearch(conversation.id, {
+                onSuccess: (data) => {
+                    if (data.EC === 0) {
+                        message.success("Đang chuyển cuộc trò chuyện đến bạn")
+                    } else {
+                        message.info("Không thêm được cuộc trò chuyện, vui lòng thử lại!")
+                    }
+                },
+            })
+        }
+        setListSearchConversation([])
+        setSearch("")
+    }
     return (
         <Layout className="h-screen bg-white">
             {conversationLoading || conversationSidebarLoading ? (
@@ -233,6 +260,31 @@ const MessengerReceptionist = () => {
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="border-none shadow-none bg-gray-200"
                                 />
+                                {listSearchConversation.length > 0 && (
+                                    <div className="search-results max-h-[300px] overflow-y-auto bg-white shadow-md rounded-md mt-1 absolute z-20 w-[calc(100%-16px)]">
+                                        <List
+                                            itemLayout="horizontal"
+                                            dataSource={listSearchConversation}
+                                            renderItem={(item) => (
+                                                <List.Item
+                                                    className="p-2 hover:bg-gray-100 cursor-pointer"
+                                                    onClick={() => handleClickSearchConversation(item)}
+                                                >
+                                                    <List.Item.Meta
+                                                        avatar={<Avatar src={item?.avatar || ""} />}
+                                                        title={
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="font-medium">{item?.lastName + " " + item?.firstName}</span>
+                                                                <span className="text-xs text-gray-500">ID: {item?.id}</span>
+                                                            </div>
+                                                        }
+                                                        description={<span className="text-xs">CCCD: {item?.cid || "Chưa cập nhật"}</span>}
+                                                    />
+                                                </List.Item>
+                                            )}
+                                        />
+                                    </div>
+                                )}
                             </div>
                             <List
                                 itemLayout="horizontal"
@@ -361,7 +413,7 @@ const MessengerReceptionist = () => {
 
                                                                 {/* Nội dung tin nhắn */}
                                                                 <div
-                                                                    className={`max-w-[85%] sm:max-w-[70%] w-fit ${msg.senderId !== user?.id && !isShowAvatar ? "ms-[5px]" : ""}`}
+                                                                    className={`max-w-[85%] sm:max-w-[70%] w-fit `}
                                                                 >
                                                                     {msg?.link ? (
                                                                         msg.link.includes("image") ? (
@@ -382,7 +434,7 @@ const MessengerReceptionist = () => {
                                                                     ) : (
                                                                         <TooltipMessage statusName={statusName} createdAt={msg.createdAt}>
                                                                             <div
-                                                                                className={`break-words whitespace-normal py-[8px] px-[12px] ${msg.senderId === user?.id ? "bg-primary-tw text-white" : "bg-gray-200"} ${msg.content.length > 110 ? "rounded-[20px]" : "rounded-[50px]"}`}
+                                                                                className={`break-words whitespace-normal py-[8px] px-[12px] min-w-16 ${msg.senderId === user?.id ? "bg-primary-tw text-white" : "bg-gray-200"} ${msg.content.length > 110 ? "rounded-[20px]" : "rounded-[50px]"}`}
                                                                             >
                                                                                 {msg.content}
                                                                             </div>
@@ -451,7 +503,7 @@ const MessengerReceptionist = () => {
                                     onFinish={sendMessageStaff}
                                     className="flex items-center px-[10px] py-[6px] bg-white border-t border-gray-300 w-full"
                                 >
-                                    <div className={`flex items-center gap-2 ${isShowUploadFile && "hidden"}`}>
+                                    <div className={`flex items-center gap-2 ${!isShowUploadFile && "hidden"}`}>
                                         <div>
                                             <ImageIcon
                                                 htmlFor={`input-upload-image-messenger`}
@@ -490,8 +542,8 @@ const MessengerReceptionist = () => {
                                             disabled={isUploading}
                                             placeholder="Nhập tin nhắn"
                                             maxLength={500}
-                                            ref={inputRef}
-                                            onChange={(e) => setIsShowUploadFile(e.target.value.length > 0)}
+                                            ref={inputref}
+                                            onChange={(e) => setIsShowUploadFile(e.target.value === "")}
                                             autoSize={{ maxRows: 4 }}
                                             onKeyDown={(e) => {
                                                 if (e.key === "Enter" && !e.altKey) {

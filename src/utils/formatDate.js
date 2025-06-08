@@ -110,3 +110,8 @@ export const calculateExpirationDate = (ngayHetHanISO) => {
     return `${soNgayConLai} ngày`;
   }
 }
+
+export const diffDate = (date1, date2) => {
+  if (!date1 || !date2) return 0
+  return dayjs(date2).startOf('day').diff(dayjs(date1).startOf('day'), 'day')
+}

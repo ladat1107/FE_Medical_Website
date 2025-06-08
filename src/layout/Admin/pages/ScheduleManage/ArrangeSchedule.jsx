@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./ScheduleManage.scss";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { Button, Col, DatePicker, Form, Input, message, Row } from "antd";
+import { Button, Col, DatePicker, Form, Input, message, Modal, Row } from "antd";
 import dayjs from "dayjs";
 import { primaryColorAdmin } from "@/styles//variables";
 import { arrangeSchedule } from "@/services/adminService";
@@ -11,35 +11,45 @@ const ArrangeSchedule = (props) => {
     let [form] = Form.useForm();
     let { handleSendNoti } = useSendNotification();
 
-    let handleArrangeSchedule = () => {
-        form.validateFields().then(async (values) => {
-            let response = await arrangeSchedule(values);
-            if (response.EC === 0) {
-                message.success("Xếp lịch thành công!");
-                props.refresh();
+    let handleConfirmArrangeSchedule = () => {
+        form.validateFields().then((values) => {
+            Modal.confirm({
+                className: "custom-confirm-modal",
+                title: "Xác nhận xếp lịch",
+                content: `Bạn có chắc chắn muốn xếp lịch trực trong 30 ngày kể từ ngày ${values.startDate.format('DD/MM/YYYY')}?`,
+                okText: "Xác nhận",
+                cancelText: "Huỷ",
+                onOk: async () => {
+                    let response = await arrangeSchedule(values);
+                    if (response.EC === 0) {
+                        message.success("Xếp lịch thành công!");
+                        props.refresh();
 
-                handleSendNoti(
-                    `📆 Thông báo lịch trực`,
-                    `<p>
-                        <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Lịch trực ✨</span> 
-                        Đã có thông tin về lịch trực mới! Các bác sĩ xem thông tin và thực hiện tại  
-                        👉 <a href="${FRONTEND_URL}/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
-                    </p>`,
-                    [],
-                    false,
-                    [...new Set(
-                        response.DT.schedule
-                            .map(item => item?.staffScheduleData?.staffUserData?.id)
-                            .filter(id => id !== undefined)
-                    )] // Chỉ lấy id của người nhận thông báo
-                )
-            } else {
-                message.error(response.EM);
-            }
+                        handleSendNoti(
+                            `📆 Thông báo lịch trực`,
+                            `<p>
+                                <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Lịch trực ✨</span> 
+                                Đã có thông tin về lịch trực mới! Các bác sĩ xem thông tin và thực hiện tại  
+                                👉 <a href="${FRONTEND_URL}/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
+                            </p>`,
+                            [],
+                            false,
+                            [...new Set(
+                                response.DT.schedule
+                                    .map(item => item?.staffScheduleData?.staffUserData?.id)
+                                    .filter(id => id !== undefined)
+                            )]
+                        )
+                    } else {
+                        message.error(response.EM);
+                    }
+                }
+            });
         }).catch((err) => {
             console.log(err);
         });
     }
+
     return (
         <div className="insert-schedule-content px-3">
             <div className="content p-2">
@@ -132,7 +142,7 @@ const ArrangeSchedule = (props) => {
                                 <Form.Item>
                                     <Button type="primary" htmlType="submit"
                                         style={{ background: primaryColorAdmin }}
-                                        onClick={() => { handleArrangeSchedule() }}>Xếp lịch</Button>
+                                        onClick={() => { handleConfirmArrangeSchedule() }}>Xếp lịch</Button>
                                 </Form.Item>
                             </Col>
                         </Row>

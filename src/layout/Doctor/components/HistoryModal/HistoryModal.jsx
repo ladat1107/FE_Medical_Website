@@ -28,6 +28,7 @@ const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescripti
 
     useEffect(() => {
         if (dataHistory && dataHistory.DT) {
+            console.log('dataHistory', dataHistory);
             setHistoryData(dataHistory.DT[0]);
             setIsLoading(false);
         }

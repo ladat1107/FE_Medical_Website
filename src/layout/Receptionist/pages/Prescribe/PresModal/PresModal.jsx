@@ -6,8 +6,11 @@ import { message } from 'antd';
 import { checkOutPrescription, updatePrescription } from '@/services/doctorService';
 import { PAYMENT_METHOD, STATUS_BE } from '@/constant/value';
 import { medicineCovered } from '@/utils/coveredPrice';
+import { PATHS } from '@/constant/path';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPrint } from '@fortawesome/free-solid-svg-icons';
 
-const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
+const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData, examinationId }) => {
     const [special, setSpecial] = useState('normal');
     const [insurance, setInsurance] = useState('');
     const [insuranceCoverage, setInsuranceCoverage] = useState(null);
@@ -18,7 +21,7 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
         infouser: { firstName: '', lastName: '', cid: '' },
         infoPres: { note: '', totalMoney: '', prescriptionDetails: [] }
     });
-    
+
     // State to track the actual amount to be paid
     const [amountToPay, setAmountToPay] = useState(0);
 
@@ -67,32 +70,36 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
         setInsuranceCoverage(patientData?.insuranceCoverage || null);
         setSpecial(newSpecial);
         setData(newData);
-        
+        setPaymentMethod(
+            patientData?.prescriptionExamData[0]?.paymentData?.paymentMethod === PAYMENT_METHOD.CASH
+                ? PAYMENT_METHOD.CASH : PAYMENT_METHOD.MOMO
+                || PAYMENT_METHOD.CASH);
+
         // Calculate the correct amount to pay
         calculateAmountToPay(newData.infoPres.prescriptionDetails, patientData?.insuranceCoverage || null);
 
     }, [isOpen, patientData]);
-    
+
     // Function to calculate the correct amount to pay
     const calculateAmountToPay = (prescriptionDetails, insuranceCoverageValue) => {
         if (!prescriptionDetails || prescriptionDetails.length === 0) {
             setAmountToPay(0);
             return;
         }
-        
+
         let totalAmount = 0;
         let totalInsuranceCovered = 0;
-        
+
         prescriptionDetails.forEach(item => {
             const itemTotal = item.PrescriptionDetail.quantity * item.price;
             totalAmount += itemTotal;
-            
+
             // Only apply insurance coverage if the item is covered (isCovered is not 0 and not null)
             if (item.isCovered === 0 || item.isCovered === null || Number(item.insuranceCovered) > 0) {
                 totalInsuranceCovered += medicineCovered(itemTotal, +insuranceCoverageValue, Number(item.insuranceCovered), data.isWrongTreatment, data.medicalTreatmentTier);
             }
         });
-        
+
         setAmountToPay(totalAmount - totalInsuranceCovered);
     };
 
@@ -103,14 +110,14 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                 let insuranceCoveredValue = (item.isCovered === 0 || item.isCovered === null || Number(item.insuranceCovered) > 0)
                     ? medicineCovered(item.PrescriptionDetail.quantity * item?.price, +insuranceCoverage, Number(item.insuranceCovered), data.isWrongTreatment, data.medicalTreatmentTier)
                     : 0;
-            
+
                 return {
                     medicineId: item.PrescriptionDetail.medicineId,
                     prescriptionId: item.PrescriptionDetail.prescriptionId,
-                    insuranceCovered: insuranceCoveredValue 
+                    insuranceCovered: insuranceCoveredValue
                 };
             });
-            
+
             let presData = {
                 id: presId,
                 status: 2,
@@ -134,7 +141,7 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
             } else {
                 const response = await checkOutPrescription(presData);
                 if (response.EC === 0) {
-                    window.location.href = response?.DT?.shortLink;
+                    window.location.href = response?.DT?.payUrl;
                 } else {
                     message.error(response.EM);
                 }
@@ -192,18 +199,18 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
         if (!data.infoPres.prescriptionDetails || data.infoPres.prescriptionDetails.length === 0) {
             return 0;
         }
-        
+
         let totalInsuranceCovered = 0;
-        
+
         data.infoPres.prescriptionDetails.forEach(item => {
             const itemTotal = item.PrescriptionDetail.quantity * item.price;
-            
+
             // Only apply insurance coverage if the item is covered (isCovered is not 0 and not null)
             if (item.isCovered === 0 || item.isCovered === null || Number(item.insuranceCovered) > 0) {
                 totalInsuranceCovered += medicineCovered(itemTotal, +insuranceCoverage, Number(item.insuranceCovered), data.isWrongTreatment, data.medicalTreatmentTier);
             }
         });
-        
+
         return totalInsuranceCovered;
     };
 
@@ -291,8 +298,8 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                                     </div>
                                     <div className='col-4 d-flex align-items-center'>
                                         <p>BHYT chi trả: {item.isCovered === 0 || item.isCovered === null || Number(item.insuranceCovered) > 0
-                                                                ? formatCurrency(medicineCovered(item.PrescriptionDetail.quantity * item?.price, +insuranceCoverage, Number(item.insuranceCovered)), data.isWrongTreatment, data.medicalTreatmentTier) 
-                                                                : formatCurrency(0)}</p>
+                                            ? formatCurrency(medicineCovered(item.PrescriptionDetail.quantity * item?.price, +insuranceCoverage, Number(item.insuranceCovered)), data.isWrongTreatment, data.medicalTreatmentTier)
+                                            : formatCurrency(0)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -316,8 +323,8 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                             <p style={{ fontWeight: "400" }}>Số BHYT:</p>
                         </div>
                         <div className='col-3'>
-                            <input 
-                                className='input-add-exam' 
+                            <input
+                                className='input-add-exam'
                                 style={{ width: "93%" }} maxLength={10}
                                 type='text' value={insurance}
                                 readOnly
@@ -357,7 +364,7 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                         </div>
                     </div>
                     <div className='col-12 d-flex flex-row mt-3'>
-                    <div className='col-3 d-flex align-items-center'>
+                        <div className='col-3 d-flex align-items-center'>
                             <p style={{ fontWeight: "600" }}>Phải trả:</p>
                         </div>
                         <div className='col-3' style={{ color: "#008EFF", fontWeight: '600' }}>
@@ -365,7 +372,7 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                         </div>
                         <div className='col-1' />
                         <div className='col-5 d-flex'>
-                            {+patientData?.status === STATUS_BE.PAID ? <div>Đã thanh toán</div> :
+                            {+patientData?.prescriptionExamData[0]?.status === 2 ? <div> Đã thanh toán</div> :
                                 <>
                                     <label className='me-5'>
                                         <input
@@ -393,10 +400,13 @@ const PresModal = ({ isOpen, onClose, onSusscess, presId, patientData }) => {
                 </div>
                 <div className='payment-footer mt-3'>
                     <button className="close-user-btn" onClick={onClose} disabled={isLoading}>Đóng</button>
+                    <button className='print-button' onClick={() => window.open(PATHS.SYSTEM.PRECRIPTION_PDF + "/" + examinationId)}>
+                        <FontAwesomeIcon icon={faPrint} className='me-2' />
+                        Xuất </button>
                     {patientData?.prescriptionExamData[0]?.status === 1 &&
-                        <button 
-                            className='payment-btn' 
-                            onClick={handlePay} 
+                        <button
+                            className='payment-btn'
+                            onClick={handlePay}
                             disabled={isLoading}
                         >
 

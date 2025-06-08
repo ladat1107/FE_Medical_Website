@@ -63,6 +63,32 @@ const MedicalRecord = () => {
         }
     }
 
+    // Tạo một hàm riêng để fetch lại dữ liệu mới nhất của bệnh nhân được chọn
+    const refreshSelectedPatientData = async () => {
+        try {
+            // Lấy lại thông tin chi tiết của bệnh nhân đã chọn
+            const response = await getMedicalRecords(status, medicalTreatmentTier, currentPage, pageSize, search);
+            if (response && response.DT && response.DT.examinations) {
+                const updatedList = response.DT.examinations;
+                setListExam(updatedList);
+                
+                // Cập nhật thông tin bệnh nhân đã chọn
+                const updatedSelectedItem = updatedList.find(item => item.id === selectedItem.id);
+                if (updatedSelectedItem) {
+                    setSelectedItem(updatedSelectedItem);
+                }
+            }
+        } catch (error) {
+            console.error("Error refreshing patient data:", error);
+        }
+    };
+
+    // Sửa hàm onSusscess
+    const onSusscess = () => {
+        // Chỉ fetch lại dữ liệu mà không đóng modal
+        refreshSelectedPatientData();
+    };
+
     return (
         <>
             <div className="appointment-content">
@@ -138,6 +164,7 @@ const MedicalRecord = () => {
                         isOpen={isModalOpen}
                         onClose={closeAddExam}
                         record={selectedItem}
+                        onSusscess={onSusscess}
                     />
                 )}
             </div>

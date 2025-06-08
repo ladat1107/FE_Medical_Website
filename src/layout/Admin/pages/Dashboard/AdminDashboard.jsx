@@ -8,20 +8,27 @@ import { getPaymentAdmin } from "@/services/adminService";
 import { MEDICAL_TREATMENT_TIER, PAYMENT_METHOD, PAYMENT_STATUS, STATUS_BE } from "@/constant/value";
 import ExamCard from "./Section/ExamCard";
 import { useGetExamination } from "@/hooks";
+import ExamTable from "./Section/ExamTable";
+import PrescriptionUsed from "./Section/PrescriptionUsed";
+import CommonDisease from "./Section/commonDisease";
+import { diffDate } from "@/utils/formatDate";
 
 const AdminDashboard = () => {
-    const [dateRange, setDateRange] = useState([dayjs().subtract(1, "year"), dayjs()]);
+    const [dateRange, setDateRange] = useState([dayjs().subtract(1, "month"), dayjs()]);
     const [cardRevenue, setCardRevenue] = useState({ totalRevenue: 0, totalBank: 0, totalCash: 0, totalInsurance: 0 })
+    const [inPatientData, setInPatientData] = useState([]);
+    const [outPatientData, setOutPatientData] = useState([]);
     const [cardExam, setCardExam] = useState({
         inPatient: { import: 0, export: 0, examming: 0, emergency: 0 },
         outPatient: { total: 0, success: 0, processing: 0, pending: 0, cancel: 0 }
     })
     const [timeFrame, setTimeFrame] = useState("month");
-    const { data: examinationData, isLoading: isLoadingExamination, refetch: refetchExamination, isFetching: isFetchingExamination } = useGetExamination(dateRange ? { startDate: dateRange[0].format("YYYY-MM-DD 00:00:00"), endDate: dateRange[1].format("YYYY-MM-DD 23:59:59") } : null)
-    const { data: paymentData, isLoading: isLoadingPayment, refetch: refetchPayment, isFetching: isFetchingPayment } = useQuery({
+    const { data: examinationData, refetch: refetchExamination } = useGetExamination(dateRange ? { startDate: dateRange[0].format("YYYY-MM-DD 00:00:00"), endDate: dateRange[1].format("YYYY-MM-DD 23:59:59") } : null)
+    const { data: paymentData, refetch: refetchPayment } = useQuery({
         queryKey: ["payment", dateRange],
         queryFn: () => getPaymentAdmin(dateRange ? { startDate: dateRange[0].format("YYYY-MM-DD 00:00:00"), endDate: dateRange[1].format("YYYY-MM-DD 23:59:59") } : null)
     })
+
     useEffect(() => {
         if (paymentData?.EC === 0 && paymentData?.DT) {
             const payments = paymentData?.DT;
@@ -31,7 +38,7 @@ const AdminDashboard = () => {
             let totalInsurance = 0;
             payments.forEach(payment => {
                 if (payment.status === PAYMENT_STATUS.REFUNDED) {
-                    totalBank += payment.amount
+                    totalRevenue += payment.amount;
                     payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment.amount : totalBank += payment.amount;
                 }
                 else if (payment.status === PAYMENT_STATUS.PAID) {
@@ -40,34 +47,37 @@ const AdminDashboard = () => {
                         const medicalTreatmentTier = examination?.medicalTreatmentTier || 0;
                         const type = (medicalTreatmentTier === MEDICAL_TREATMENT_TIER.INPATIENT || medicalTreatmentTier === MEDICAL_TREATMENT_TIER.EMERGENCY) ? 1 : 2;
                         if (type === 1) {
-                            totalRevenue += examination.price;
-                            payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment.amount : totalBank += payment.amount;
-                            totalInsurance += examination.insuranceCovered
-                            examination.examinationResultParaclincalData.forEach(paraclinical => {
-                                totalInsurance += paraclinical.insuranceCovered;
-                                totalRevenue += paraclinical.price;
+                            totalInsurance += examination?.insuranceCovered || 0;
+                            examination?.examinationResultParaclincalData?.forEach(paraclinical => {
+                                totalInsurance += paraclinical?.insuranceCovered || 0;
                             })
                             examination.prescriptionExamData.forEach(prescription => {
-                                totalInsurance += prescription.insuranceCovered;
-                                totalRevenue += prescription.totalMoney;
+                                totalInsurance += prescription?.insuranceCovered || 0;
                             })
                         } else if (type === 2) {
                             totalRevenue += examination.price;
-                            payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment.amount : totalBank += payment.amount;
-                            totalInsurance += examination.insuranceCovered;
+                            let coveredPriceOutpatient = examination?.coveredPrice || examination.price;
+                            payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPriceOutpatient : totalBank += coveredPriceOutpatient;
+                            totalInsurance += examination?.insuranceCovered || 0;
                         }
                     } else if (payment?.paraclinicalData?.length > 0) {
                         const paraclinical = payment?.paraclinicalData;
                         paraclinical.forEach(item => {
+                            let coveredPriceParaclinicalOutpatient = item?.coveredPrice || item.price;
                             totalRevenue += item.price;
-                            payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment.amount : totalBank += payment.amount;
-                            totalInsurance += item.insuranceCovered;
+                            payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPriceParaclinicalOutpatient : totalBank += coveredPriceParaclinicalOutpatient;
+                            totalInsurance += item?.insuranceCovered || 0;
                         })
                     } else if (payment?.prescriptionData) {
+                        let diffDatePrescription = diffDate(payment?.prescriptionData?.createdAt, payment?.prescriptionData?.endDate || payment?.prescriptionData?.dischargedAt || dayjs()) + 1;
                         const prescription = payment?.prescriptionData;
-                        totalRevenue += prescription.totalMoney;
-                        payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment.amount : totalBank += payment.amount;
-                        totalInsurance += prescription.insuranceCovered;
+                        let coveredPricePrescriptionOutpatient = prescription?.coveredPrice || prescription.totalMoney;
+                        totalRevenue += prescription.totalMoney * diffDatePrescription;
+                        payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPricePrescriptionOutpatient * diffDatePrescription : totalBank += coveredPricePrescriptionOutpatient * diffDatePrescription;
+                        totalInsurance += prescription?.insuranceCovered * diffDatePrescription || 0;
+                    } else if (payment?.advanceMoneyData) {
+                        totalRevenue += payment?.advanceMoneyData?.amount;
+                        payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment?.advanceMoneyData?.amount : totalBank += payment?.advanceMoneyData?.amount;
                     }
                 }
             })
@@ -80,13 +90,17 @@ const AdminDashboard = () => {
             });
         }
     }, [paymentData])
+
     useEffect(() => {
         if (examinationData?.EC === 0 && examinationData?.DT) {
             const examinations = examinationData?.DT;
             let _inPatient = { import: 0, export: 0, examming: 0, emergency: 0 }
             let _outPatient = { total: 0, success: 0, processing: 0, pending: 0, cancel: 0 }
+            let _inPatientData = [];
+            let _outPatientData = [];
             examinations.forEach(examination => {
                 if (examination.medicalTreatmentTier === MEDICAL_TREATMENT_TIER.OUTPATIENT) {
+                    _outPatientData.push(examination);
                     _outPatient.total += 1;
                     if (examination.status === STATUS_BE.DONE) {
                         _outPatient.success += 1;
@@ -98,6 +112,7 @@ const AdminDashboard = () => {
                         _outPatient.cancel += 1;
                     }
                 } else {
+                    _inPatientData.push(examination);
                     if (examination?.status === STATUS_BE.DONE_INPATIENT) _inPatient.export += 1;
                     else {
                         _inPatient.examming += 1;
@@ -110,11 +125,13 @@ const AdminDashboard = () => {
                 }
             })
             setCardExam({ ...cardExam, inPatient: _inPatient, outPatient: _outPatient })
+            setInPatientData(_inPatientData);
+            setOutPatientData(_outPatientData);
         }
     }, [examinationData])
+
     useEffect(() => {
-        refetchPayment();
-        refetchExamination();
+        handleRefetch();
     }, [dateRange])
 
     const handleDateRangeChange = (dates) => {
@@ -132,14 +149,20 @@ const AdminDashboard = () => {
         }
         setTimeFrame(value)
     }
+
     const handleRefetch = () => {
-        //refetchExamination();
+        refetchExamination();
+        refetchPayment();
     }
+
     return (
         <div className="p-4 bg-bgAdmin min-h-screen">
             <HeaderDashboard handleRefetch={handleRefetch} handleDateRangeChange={handleDateRangeChange} handleTimeFrameChange={handleTimeFrameChange} dateRange={dateRange} timeFrame={timeFrame} />
             <CardRevenue {...cardRevenue} />
             <ExamCard {...cardExam} />
+            <ExamTable inPatientData={inPatientData} outPatientData={outPatientData} />
+            <PrescriptionUsed startDate={dateRange[0].format("YYYY-MM-DD 00:00:00")} endDate={dateRange[1].format("YYYY-MM-DD 23:59:59")} />
+            <CommonDisease examinationList={examinationData} doneExaminations={cardExam.inPatient.export + cardExam.outPatient.success} dateRange={dateRange} />
         </div>
     );
 }

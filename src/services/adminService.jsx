@@ -103,8 +103,8 @@ export const createServiceOfRoom = (data) => {
 export const createRoom = (data) => {
     return axios.post(`/api/admin/createRoom`, data)
 }
-export const getAllRoom = (page, limit, search, searchDepartment) => {
-    return axios.get(`/api/admin/getAllRoomAdmin?page=${+page}&limit=${+limit}&search=${search}&searchDepartment=${searchDepartment}`)
+export const getAllRoom = (query) => {
+    return axios.get(`/api/admin/getAllRoomAdmin`, { params: query })
 }
 export const getRoomById = (id) => {
     return axios.get(`/api/getRoomById?id=${id}`)

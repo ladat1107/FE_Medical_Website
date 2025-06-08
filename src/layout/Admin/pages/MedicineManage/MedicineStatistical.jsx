@@ -91,7 +91,7 @@ const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, 
                 }
                 medicineGroup[group].count += 1;
 
-                if (new Date(medicine.updatedAt) > new Date(new Date().setMonth(new Date().getMonth() - 1))) {
+                if (new Date(medicine.createdAt) > new Date(new Date().setMonth(new Date().getMonth() - 1))) {
                     _newMedicines += 1;
                 }
             });

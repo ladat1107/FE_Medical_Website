@@ -2,7 +2,7 @@
 
 import "./header-styles.css"
 import { useState, useEffect } from "react"
-import { Badge, Dropdown, Spin } from "antd"
+import { Badge, Dropdown, message, Spin } from "antd"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -16,7 +16,7 @@ import {
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons"
 import { PATHS } from "@/constant/path"
-import { TAGS } from "@/constant/value"
+import { BOOKING_CONTENT, TAGS } from "@/constant/value"
 import { ROLE } from "@/constant/role"
 import { handleLogout } from "@/redux/actions/authenActions"
 import { useMobile } from "@/hooks/useMobile"
@@ -27,6 +27,7 @@ import { timeAgo } from "@/utils/formatDate"
 import ParseHtml from "@/components/ParseHtml"
 import SvgIcon from "../SvgIcon"
 import MobileDrawer from "./mobile-drawer"
+import { clearBooking, setCurrentContent } from "@/redux/bookingSlice"
 
 function Header() {
   const navigate = useNavigate()
@@ -64,7 +65,7 @@ function Header() {
 
   // Combine socket and API notifications
   useEffect(() => {
-    if (!apiNotifications.rows) return
+    if (!apiNotifications?.rows) return
 
     const allNotifications = [...socketNotifications, ...(apiNotifications.rows || [])]
 
@@ -102,9 +103,21 @@ function Header() {
       title: "Dịch vụ",
       inner: [
         {
-          title: "Đặt lịch khám",
+          title: "Đặt lịch chuyên khoa",
           icon: <FontAwesomeIcon icon={faCalendarCheck} />,
           action: PATHS.HOME.BOOKING,
+          contentVisible: BOOKING_CONTENT.SPECIALTY,
+        },
+        {
+          title: "Đặt khám với bác sĩ",
+          icon: <FontAwesomeIcon icon={faSyringe} />,
+          action: PATHS.HOME.BOOKING,
+          contentVisible: BOOKING_CONTENT.DOCTOR,
+        },
+        {
+          title: "Số khám hiện tại",
+          icon: <i className="fa-solid fa-list-ol"></i>,
+          action: PATHS.HOME.NUMERICAL,
         },
       ],
     },
@@ -244,8 +257,12 @@ function Header() {
   }
 
   // Handle navigation
-  const handleNavigation = (path) => {
+  const handleNavigation = (path, contentVisible) => {
     if (path) {
+      if (contentVisible) {
+        dispatch(clearBooking())
+        dispatch(setCurrentContent(contentVisible))
+      }
       navigate(path)
       setDrawerVisible(false)
     }
@@ -262,7 +279,9 @@ function Header() {
             label: (
               <div
                 className="text-secondaryText-tw flex items-center gap-2 p-2 whitespace-nowrap"
-                onClick={() => handleNavigation(innerItem.action)}
+                onClick={() => {
+                  handleNavigation(innerItem.action, innerItem?.contentVisible || undefined)
+                }}
               >
                 {innerItem.icon && <span>{innerItem.icon}</span>}
                 <span>{innerItem.title}</span>
@@ -288,7 +307,7 @@ function Header() {
           <div className="flex items-center" onClick={() => navigate(PATHS.HOME.HOMEPAGE)}>
             <img
               src="https://res.cloudinary.com/utejobhub/image/upload/v1733740053/KHOA_500_x_200_px_dp7on2.png"
-              alt="MedPro Logo"
+              alt="Hoa Sen Logo"
               className="h-10"
             />
           </div>
@@ -332,7 +351,7 @@ function Header() {
             <div className="flex items-center cursor-pointer" onClick={() => navigate(PATHS.HOME.HOMEPAGE)}>
               <img
                 src="https://res.cloudinary.com/utejobhub/image/upload/v1733740053/KHOA_500_x_200_px_dp7on2.png"
-                alt="MedPro Logo"
+                alt="Hoa Sen Logo"
                 className="h-12"
               />
             </div>
@@ -357,7 +376,7 @@ function Header() {
                     open={isDropdownVisible}
                     onOpenChange={setIsDropdownVisible}
                     overlayStyle={{ width: 350 }}
-                    dropdownRender={(menu) => (
+                    popupRender={(menu) => (
                       <div className="bg-white rounded-md shadow-lg">
                         {listNotiLoading ? (
                           <div className="p-5 text-center">

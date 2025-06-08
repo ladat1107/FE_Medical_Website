@@ -62,11 +62,8 @@ const Instruction = () => {
                         Các tài khoản đăng nhập vào hệ thống
                     </h1>
                     <p className="text-gray-700 text-sm sm:text-base">
-                        Website hiện tại đang được triển khai miễn phí, do đó một số tính năng vẫn còn hạn chế và giao diện <b>chưa hoàn toàn tối ưu</b> trên một số thiết bị. 🖥️📱
+                        Website hiện tại đang được triển khai miễn phí, do đó một số tính năng vẫn còn hạn chế và giao diện chưa hoàn toàn tối ưu trên một số thiết bị. 🖥️📱
                         Chúng tôi đang nỗ lực cải thiện và cập nhật để mang đến trải nghiệm tốt hơn. Rất mong bạn thông cảm và tiếp tục sử dụng!
-                    </p>
-                    <p className="text-gray-700 text-sm sm:text-base font-bold">
-                        Dữ liệu có thể chưa đồng bộ do còn trong quá trình phát triển.
                     </p>
                 </div>
 

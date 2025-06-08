@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Drawer } from "antd"
 import {
-    Home,
     Calendar,
     Clock,
     Stethoscope,
@@ -17,7 +16,6 @@ import {
     Bell,
     Settings,
     Phone,
-    Mail,
     Download,
     LogOut,
     ChevronDown,
@@ -26,10 +24,14 @@ import {
     Newspaper,
     X,
 } from "lucide-react"
+import { BOOKING_CONTENT } from "@/constant/value"
+import { clearBooking, setCurrentContent } from "@/redux/bookingSlice"
+import { useDispatch } from "react-redux"
 
 const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, paths, tags, role }) => {
     // State for expanded menu items
     const [expandedItems, setExpandedItems] = useState({})
+    const dispatch = useDispatch()
 
     // Toggle expanded state for menu items
     const toggleExpand = (itemTitle) => {
@@ -47,38 +49,29 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
             hasChildren: true,
             children: [
                 {
-                    title: "Đặt lịch khám",
+                    title: "Đặt lịch chuyên khoa",
                     icon: <Calendar size={18} className="text-primary-tw" />,
                     action: paths.HOME.BOOKING,
+                    contentVisible: BOOKING_CONTENT.SPECIALTY,
                 },
                 {
-                    title: "Đặt khám theo bác sĩ",
+                    title: "Đặt khám với bác sĩ",
                     icon: <Stethoscope size={18} className="text-primary-tw" />,
-                    action: paths.HOME.DOCTOR_LIST,
-                },
-                {
-                    title: "Đặt khám theo giờ",
-                    icon: <Clock size={18} className="text-primary-tw" />,
+                    action: paths.HOME.BOOKING,
+                    contentVisible: BOOKING_CONTENT.DOCTOR,
                 },
             ],
         },
         {
-            title: "Khám sức khỏe doanh nghiệp",
+            title: "Số khám hiện tại",
             icon: <Building2 size={20} className="text-primary-tw" />,
+            action: paths.HOME.NUMERICAL,
         },
         {
             title: "Bệnh viện & Phòng khám",
             icon: <Hospital size={20} className="text-primary-tw" />,
             hasChildren: true,
             children: [
-                {
-                    title: "Danh sách bệnh viện",
-                    icon: <Building2 size={18} className="text-primary-tw" />,
-                },
-                {
-                    title: "Danh sách phòng khám",
-                    icon: <Hospital size={18} className="text-primary-tw" />,
-                },
                 {
                     title: "Tìm bác sĩ",
                     icon: <Search size={18} className="text-primary-tw" />,
@@ -88,10 +81,6 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
                     title: "Khoa",
                     icon: <Hospital size={18} className="text-primary-tw" />,
                     action: paths.HOME.DEPARTMENT_LIST,
-                },
-                {
-                    title: "Chuyên khoa",
-                    icon: <Stethoscope size={18} className="text-primary-tw" />,
                 },
             ],
         },
@@ -242,7 +231,7 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
                                     if (item.hasChildren) {
                                         toggleExpand(item.title)
                                     } else if (item.action) {
-                                        handleNavigation(item.action)
+                                        handleNavigation(item.action, item?.contentVisible || undefined)
                                     }
                                 }}
                             >
@@ -264,7 +253,7 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
                                         <div
                                             key={childIndex}
                                             className="flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer border-t border-gray-100"
-                                            onClick={() => child.action && handleNavigation(child.action)}
+                                            onClick={() => child.action && handleNavigation(child.action, child?.contentVisible || undefined)}
                                         >
                                             {child.icon}
                                             <span>{child.title}</span>
@@ -282,7 +271,7 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
                             <div
                                 key={index}
                                 className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100"
-                                onClick={() => item.action && handleNavigation(item.action)}
+                                onClick={() => item.action && handleNavigation(item.action, item?.contentVisible || undefined)}
                             >
                                 {item.icon}
                                 <div>

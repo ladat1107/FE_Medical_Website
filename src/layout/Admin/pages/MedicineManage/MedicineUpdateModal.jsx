@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs"
 import { useState } from "react"
 import DeleteModal from "../../components/Modal/DeleteModal"
-import { TABLE } from "@/constant/value"
+import { STATUS_BE, TABLE } from "@/constant/value"
 import { BadgePercent } from "lucide-react"
 import { calculateExpirationDate } from "@/utils/formatDate"
 import { formatCurrency } from "@/utils/formatCurrency"
@@ -35,6 +35,7 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                 ...values,
                 id: data?.id,
                 inventory: newInventory,
+                insuranceCovered: values.insuranceCovered / 100,
             }
             updateMedicine(updatedData, {
                 onSuccess: (data) => {
@@ -90,11 +91,9 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                                 </div>
                             </div>
                             <div className="flex flex-col items-center gap-2">
-                                <Badge
-                                    count={data?.status ? "Đang sử dụng" : "Ngừng sử dụng"}
-                                    style={{ backgroundColor: data?.status ? "#52c41a" : "#ff4d4f" }}
-                                    className="ml-auto"
-                                />
+                                <div className={`ml-auto ${data?.status === STATUS_BE.ACTIVE ? "bg-green-500" : "bg-red-500"} text-white px-2 rounded-2xl text-[12px]`}>
+                                    {data?.status === STATUS_BE.ACTIVE ? "Đang sử dụng" : "Ngừng sử dụng"}
+                                </div>
                                 <div className="flex items-center gap-2 font-semibold text-yellow-500 text-lg">
                                     <BadgePercent size={18} />
                                     <span>{formatCurrency(data?.price || 0)}</span>
@@ -205,11 +204,9 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                                     <CalendarOutlined />
                                     <span>Hạn sử dụng</span>
                                 </div>
-                                <Badge
-                                    count={calculateExpirationDate(data?.exp)}
-                                    style={{ backgroundColor: calculateExpirationDate(data?.exp)?.includes("Đã hết hạn") ? "#FFCC00" : "#1890ff" }}
-                                    className="ml-auto"
-                                />
+                                <div className={`ml-auto px-2 rounded-2xl text-[12px] text-white ${calculateExpirationDate(data?.exp)?.includes("Đã hết hạn") ? "bg-red-500" : "bg-blue-500"}`}>
+                                    {calculateExpirationDate(data?.exp)}
+                                </div>
                             </div>
                             <div className="mt-3 text-sm text-gray-700 space-y-1">
                                 <div className="flex justify-between">
@@ -251,6 +248,7 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                     exp: data?.exp ? dayjs(dayjs(data?.exp).format('DD/MM/YYYY'), "DD/MM/YYYY") : null,
                     mfg: data?.mfg ? dayjs(dayjs(data?.mfg).format('DD/MM/YYYY'), "DD/MM/YYYY") : null,
                     approvalDate: data?.approvalDate ? dayjs(dayjs(data?.approvalDate).format('DD/MM/YYYY'), "DD/MM/YYYY") : null,
+                    insuranceCovered: data?.insuranceCovered * 100,
                 }} className="p-3">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <Card title={
@@ -428,7 +426,7 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                             >
                                 <InputNumber
                                     min={0}
-                                    max={1}
+                                    max={100}
                                     step={0.1}
                                     style={{ width: "100%" }}
                                     placeholder="0"

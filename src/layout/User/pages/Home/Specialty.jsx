@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import useQuery from '@/hooks/useQuery';
 import userService from '@/services/userService';
 import { Skeleton } from 'antd';
-
+import { clearBooking, setCurrentContent, setSpecialty } from '@/redux/bookingSlice';
+import { BOOKING_CONTENT } from '@/constant/value';
+import { PATHS } from '@/constant/path';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 const getItemsToShow = (list, showAll) => {
   if (showAll) return list;
   const width = window.innerWidth;
@@ -15,6 +19,8 @@ const Specialty = () => {
   const { data: specialtyData, loading } = useQuery(() =>
     userService.getSpecialty()
   );
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const listSpecialty = specialtyData?.DT || [];
   const [showAll, setShowAll] = useState(false);
   const [itemsToShow, setItemsToShow] = useState(() =>
@@ -35,6 +41,12 @@ const Specialty = () => {
     setItemsToShow(getItemsToShow(listSpecialty, showAll));
   }, [showAll, listSpecialty]);
 
+  const handleBookingSpecialty = (item) => {
+    dispatch(clearBooking())
+    dispatch(setSpecialty(item))
+    dispatch(setCurrentContent(BOOKING_CONTENT.DOCTOR))
+    navigate(PATHS.HOME.BOOKING)
+  }
   return (
     <div className="container mx-auto px-4 pb-12">
       <h2 className="text-2xl md:text-3xl font-bold text-secondaryText-tw mb-8 text-center">
@@ -57,6 +69,7 @@ const Specialty = () => {
             <div
               key={index}
               className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => handleBookingSpecialty(item)}
             >
               <img
                 src={item.image}

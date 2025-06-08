@@ -4,9 +4,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ParseHtml from '@/components/ParseHtml';
 import HandbookCardHorizontal from '@/components/HandbookItem/HandbookCard/HandbookCardHorizontal';
+import HandbookCardHorizontalSkeleton from '@/components/HandbookItem/HandbookCard/HandbookCardHorizontalSkeleton';
 
 const DoctorDetailBody = (props) => {
-    let { data, handbook } = props;
+    let { data, handbook, handbookLoading } = props;
     const [showMore, setShowMore] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
 
@@ -51,10 +52,14 @@ const DoctorDetailBody = (props) => {
 
                 <div className="hidden sm:block w-full sm:w-1/2 lg:w-[40%] bg-white rounded-2xl shadow-card-doctor h-fit" >
                     <div className="mb-[20px] text-2xl font-bold text-primary-tw px-6 pt-8" >Bài viết Liên quan</div>
-                    <div className="overflow-y-auto overflow-x-hidden max-h-[800px] px-6" >
-                        {handbook?.length > 0 && handbook.map((item, index) => (
-                            <HandbookCardHorizontal key={index} item={item} />
-                        ))}
+                    <div className="overflow-y-auto overflow-x-hidden h-[800px] px-6" >
+                        {handbookLoading ?
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <HandbookCardHorizontalSkeleton key={index} />
+                            ))
+                            : handbook?.length > 0 ? handbook.map((item, index) => (
+                                <HandbookCardHorizontal key={index} item={item} />
+                            )) : <div className="text-start text-gray-500">Không có bài viết liên quan</div>}
                     </div>
                 </div>
             </div>

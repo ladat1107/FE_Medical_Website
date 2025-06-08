@@ -99,15 +99,7 @@ const ExaminationList = ({ examinationList }) => {
     setCurrentExamination(record)
     setIsDetailModalVisible(true)
   }
-
-  const handleExport = () => {
-    message.success("Xuất dữ liệu thành công")
-  }
-
-  const handlePrint = (record) => {
-    message.success("Đang chuẩn bị in đơn khám")
-  }
-
+  
   const columns = [
     {
       title: "Mã đơn",
@@ -217,9 +209,9 @@ const ExaminationList = ({ examinationList }) => {
           </Select>
         </div>
         <div className="flex gap-2">
-          <Button icon={<FileExcelOutlined />} onClick={handleExport}>
+          {/* <Button icon={<FileExcelOutlined />} onClick={handleExport}>
             Xuất Excel
-          </Button>
+          </Button> */}
         </div>
       </div>
 

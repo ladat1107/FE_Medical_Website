@@ -1,5 +1,4 @@
 import { DatePicker, Input } from "antd";
-import "../Booking.scss";
 import { SearchOutlined } from "@mui/icons-material";
 import userService from "@/services/userService";
 import { useEffect, useState } from "react";
@@ -27,6 +26,7 @@ const BookingDoctor = (props) => {
     useEffect(() => {
         if (dataDoctor) { setListDoctor(dataDoctor?.DT || []); }
     }, [dataDoctor]);
+    
     useEffect(() => {
         fetchDoctor();
     }, [searchDebounce, specialtyId]);
@@ -53,47 +53,54 @@ const BookingDoctor = (props) => {
 
     return (
         <>
-            <div className="header">
-                <FontAwesomeIcon className="icon-back" icon={faLeftLong} onClick={() => { props.back() }} />
+            <div className="relative bg-gradient-primary text-white text-center text-lg font-bold py-2 px-4 rounded-t-lg mb-2">
+                <FontAwesomeIcon className="absolute top-[15px] left-[25px] cursor-pointer" icon={faLeftLong} onClick={() => { props.back() }} />
                 Vui lòng chọn bác sĩ
             </div>
-            <div className="content">
+            <div className="p-4">
                 <div>
                     <Input
                         onChange={(e) => handleChangeSearch(e)}
                         style={{ height: '40px', borderRadius: '5px', }}
                         placeholder="Tìm nhanh bác sĩ"
-                        suffix={<SearchOutlined />}
-                    /></div>
+                        suffix={<SearchOutlined className="text-gray-500" />}
+                    />
+                </div>
                 <div className="mt-2">
                     <DatePicker
-                        className="date-picker"
+                        className="w-full sm:w-1/2 lg:w-1/3 h-[40px] "
                         onChange={(date) => setDate(date)}
                         allowClear={true}
                         placeholder="Chọn ngày khám"
-                        format={'DD/MM/YYYY'} style={{ width: "30%" }}
+                        format={'DD/MM/YYYY'}
                         disabledDate={(current) => current && current.valueOf() <= dayjs().endOf("day").valueOf()}
                     />
                 </div>
 
-                {loadingDoctor ? <div className="doctor-list mt-3"><Loading /></div> :
-                    <div className="doctor-list mt-3">
+                {loadingDoctor ? <div className="h-[500px] overflow-auto scrollbar-none mt-3"><Loading /></div> :
+                    <div className="h-[500px] overflow-auto scrollbar-none mt-3">
                         {listDoctorFilter?.length > 0 ? listDoctorFilter.map((doctor, index) => (
-                            <div className={"item"} key={index} onClick={() => props.next(doctor)}>
-                                <div className={"name"}><FontAwesomeIcon className="me-3" icon={faUserDoctor} />{doctor?.staffUserData?.lastName + " " + doctor?.staffUserData?.firstName}</div>
-                                <p className={"gender"}>
+                            <div
+                                className="border-2 border-[#eceff3] rounded-lg p-4 mb-1 transition-all hover:border-[#1cd7e4] hover:shadow-md"
+                                key={index}
+                                onClick={() => props.next(doctor)}>
+                                <div className="text-lg font-bold text-[#f9bc4b] mb-2">
+                                    <FontAwesomeIcon className="mr-3" icon={faUserDoctor} />
+                                    {doctor?.staffUserData?.lastName + " " + doctor?.staffUserData?.firstName}
+                                </div>
+                                <p className="text-sm text-secondaryText-tw py-0.5 my-1">
                                     <span>Giới tính:</span> {doctor?.staffUserData?.gender === 1 ? "Nữ" : "Nam"}
                                 </p>
-                                <p className={"specialty"}>
+                                <p className="text-sm text-secondaryText-tw py-0.5 my-1">
                                     <span>Chuyên khoa:</span> {doctor?.staffSpecialtyData?.name || "Đa khoa"}
                                 </p>
-                                <p className={"schedule"}>
+                                <p className="text-sm text-secondaryText-tw py-0.5 my-1">
                                     <span>Lịch khám: </span>
-                                    <span className="time"> {doctor?.staffScheduleData?.slice(0, 3).map(item =>
+                                    <span className="ml-[3px] capitalize"> {doctor?.staffScheduleData?.slice(0, 3).map(item =>
                                         dayjs(item.date).locale('vi').format('dddd (DD-MM)')
                                     ).join(", ")} {" ,....."}</span>
                                 </p>
-                                <p className={"price"}>
+                                <p className="text-sm text-secondaryText-tw py-0.5 my-1">
                                     <span>Giá khám:</span> {formatCurrency(doctor?.price || 0)}
                                 </p>
                             </div>
@@ -101,9 +108,7 @@ const BookingDoctor = (props) => {
                             <div className="text-center">Không tìm thấy bác sĩ</div>}
                     </div>
                 }
-
             </div>
-
         </>
     );
 }

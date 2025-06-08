@@ -29,7 +29,6 @@ socket.on('disconnect', (reason) => {
 // Authenticate socket with a token
 export const authenticateSocket = (token) => {
   if (socket && token) {
-    console.log('Authenticating socket with token');
     socket.emit('authenticate', token);
   }
 };

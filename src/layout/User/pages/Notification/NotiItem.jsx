@@ -10,6 +10,8 @@ import {
     faChevronUp,
 } from "@fortawesome/free-solid-svg-icons"
 import { Badge } from "antd"
+import ParseHtml from "@/components/ParseHtml"
+import AttachedFile from "@/layout/Doctor/pages/Notification/NotiItem/attachedFile"
 
 const NotiItem = ({ noti, isExpanded, onToggleExpand, animationDelay = 0 }) => {
     // Format date to display
@@ -56,7 +58,7 @@ const NotiItem = ({ noti, isExpanded, onToggleExpand, animationDelay = 0 }) => {
             style={{ animationDelay: `${animationDelay}ms` }}
         >
             {/* Notification Header */}
-            <div className={`p-4 cursor-pointer ${isExpanded ? "border-b border-gray-100" : ""}`} onClick={onToggleExpand}>
+            <div className={`px-4 pt-4 pb-2 cursor-pointer ${isExpanded ? "border-b border-gray-100" : ""}`} onClick={onToggleExpand}>
                 <div className="flex items-center">
 
                     <div className="flex-grow">
@@ -66,9 +68,18 @@ const NotiItem = ({ noti, isExpanded, onToggleExpand, animationDelay = 0 }) => {
                                 {!noti.isRead && <Badge status="processing" className="ml-2" />}
                             </h3>
 
-                            <div className="flex items-start text-xs text-gray-500">
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
                                 <FontAwesomeIcon icon={faClock} className="mr-1" />
                                 <span>{formatDate(noti.createdAt || noti.date)}</span>
+                                {isExpanded && <div className="flex justify-end items-center">
+                                    <span className="text-xs text-secondaryText-tw flex items-center">
+                                        Thu gọn
+                                        <FontAwesomeIcon
+                                            icon={faChevronUp}
+                                            className="ml-1 text-xs transition-transform"
+                                        />
+                                    </span>
+                                </div>}
                             </div>
                         </div>
 
@@ -76,15 +87,15 @@ const NotiItem = ({ noti, isExpanded, onToggleExpand, animationDelay = 0 }) => {
                             {isExpanded ? "" : truncateText(noti.htmlDescription)}
                         </p>
 
-                        <div className="mt-2 flex justify-end items-center">
+                        {!isExpanded && <div className="mt-2 flex justify-end items-center">
                             <span className="text-xs text-secondaryText-tw flex items-center">
-                                {isExpanded ? "Thu gọn" : "Xem chi tiết"}
+                                Xem chi tiết
                                 <FontAwesomeIcon
-                                    icon={isExpanded ? faChevronUp : faChevronDown}
+                                    icon={faChevronDown}
                                     className="ml-1 text-xs transition-transform"
                                 />
                             </span>
-                        </div>
+                        </div>}
                     </div>
                 </div>
             </div>
@@ -96,10 +107,23 @@ const NotiItem = ({ noti, isExpanded, onToggleExpand, animationDelay = 0 }) => {
 
                     {/* HTML Description Content */}
                     {noti.htmlDescription ? (
-                        <div
-                            className="notification-html-content prose max-w-none text-gray-700"
-                            dangerouslySetInnerHTML={{ __html: noti.htmlDescription }}
-                        />
+                        <>
+                            <div
+                                className="notification-html-content prose max-w-none text-gray-700"
+                                dangerouslySetInnerHTML={{ __html: noti.htmlDescription }}
+                            />
+                            {noti.NotificationAttachFileData && noti.NotificationAttachFileData.length > 0 && (
+                                <div className="noti-item-attach-file mt-3">
+                                    {noti.NotificationAttachFileData.map((file, index) => (
+                                        <AttachedFile
+                                            key={index}
+                                            link={file.link}
+                                            type={file.type?.toLowerCase()}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="text-gray-500 italic text-center py-4">Không có nội dung chi tiết</div>
                     )}

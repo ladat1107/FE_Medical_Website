@@ -1,15 +1,35 @@
 import React from "react";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { LINK } from "@/constant/value";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { PATHS } from "@/constant/path";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import userService from "@/services/userService";
+import { useDispatch } from "react-redux";
+import { BOOKING_CONTENT } from "@/constant/value";
+import { clearBooking, setCurrentContent, setDoctor } from "@/redux/bookingSlice";
 // Tạo instance của classnames với bind styles
 const DoctorDetailHeader = (props) => {
   let { data } = props;
   let navigate = useNavigate()
+  const dispatch = useDispatch()
+  const handleBookingDoctor = async (doctorId) => {
+    try {
+      let response = await userService.getDoctorBookingById({ id: doctorId })
+      if (response?.EC === 0) {
+        dispatch(clearBooking())
+        dispatch(setDoctor(response?.DT))
+        dispatch(setCurrentContent(BOOKING_CONTENT.SCHEDULE))
+        navigate(PATHS.HOME.BOOKING)
+      } else {
+        message.warning(response?.EM)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <div className={'mb-12'} >
       <Breadcrumb className="mb-4 text-sm !text-secondaryText-tw font-bold hover:!bg-transparent" >
@@ -78,7 +98,7 @@ const DoctorDetailHeader = (props) => {
 
           <button
             className="bg-gradient-primary flex items-center px-6 sm:px-9 py-2 rounded-full text-white font-bold whitespace-nowrap cursor-pointer"
-            onClick={() => navigate(PATHS.HOME.BOOKING)}
+            onClick={() => handleBookingDoctor(data?.id)}
           >
             Đặt lịch
           </button>

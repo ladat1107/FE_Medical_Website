@@ -30,6 +30,7 @@ const DepartmentManage = () => {
         loading: loadingDepartment,
         execute: fetchDepartments,
     } = useMutation((query) => getDepartment(currentPage, rowsPerPage, searchDebounce))
+    
     useEffect(() => {
         if (dataDepartment && dataDepartment.DT && dataDepartment.DT.rows && dataDepartment.DT) {
             let _listDepartment = [...dataDepartment.DT.rows];
@@ -46,6 +47,7 @@ const DepartmentManage = () => {
     useEffect(() => {
         fetchDepartments();
     }, [currentPage, useDebounce(search, 500), rowsPerPage]);
+    
     const handleChange = (item) => {
         let _listDepartment = [...listDepartment];
         _listDepartment = _listDepartment.map(obj =>

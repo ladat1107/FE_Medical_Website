@@ -2,14 +2,14 @@ import { message } from 'antd';
 import { PropTypes } from 'prop-types';
 import { useEffect, useState } from 'react';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { checkOutExamination, checkOutParaclinical, updateExamination, updateListPayParaclinicals } from '@/services/doctorService';
+import { checkOutExaminationAdvance, checkOutParaclinical, updateExamination, updateListPayParaclinicals } from '@/services/doctorService';
 import './PayModal.scss';
-import { PAYMENT_METHOD, STATUS_BE } from '@/constant/value';
+import { PAYMENT_METHOD, PAYMENT_STATUS, STATUS_BE } from '@/constant/value';
 import MoneyInput from '@/components/Input/MoneyInput';
 import RoomSelectionModal from '@/layout/Doctor/components/RoomOptionModal/RoomSelectionModal';
 
 const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
-
+    
     const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD.CASH);
     const [isLoading, setIsLoading] = useState(false);
     const [amount, setAmount] = useState(
@@ -53,8 +53,8 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
             return;
         }
 
-        if (+amount < 1) {
-            message.error('Số tiền tạm ứng tối thiểu là 1.000.000đ!');
+        if (+amount < 1000) {
+            message.error('Số tiền tạm ứng tối thiểu là 1.000đ!');
             return;
         }
 
@@ -62,14 +62,23 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
         try {
             let paymentData = {
                 id: patientData?.id,
-                insuranceCoverage: patientData?.insuranceCoverage || null,
-                insuranceCode: patientData?.insuranceCode || null,
+                //insuranceCoverage: patientData?.insuranceCoverage || null,
+                //insuranceCode: patientData?.insuranceCode || null,
                 status: STATUS_BE.PAID,
                 payment: paymentMethod,
 
                 advanceId: patientData?.advanceMoneyExaminationData[0]?.id || null,
                 advanceMoney: +amount,
             };
+
+            if (selectedRoom?.id !== patientData?.examinationRoomData?.id) {
+                paymentData = {
+                    ...paymentData,
+                    roomId: selectedRoom?.id,
+                    roomName: selectedRoom?.name,
+                    updateRoomId: patientData?.examinationRoomData?.id,
+                };
+            }
 
             if (paymentMethod === PAYMENT_METHOD.CASH) {
                 const response = await updateExamination(paymentData);
@@ -81,13 +90,12 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                     message.error('Cập nhật bệnh nhân thất bại!');
                 }
             } else {
-                // let response = await checkOutExamination(paymentData);
-                // if (response.EC === 0) {
-                //     window.location.href = response?.DT?.shortLink;
-                // } else {
-                //     message.error(response.EM);
-                // }
-                message.error('Để La Đạt làm!');
+                let response = await checkOutExaminationAdvance(paymentData);
+                if (response.EC === 0) {
+                    window.location.href = response?.DT?.payUrl;
+                } else {
+                    message.error(response.EM);
+                }
             }
         } catch (error) {
             console.log(error);
@@ -196,7 +204,8 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                             <p className='text-start'
                                 style={{ fontWeight: "400", width: '100%' }}>
                                 {selectedRoom?.serviceData[0]?.id === 3 ? 'Phòng thường' :
-                                    selectedRoom?.serviceData[0]?.id === 4 ? 'Phòng VIP' : ''}
+                                    selectedRoom?.serviceData[0]?.id === 4 ? 'Phòng VIP' :
+                                        selectedRoom?.serviceData[0]?.id === 6 ? 'Phòng cấp cứu' : 'Phòng khác'}
                             </p>
                         </div>
                     </div>
@@ -208,7 +217,7 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                             <p>{selectedRoom?.serviceData[0]?.price ? formatCurrency(selectedRoom?.serviceData[0]?.price || 0) : null}</p>
                         </div>
                         <div className='col-5 d-flex align-items-center'>
-                            {+patientData?.status >= STATUS_BE.PAID ? <></>
+                            {+patientData?.advanceMoneyExaminationData[0]?.status === PAYMENT_STATUS.PAID ? <></>
                                 :
                                 <button className='change-btn' onClick={showModal}>
                                     Sửa phòng
@@ -257,7 +266,7 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                         </div>
                         <div className='col-1' />
                         <div className='col-5 d-flex'>
-                            {+patientData?.status >= STATUS_BE.PAID ? <div>Đã thanh toán</div> :
+                            {+patientData?.advanceMoneyExaminationData[0]?.status === PAYMENT_STATUS.PAID ? <div>Đã thanh toán</div> :
                                 <>
                                     <label className='me-5'>
                                         <input
@@ -279,13 +288,14 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                                         />
                                         Chuyển khoản
                                     </label>
-                                </>}
+                                </>
+                            }
                         </div>
                     </div>
                 </div>
                 <div className='payment-footer mt-4'>
                     <button className="close-user-btn" onClick={onClose}>Đóng</button>
-                    {+patientData?.status >= STATUS_BE.PAID ? <></>
+                    {+patientData?.advanceMoneyExaminationData[0]?.status === PAYMENT_STATUS.PAID ? <></>
                         :
                         <button className='payment-btn' onClick={handlePay}>
                             {isLoading ? (
@@ -304,6 +314,7 @@ const AdvanceModal = ({ isOpen, onClose, onPaySusscess, patientData }) => {
                     onClose={handleModalClose}
                     onRoomSelect={handleRoomSelect}
                     selected={selectedRoom}
+                    medicalTreatmentTier={patientData?.medicalTreatmentTier}
                 />
             )}
         </div>

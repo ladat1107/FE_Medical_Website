@@ -5,9 +5,12 @@ import { PATHS } from "@/constant/path";
 import DeparmentCardSkeleton from "@/components/DepartmentCard/DeparmentCardSkeleton";
 import { Input } from "antd";
 import { Search } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { clearBooking } from "@/redux/bookingSlice";
 
 const DepartmentInfo = (props) => {
   let [departmentList, setListDepartment] = useState(props?.departmentList);
+  const dispatch = useDispatch();
   useEffect(() => {
     if (props.departmentList?.length > 0) {
       setListDepartment(props.departmentList);
@@ -24,6 +27,10 @@ const DepartmentInfo = (props) => {
     }
     let list = _listDepartment.filter((item) => item.name.toLowerCase().includes(e.target.value.toLowerCase()));
     setListDepartment(list);
+  }
+  const handleBooking = () => {
+    dispatch(clearBooking());
+    navigate(PATHS.HOME.BOOKING);
   }
   return (
     <div className="w-full py-10" >
@@ -43,7 +50,7 @@ const DepartmentInfo = (props) => {
             <div className="flex justify-center items-center bg-[#00e0ff] text-white px-3 py-2 rounded-full shadow-card-doctor cursor-pointer w-[48%] h-11 text-center
             hover:bg-[#00e0ff]/60 hover:scale-105 transition-all duration-300">Tư Vấn Ngay</div>
             <div className="flex justify-center items-center bg-white text-primary-tw border-2 border-primary-tw px-3 py-2 rounded-full shadow-card-doctor cursor-pointer w-[48%]  h-11 text-center
-            hover:scale-105 transition-all duration-300" onClick={() => { navigate(PATHS.HOME.BOOKING) }}>Đặt lịch hẹn</div>
+            hover:scale-105 transition-all duration-300" onClick={handleBooking}>Đặt lịch hẹn</div>
           </div>
         </div>
       </div>

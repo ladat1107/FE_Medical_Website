@@ -30,6 +30,7 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
     const client = useQueryClient();
     const { mutate: createMedicine, isPending } = useCreateMedicine();
     const [errorText, setErrorText] = useState('');
+    const [allowAddExisting, setAllowAddExisting] = useState(false);
     const [form] = Form.useForm();
     const isMobile = useMobile();
 
@@ -38,14 +39,14 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
         if (!open) {
             form.resetFields();
             setDataSource([]);
+            setAllowAddExisting(false);
+            setErrorText('');
         }
     }, [open, form]);
 
     // Cập nhật dataSource khi initialRows thay đổi
     useEffect(() => {
         if (initialRows && initialRows.length > 0) {
-            console.log("Nhận initialRows:", initialRows);
-
             // Đảm bảo các trường ngày tháng là đối tượng dayjs
             const formattedRows = initialRows.map(row => ({
                 ...row,
@@ -170,6 +171,23 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
         setDataSource([...current, newRow]); // Ensure dataSource is updated to trigger re-render
     };
 
+    const handleConfirmClick = () => {
+        if (!allowAddExisting) {
+            handleSave();
+        } else {
+            Modal.confirm({
+                title: 'Xác nhận',
+                content: 'Các thuốc đã tồn tại sẽ được cập nhật lại số lượng tồn kho. Bạn có chắc chắn muốn tiếp tục thêm không?',
+                okText: 'Đồng ý',
+                cancelText: 'Hủy',
+                className: 'custom-confirm-modal',
+                onOk: () => {
+                    handleSave();
+                },
+            });
+        }
+    };
+
     const handleSave = () => {
         setErrorText('');
         form.validateFields().then((values) => {
@@ -192,7 +210,7 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
                 message.error(hasDuplicate);
                 return;
             }
-            createMedicine(values.rows, {
+            createMedicine({ data: values.rows, allowAddExisting }, {
                 onSuccess: (data) => {
                     if (data.EC === 0) {
                         message.success(data.EM);
@@ -200,9 +218,11 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
                         form.resetFields();
                         setDataSource([]);
                         setErrorText('');
+                        setAllowAddExisting(false);
                         onClose();
                     } else if (data.EC === 1) {
                         setErrorText(data.DT);
+                        setAllowAddExisting(true);
                     } else {
                         message.error(data.EM);
                     }
@@ -249,7 +269,7 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
                 <Button key="cancel" onClick={onClose}>
                     Hủy
                 </Button>,
-                <Button loading={isPending} key="submit" type="primary" onClick={handleSave}>
+                <Button loading={isPending} key="submit" type="primary" onClick={handleConfirmClick}>
                     {isPending ? 'Đang xử lý...' : 'Lưu'}
                 </Button>,
             ]}
@@ -262,7 +282,7 @@ const MedicineInsertModal = ({ open, onClose, initialRows = [] }) => {
                         </Button>
                     </div>
 
-                    {errorText && <div className="text-red-500 mb-2">{errorText}</div>}
+                    {errorText && <div className="text-red-500 mb-2" dangerouslySetInnerHTML={{ __html: errorText }}></div>}
 
                     <div className="min-h-[300px] overflow-auto
                 [&_.ant-table-cell]:border [&_.ant-table-cell]:border-gray-400

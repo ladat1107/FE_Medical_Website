@@ -55,7 +55,7 @@ const Sidebar = (props) => {
                     </div>
                     }
                 </div>
-               {user.staff ? <MenuSidebar /> : <MenuSidebarAdmin />}
+                {user.staff ? <MenuSidebar /> : <MenuSidebarAdmin />}
             </Sider >
         </div >
 

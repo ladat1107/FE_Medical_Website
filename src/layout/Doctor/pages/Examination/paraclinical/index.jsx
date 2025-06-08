@@ -16,7 +16,7 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh, isEditMode })
     const [paracOptions, setParacOptions] = useState([]);
 
     const paraclinicalContainerRef = useRef(null);
-    const inputRef = useRef(null);
+    const inputref = useRef(null);
     const searchResultsRef = useRef(null);
 
     const [isLoading, setIsLoading] = useState(false);
@@ -158,7 +158,7 @@ const Paraclinical = ({ listParaclinicals, examinationId, refresh, isEditMode })
                         </div>
                         {/* Input tìm kiếm bệnh đi kèm */}
                         <input
-                            ref={inputRef}
+                            ref={inputref}
                             className='input-add-prac'
                             type='text'
                             placeholder='Thêm yêu cầu cận lâm sàng...'

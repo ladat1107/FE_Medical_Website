@@ -2,7 +2,6 @@ import { Avatar, Button, Form, Input, message, Progress } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { SendOutlined } from "@ant-design/icons";
-import "./ChatBubbleUser.scss";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,20 +19,21 @@ import EmojiPicker from 'emoji-picker-react';
 
 const { TextArea } = Input;
 const ChatContentStaff = () => {
-    const { user, isLogin } = useSelector(state => state.authen);
-    const { data: conversationData, isLoading: conversationLoading, refetch: refetchConversationData } = useConversation({ enabled: isLogin ? true : false })
+    const { user, isLoggedIn } = useSelector(state => state.authen);
+    const { data: conversationData, isLoading: conversationLoading, refetch: refetchConversationData } = useConversation({ enabled: isLoggedIn })
     const { mutate: createMessage, isPending: isCreatingMessage } = useCreateMessage();
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
 
     const [messages, setMessages] = useState([]);
     const [receiver, setReceiver] = useState(null);
+    const [emptyStaff, setEmptyStaff] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showScrollDown, setShowScrollDown] = useState(false);
     const [form] = Form.useForm();
 
     const chatContentRef = useRef(null);
-    const inputRef = useRef(null);
+    const inputref = useRef(null);
     const emojiPickerRef = useRef(null);
     const navigate = useNavigate();
 
@@ -44,6 +44,7 @@ const ChatContentStaff = () => {
         if (conversationData?.EC === 0) {
             setMessages(conversationData?.DT?.messageData || []);
             setReceiver(conversationData?.DT?.staffData || null);
+            setEmptyStaff(conversationData?.DT?.staffData ? false : true);
         }
     }, [conversationData])
 
@@ -69,7 +70,7 @@ const ChatContentStaff = () => {
 
     useEffect(() => {
         scrollToBottom();
-        if (inputRef.current) inputRef.current.focus();
+        if (inputref.current) inputref.current.focus();
     }, [messages, isUploading, uploadProgress, isCreatingMessage]);
 
     const handleScroll = () => {
@@ -130,11 +131,15 @@ const ChatContentStaff = () => {
             status: STATUS_MESSAGE.SENDING
         }
         setMessages(pre => [...pre, message]);
+        setEmptyStaff(false);
         form.resetFields();
         setShowEmojiPicker(false);
         createMessage(message, {
             onSuccess: () => {
                 refetchConversationData();
+                if (!conversationData?.DT?.staffId) {
+                    setEmptyStaff(true);
+                }
             },
         });
     }
@@ -145,14 +150,14 @@ const ChatContentStaff = () => {
             message: currentMessage + emojiData.emoji,
         });
         // Focus lại vào input sau khi chọn emoji
-        inputRef.current?.focus();
+        inputref.current?.focus();
     };
     return (
         <>
             {conversationLoading ? <SkeletonChatContent /> :
-                <div className="chat-content" ref={chatContentRef} onScroll={handleScroll}>
+                <div className="flex-grow overflow-y-auto p-2 flex flex-col gap-2 scroll-smooth" ref={chatContentRef} onScroll={handleScroll}>
                     {messages.length === 0 ? (
-                        <div className="empty-chat">
+                        <div className="flex items-center justify-center h-full">
                             <p>Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</p>
                         </div>
                     ) :
@@ -165,20 +170,20 @@ const ChatContentStaff = () => {
                             return (
                                 <div key={index}>
                                     {isShowTime && (
-                                        <div className="text-center text-muted my-3" style={{ fontSize: "12px" }}>
+                                        <div className="text-center text-gray-500 my-3 text-xs">
                                             {dayjs(msg.createdAt).format("HH:mm")} {convertDateTimeToString(msg.createdAt)}
                                         </div>
                                     )}
 
-                                    <div className={`chat-message ${msg.senderId === user?.id ? "user" : "bot"}`}>
-                                        {isShowAvatar && <Avatar className="chat-avatar" size={30} src={receiver?.avatar} ></Avatar>}
+                                    <div className={`flex items-end mb-1 w-full ${msg.senderId === user?.id ? "flex-row-reverse" : "justify-start"}`}>
+                                        {isShowAvatar && <Avatar className="mx-2.5 w-[10%]" size={30} src={receiver?.avatar} />}
 
-                                        <div className="chat-text">
+                                        <div className="max-w-[70%]">
                                             {msg?.link ?
-                                                <div style={{ marginLeft: isShowAvatar ? "" : "50px", display: "flex", justifyContent: msg.senderId === user?.id ? "flex-end" : "flex-start" }}>
+                                                <div className={`${isShowAvatar ? "" : "ml-[50px]"} flex ${msg.senderId === user?.id ? "justify-end" : "justify-start"}`}>
                                                     {msg.link.includes("image") ?
                                                         <TooltipMessage statusName={statusName} createdAt={msg.createdAt}>
-                                                            <img src={msg?.link} onClick={() => window.open(msg?.link, "_blank")} alt="Uploaded" className="chat-image" />
+                                                            <img src={msg?.link} onClick={() => window.open(msg?.link, "_blank")} alt="Uploaded" className="max-w-[80%] max-h-60 rounded-xl object-fill my-1 cursor-pointer shadow-md" />
                                                         </TooltipMessage>
                                                         :
                                                         <TooltipMessage statusName={statusName} createdAt={msg.createdAt}>
@@ -190,59 +195,74 @@ const ChatContentStaff = () => {
                                                 </div>
                                                 :
                                                 <TooltipMessage statusName={statusName} createdAt={msg.createdAt}>
-                                                    <span className={`chat-text-content ${msg.senderId === user?.id ? "user" : "bot"}`} style={{ marginLeft: isShowAvatar ? "" : "50px" }}> {msg?.content}</span>
+                                                    <span
+                                                        className={`inline-block p-2.5 rounded-lg w-full break-words ${isShowAvatar ? "" : "ml-[50px]"} ${msg.senderId === user?.id
+                                                            ? "bg-primary-tw text-white !ml-0"
+                                                            : "bg-gray-200 text-black"
+                                                            }`}
+                                                    >
+                                                        {msg?.content}
+                                                    </span>
                                                 </TooltipMessage>
                                             }
                                             {msg.senderId === user?.id && !nextMsg && !isUploading && (
-                                                <div className="message-status">
-                                                    {msg.status === STATUS_MESSAGE.SENDING && <span className="d-flex align-items-center gap-1">Đang gửi...</span>}
-                                                    {msg.status === STATUS_MESSAGE.SENT && <span className="d-flex align-items-center gap-1">Đã gửi <Check size={10} /></span>}
-                                                    {msg.status === STATUS_MESSAGE.RECEIVED && <span className="d-flex align-items-center gap-1">Đã nhận <CheckCheck size={10} /></span>}
-                                                    {msg.status === STATUS_MESSAGE.READ && <span className="d-flex align-items-center gap-1">Đã xem</span>}
-                                                    {msg.status === STATUS_MESSAGE.FAILED && <span className="d-flex align-items-center gap-1 text-danger">Gửi thất bại</span>}
+                                                <div className="text-xs text-gray-500 mt-0.5 flex items-center justify-end gap-1">
+                                                    {msg.status === STATUS_MESSAGE.SENDING && <span className="flex items-center gap-1">Đang gửi...</span>}
+                                                    {msg.status === STATUS_MESSAGE.SENT && <span className="flex items-center gap-1">Đã gửi <Check size={10} /></span>}
+                                                    {msg.status === STATUS_MESSAGE.RECEIVED && <span className="flex items-center gap-1">Đã nhận <CheckCheck size={10} /></span>}
+                                                    {msg.status === STATUS_MESSAGE.READ && <span className="flex items-center gap-1">Đã xem</span>}
+                                                    {msg.status === STATUS_MESSAGE.FAILED && <span className="flex items-center gap-1 text-red-500">Gửi thất bại</span>}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-
                                 </div >
                             )
                         })}
+
+                    {emptyStaff && (
+                        <div className="text-sm text-gray-500 mt-1 flex items-center justify-center gap-1 transition-all duration-300">
+                            <span className="flex items-center gap-1">Hiện tại chưa có nhân viên hỗ trợ, vui lòng chờ...</span>
+                        </div>
+                    )}
                     {isUploading && (
-                        <div className="d-flex flex-row-reverse">
-                            <div className="d-flex flex-column align-items-end" style={{ width: "70%" }}>
+                        <div className="flex flex-row-reverse">
+                            <div className="flex flex-col items-end w-[70%]">
                                 <Progress type="circle" percent={uploadProgress} status="active" size={80} />
                             </div>
                         </div>
                     )
                     }
                     {showScrollDown && (
-                        <div className="scroll-to-bottom" onClick={scrollToBottom}>
+                        <div
+                            className="fixed flex items-center justify-center bottom-[60px] right-[300px] md:right-20 bg-primary-tw p-2 rounded-full w-[35px] h-[35px] text-white cursor-pointer shadow-md transition-all duration-300 hover:bg-blue-700"
+                            onClick={scrollToBottom}
+                        >
                             <FontAwesomeIcon icon={faArrowDown} />
                         </div>
                     )}
                 </div >}
-            <Form form={form} onFinish={sendMessageStaff} className="chat-input-container">
-                <div className="d-flex align-items-center gap-2">
+            <Form form={form} onFinish={sendMessageStaff} className="flex items-center p-2 border-t border-gray-200">
+                <div className="flex items-center gap-2">
                     <div>
-                        <Image htmlFor={`input-upload-image-messenger`} onClick={() => document.getElementById(`input-upload-image-messenger`).click()} size={20} style={{ color: "gray", cursor: "pointer", paddingTop: "2px" }} />
+                        <Image htmlFor={`input-upload-image-messenger`} onClick={() => document.getElementById(`input-upload-image-messenger`).click()} size={20} className="text-gray-500 cursor-pointer pt-0.5" />
                         <input type="file" id={`input-upload-image-messenger`} hidden={true} onChange={handleImageUpload} accept="image/*" />
                     </div>
                     <div>
                         <Paperclip htmlFor={`input-upload-file-messenger`} onClick={() => document.getElementById(`input-upload-file-messenger`).click()}
-                            size={20} style={{ color: "gray", cursor: "pointer", paddingTop: "2px" }} />
+                            size={20} className="text-gray-500 cursor-pointer pt-0.5" />
                         <input type="file" id={`input-upload-file-messenger`} hidden={true} onChange={handleUploadFile}
                             accept="application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-powerpoint, application/vnd.openxmlformats-officedocument.presentationml.presentation" />
                     </div>
                 </div>
                 <Form.Item name="message" style={{ flex: 1, marginBottom: 0 }}>
                     <TextArea
-                        className="chat-input"
+                        className="mx-2 border-none outline-none shadow-none resize-none overflow-y-auto max-h-24 scrollbar-none"
                         disabled={!user?.id}
                         autoComplete="off"
                         placeholder="Nhập tin nhắn (tối đa 250 ký tự)..."
                         maxLength={500}
-                        ref={inputRef}
+                        ref={inputref}
                         autoSize={{ maxRows: 4 }}
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && !e.altKey) {
@@ -255,23 +275,27 @@ const ChatContentStaff = () => {
                         }}
                     />
                 </Form.Item>
-                <div ref={emojiPickerRef} style={{ position: 'relative' }}>
+                <div ref={emojiPickerRef} className="relative">
                     <Smile
                         size={20}
-                        style={{ color: 'gray', cursor: 'pointer', paddingTop: '2px' }}
+                        className="text-gray-500 cursor-pointer pt-0.5"
                         onClick={() => setShowEmojiPicker(prev => !prev)}
                     />
                     {showEmojiPicker && (
                         <div
-                            style={{ position: 'absolute', bottom: '50px', right: 0, zIndex: 999 }}
+                            className="absolute bottom-[50px] right-0 z-[999]"
                         >
                             <EmojiPicker size={20} onEmojiClick={onEmojiClick} skinTonesDisabled={true} previewConfig={{ showPreview: false }}
                                 style={{ backgroundColor: "#f4f4f4" }} />
                         </div>
                     )}
                 </div>
-                <Button icon={<SendOutlined />} htmlType="submit"
-                    disabled={!user?.id || isCreatingMessage || conversationLoading} />
+                <Button
+                    icon={<SendOutlined />}
+                    htmlType="submit"
+                    className="border-none shadow-none ml-2"
+                    disabled={!user?.id || isCreatingMessage || conversationLoading}
+                />
             </Form>
         </>
 

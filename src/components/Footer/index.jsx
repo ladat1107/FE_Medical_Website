@@ -15,7 +15,7 @@ const Footer = () => {
             <div className="mb-6">
               <img
                 src="https://res.cloudinary.com/utejobhub/image/upload/v1733740053/KHOA_500_x_200_px_dp7on2.png"
-                alt="Medpro Logo"
+                alt="Hoa Sen Logo"
                 className="h-16 object-contain"
               />
             </div>
@@ -28,15 +28,15 @@ const Footer = () => {
 
               <div className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-primary-tw flex-shrink-0" />
-                <a href="https://medpro.vn" className="text-sm hover:text-primary-tw transition-colors">
-                  https://medpro.vn
+                <a href="https://hoasen.vn" className="text-sm hover:text-primary-tw transition-colors">
+                  https://hoasen.vn
                 </a>
               </div>
 
               <div className="flex items-center gap-2">
                 <Mail className="w-5 h-5 text-primary-tw flex-shrink-0" />
-                <a href="mailto:cskh@medpro.vn" className="text-sm hover:text-primary-tw transition-colors">
-                  cskh@medpro.vn
+                <a href="mailto:cskh@hoasen.vn" className="text-sm hover:text-primary-tw transition-colors">
+                  cskh@hoasen.vn
                 </a>
               </div>
 
@@ -121,7 +121,7 @@ const Footer = () => {
               {/* Cooperation Section */}
               <FooterSectionCollapse
                 title="Liên hệ hợp tác"
-                items={["Tham gia Medpro", "Khám sức khỏe doanh nghiệp", "Quảng cáo", "Tuyển Dụng",]}
+                items={["Tham gia Hoa Sen", "Khám sức khỏe doanh nghiệp", "Quảng cáo", "Tuyển Dụng",]}
               />
 
               {/* News Section */}
@@ -132,8 +132,8 @@ const Footer = () => {
 
               {/* About Section */}
               <FooterSectionCollapse
-                title="Về Medpro"
-                items={["Về Medpro", "Giới thiệu", "Điều khoản dịch vụ", "Chính sách bảo mật", "Quy định sử dụng",]}
+                title="Về Hoa Sen"
+                items={["Về Hoa Sen", "Giới thiệu", "Điều khoản dịch vụ", "Chính sách bảo mật", "Quy định sử dụng",]}
               />
             </div>
           </div>
@@ -145,8 +145,8 @@ const Footer = () => {
             <div className="flex items-center justify-between md:justify-start">
               <div className="flex flex-col items-center w-1/2">
                 <img
-                  src="https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/474488971_1333705871378720_7009368911692003946_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEtR1x4DIhbOd556vaPgBC1GHoxsd9Y3sAYejGx31jewBcpLTkmfgIqx0l-S8YZeVvq8zjWgV7_F3UfuTuttqeM&_nc_ohc=cXr7KBPRNu0Q7kNvwFwgVlD&_nc_oc=Adm_TwUH9B4hfWmx3wy8JxukFcYOvV-D14sC1SGFqfXP-PwelJBSXi_-YCVkW4CuC-I&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=ckOuJlRA1eMRWe1lR7k3-Q&oh=00_AfHTqD2y9hYimCgaThU8-qAhhUPUzqWMUfvlxWZzI-NNXQ&oe=680EE3CE"
-                  alt="Đã đăng ký Bộ Công Thương"
+                  src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Logo_Tr%C6%B0%E1%BB%9Dng_%C4%90%E1%BA%A1i_H%E1%BB%8Dc_S%C6%B0_Ph%E1%BA%A1m_K%E1%BB%B9_Thu%E1%BA%ADt_TP_H%E1%BB%93_Ch%C3%AD_Minh.png"
+                  alt="Trường đại học Sư phạm Kỹ thuật TP.HCM"
                   className="h-12"
                 />
                 <span className="text-xs text-center text-secondaryText-tw font-bold mt-1">Trường Đại học Sư phạm Kỹ thuật TP.HCM</span>
@@ -155,7 +155,7 @@ const Footer = () => {
               <div className="flex flex-col items-center w-1/2">
                 <img
                   src="https://fit.hcmute.edu.vn/Resources/Images/SubDomain/fit/FIT-DoanHoi.png"
-                  alt="Đã thông báo Bộ Công Thương"
+                  alt="Khoa Công nghệ thông tin"
                   className="h-12"
                 />
                 <span className="text-xs text-center text-secondaryText-tw font-bold mt-1">Khoa Công nghệ thông tin</span>

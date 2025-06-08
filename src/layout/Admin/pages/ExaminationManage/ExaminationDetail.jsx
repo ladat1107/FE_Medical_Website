@@ -33,7 +33,7 @@ import {
   CheckCircle2,
   EyeOff,
 } from "lucide-react"
-import { SPECIAL_EXAMINATION, STATUS_BE } from "@/constant/value"
+import { MEDICAL_TREATMENT_TIER, PAYMENT_METHOD, PAYMENT_STATUS, SPECIAL_EXAMINATION, STATUS_BE } from "@/constant/value"
 import HistoryModal from "@/layout/Doctor/components/HistoryModal/HistoryModal"
 import { useEffect, useState } from "react"
 import { formatDate } from "@/utils/formatDate"
@@ -73,6 +73,11 @@ const isSameDay = (date1, date2) => {
   const d1 = dayjs(date1)
   const d2 = dayjs(date2)
   return d1.isSame(d2, "day")
+};
+
+const diffDate = (date1, date2) => {
+  if (!date1 || !date2) return 0
+  return dayjs(date2).startOf('day').diff(dayjs(date1).startOf('day'), 'day')
 }
 
 const getDischargeStatusTag = (status) => {
@@ -81,24 +86,7 @@ const getDischargeStatusTag = (status) => {
   if (status === 3) return <Text className="text-blue-500">Xin xuất viện</Text>
   if (status === 4) return <Text className="text-yellow-500">Hẹn tái khám</Text>
 }
-const getPaymentStatusTag = (status) => {
-  const statusMap = {
-    0: { color: "default", text: "Chưa hoàn tất", icon: <Clock size={14} className="mr-1" /> },
-    1: { color: "success", text: "Hoàn tất", icon: <CheckCircle size={14} className="mr-1" /> },
-  }
 
-  const statusInfo = statusMap[status] || {
-    color: "default",
-    text: "Không xác định",
-    icon: <Info size={14} className="mr-1" />,
-  }
-  return (
-    <Tag color={statusInfo.color} className="flex items-center text-sm py-1 px-2">
-      {statusInfo.icon}
-      {statusInfo.text}
-    </Tag>
-  )
-}
 
 const getParaclinicalStatusTag = (status) => {
   const statusMap = {
@@ -147,10 +135,10 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
   const [coveredPriceParaclinical, setCoveredPriceParaclinical] = useState(0)
   useEffect(() => {
     if (examinationData) {
-      setTotalPricePrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.totalMoney || 0), 0) || 0)
-      setInsuranceCoveredPrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.insuranceCovered || 0), 0) || 0)
-      setCoveredPricePrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.coveredPrice || 0), 0) || 0)
-      setTotalPriceParaclinical(examinationData?.examinationResultParaclincalData?.reduce((sum, p) => sum + (p?.coveredPrice || 0), 0) || 0)
+      setTotalPricePrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.totalMoney * (diffDate(p?.createdAt, p?.endDate || p?.dischargedAt || dayjs()) + 1) || 0), 0) || 0)
+      setInsuranceCoveredPrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.insuranceCovered * (diffDate(p?.createdAt, p?.endDate || p?.dischargedAt || dayjs()) + 1) || 0), 0) || 0)
+      setCoveredPricePrescription(examinationData?.prescriptionExamData?.reduce((sum, p) => sum + (p.coveredPrice * (diffDate(p?.createdAt, p?.endDate || p?.dischargedAt || dayjs()) + 1) || 0), 0) || 0)
+      setTotalPriceParaclinical(examinationData?.examinationResultParaclincalData?.reduce((sum, p) => sum + (p?.price || 0), 0) || 0)
       setInsuranceCoveredParaclinical(examinationData?.examinationResultParaclincalData?.reduce((sum, p) => sum + (p?.insuranceCovered || 0), 0) || 0)
       setCoveredPriceParaclinical(examinationData?.examinationResultParaclincalData?.reduce((sum, p) => sum + (p?.coveredPrice || 0), 0) || 0)
 
@@ -197,12 +185,6 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
             suffix="₫"
             className="!mr-4"
           />
-          {examinationData.paymentData && (
-            <div className="flex items-center">
-              <Text className="mr-2">Thanh toán:</Text>
-              {getPaymentStatusTag(examinationData?.paymentData?.status || 1)}
-            </div>
-          )}
         </div>
       </div>
 
@@ -266,25 +248,25 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                       <div className="flex justify-between">
                         <Text type="secondary">Họ và tên:</Text>
                         <Text strong>
-                          {examinationData.userExaminationData.lastName} {examinationData.userExaminationData.firstName}
+                          {examinationData?.userExaminationData?.lastName || ""} {examinationData?.userExaminationData?.firstName || ""}
                         </Text>
                       </div>
                       <div className="flex justify-between">
                         <Text type="secondary">CMND/CCCD:</Text>
-                        <Text>{examinationData.userExaminationData.cid}</Text>
+                        <Text>{examinationData?.userExaminationData?.cid || "Không có"}</Text>
                       </div>
                       <div className="flex justify-between">
                         <Text type="secondary">Số điện thoại:</Text>
                         <div className="flex items-center">
                           <Phone size={14} className="mr-1 text-gray-500" />
-                          <Text>{examinationData.userExaminationData.phoneNumber || "Không có"}</Text>
+                          <Text>{examinationData?.userExaminationData?.phoneNumber || "Không có"}</Text>
                         </div>
                       </div>
                       <div className="flex justify-between">
                         <Text type="secondary">Email:</Text>
                         <div className="flex items-center">
                           <Mail size={14} className="mr-1 text-gray-500" />
-                          <Text>{examinationData.userExaminationData.email || "Không có"}</Text>
+                          <Text>{examinationData?.userExaminationData?.email || "Không có"}</Text>
                         </div>
                       </div>
                     </div>
@@ -442,7 +424,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                         </div>
                         <div className="flex justify-between">
                           <Text type="secondary">Phòng khám:</Text>
-                          <Text>{examinationData?.examinationStaffData?.staffDepartmentData?.name || ""}</Text>
+                          <Text>{examinationData?.roomName || examinationData?.examinationStaffData?.staffDepartmentData?.name || ""}</Text>
                         </div>
                         <div className="flex justify-between">
                           <Text type="secondary">Số điện thoại:</Text>
@@ -462,16 +444,26 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                     </Card>
                   </Col>
                 }
-                <Col xs={24} md={examinationData?.medicalTreatmentTier === 1 ? 24 : 12}>
-                  <Card title="Chi tiết khám bệnh" bordered={false} className="h-full bg-bgAdmin">
+                <Col xs={24} md={examinationData?.medicalTreatmentTier === MEDICAL_TREATMENT_TIER.OUTPATIENT ? 12 : 24}>
+                  <Card title="Chi tiết khám bệnh" className="h-full bg-bgAdmin">
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <Text type="secondary">Ngày khám:</Text>
+                        <Text type="secondary">Thời gian:</Text>
                         <div className="flex items-center">
                           <Calendar size={14} className="mr-1 text-gray-500" />
                           <Text>{isSameDay(examinationData?.admissionDate, examinationData?.dischargeDate) ? formatDate(examinationData?.admissionDate || "") : `${formatDate(examinationData?.admissionDate || "")} - ${formatDate(examinationData?.dischargeDate || "")}`}</Text>
                         </div>
                       </div>
+                      {examinationData?.medicalTreatmentTier !== MEDICAL_TREATMENT_TIER.OUTPATIENT &&
+                        <>
+                          <div className="flex justify-between">
+                            <Text type="secondary">Phòng nhập viện:</Text>
+                            <div className="flex items-center">
+                              <Text>{examinationData?.roomName || ""}</Text>
+                            </div>
+                          </div>
+                        </>
+                      }
                       <div className="flex justify-between">
                         <Text type="secondary">Triệu chứng:</Text>
                         <div className="flex items-center">
@@ -612,23 +604,23 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                         Chi tiết chi phí
                       </Text>
                       <div className="space-y-3 text-sm text-gray-700">
-                        {examinationData.price && examinationData?.medicalTreatmentTier === 1 ? (
+                        {examinationData?.medicalTreatmentTier !== MEDICAL_TREATMENT_TIER.OUTPATIENT ? (
                           <div className="flex justify-between">
                             <Text className="text-gray-600">Giường:</Text>
-                            <Text className="font-medium text-right">{formatCurrency(examinationData.coveredPrice || examinationData.price)}</Text>
+                            <Text className="font-medium text-right">{examinationData?.price ? formatCurrency(examinationData?.coveredPrice || examinationData?.price) : "Chưa cập nhật"}</Text>
                           </div>
                         ) : (
                           <div className={`grid gap-2 items-start ${examinationData?.insuranceCovered ? 'grid-cols-3' : 'grid-cols-2'}`}>
                             <Text className="text-gray-600">Phí khám bệnh:</Text>
-                            {examinationData?.insuranceCovered && (
+                            {examinationData?.insuranceCovered ?
                               <Text className="text-right">
                                 {formatCurrency(examinationData?.price)}
-                                <span className="ml-2 border border-green-400 text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">BHYT: {formatCurrency(examinationData?.insuranceCovered)}</span>
-                              </Text>
-                            )}
+                                <span className="ml-2 border border-green-400 text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">BHYT: {formatCurrency(examinationData?.insuranceCovered || 0)}</span>
+                              </Text> : null
+                            }
                             <Text className="flex flex-wrap items-center justify-end text-end gap-1">
-                              {formatCurrency(examinationData?.coveredPrice || examinationData?.price || 0)}
-                              {!examinationData?.paymentData || examinationData?.paymentData?.status !== 2 ? (
+                              {formatCurrency(examinationData?.coveredPrice !== null ? examinationData?.coveredPrice : examinationData?.price)}
+                              {!examinationData?.paymentId || examinationData?.paymentData?.status !== 2 ? (
                                 <span className="ml-1 text-blue-500 italic text-xs">(Chưa thanh toán)</span>
                               ) : (
                                 <PaymentTooltip
@@ -654,7 +646,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                               {formatCurrency(totalPricePrescription - insuranceCoveredPrescription)}
                               {examinationData?.medicalTreatmentTier !== 1 &&
                                 <>
-                                  {(!examinationData?.prescriptionExamData[0]?.paymentData ||
+                                  {(!examinationData?.prescriptionExamData[0]?.paymentId ||
                                     examinationData?.prescriptionExamData[0]?.paymentData?.status !== 2) ? (
                                     <span className="ml-1 text-blue-500 italic text-xs">(Chưa thanh toán)</span>
                                   ) : (
@@ -676,7 +668,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                             {insuranceCoveredParaclinical > 0 && (
                               <Text className="text-right">
                                 {formatCurrency(totalPriceParaclinical)}
-                                <span className="ml-2 border border-green-400 text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">BHYT: {formatCurrency(coveredPriceParaclinical)}</span>
+                                <span className="ml-2 border border-green-400 text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">BHYT: {formatCurrency(insuranceCoveredParaclinical)}</span>
                               </Text>
                             )}
                             <Text className="flex flex-wrap items-center justify-end text-end gap-1">
@@ -713,7 +705,59 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                       </div>
                     </div>
                   </Col>
-
+                  {(examinationData?.medicalTreatmentTier !== MEDICAL_TREATMENT_TIER.OUTPATIENT && examinationData?.advanceMoneyExaminationData?.length > 0) &&
+                    <Col xs={24}>
+                      <div className="bg-white shadow-sm p-4 rounded-lg border border-gray-100 mt-4">
+                        <Text strong className="block mb-3 text-base text-gray-800">
+                          Chi tiết tạm ứng
+                        </Text>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  #
+                                </th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Thời gian
+                                </th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Số tiền
+                                </th>
+                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Phương thức
+                                </th>
+                                <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Trạng thái
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {examinationData?.advanceMoneyExaminationData.map((advanceMoney) => (
+                                <tr key={advanceMoney.id} className="hover:bg-gray-50">
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {advanceMoney.id}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                    {dayjs(advanceMoney.date).format("DD/MM/YYYY")}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                    {formatCurrency(advanceMoney.amount)}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                    {advanceMoney?.paymentData ? advanceMoney.paymentData?.method === PAYMENT_METHOD.CASH ? "Tiền mặt" : "Chuyển khoản" : ""}
+                                  </td>
+                                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 text-right">
+                                    {advanceMoney?.paymentData ? advanceMoney.paymentData?.status === PAYMENT_STATUS.PAID ? "Đã thanh toán" : "Chưa thanh toán" : "Chưa thanh toán"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </Col>
+                  }
                 </Row>
               </div>
             </Card>
@@ -745,7 +789,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                     }
                     bordered={false}
                     className="mb-4 bg-gray-50"
-                    extra={<Tag color="blue">Tổng: {formatCurrency(prescription.totalMoney)}</Tag>}
+                    extra={<Tag color="blue">Tổng: {formatCurrency(prescription.totalMoney * (diffDate(prescription?.createdAt, prescription?.endDate || prescription?.dischargedAt || dayjs()) + 1))}</Tag>}
                   >
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">

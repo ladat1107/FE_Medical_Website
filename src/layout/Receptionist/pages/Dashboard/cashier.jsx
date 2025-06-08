@@ -172,7 +172,7 @@ const Cashier = () => {
                         <p className="search-title">Đối tượng thanh toán</p>
                         <Select className="select-box" defaultValue="2" onChange={handelTreatmentTierChange}>
                             <Select.Option value="2">Ngoại trú</Select.Option>
-                            <Select.Option value="1">Nội trú</Select.Option>
+                            <Select.Option value="1">Nhập viện</Select.Option>
                             <Select.Option value="3">Xuất viện</Select.Option>
                         </Select>
                     </div>
@@ -186,7 +186,7 @@ const Cashier = () => {
                     <div className="col-6">
                         <p className="search-title">Tìm kiếm đơn khám</p>
                         <input type="text" className="search-box"
-                            placeholder="Nhập tên bệnh nhân để tìm kiếm..."
+                            placeholder="Nhập thông tin bệnh nhân để tìm kiếm..."
                             value={search}
                             onChange={handleSearch} />
                     </div>
@@ -266,6 +266,7 @@ const Cashier = () => {
                                         onClickItem={() => handlePay(index)}
                                         sort={false}
                                         doctorHeader="Số điện thoại"
+                                        isEmergency={item?.medicalTreatmentTier === 3 ? true : false}
                                     />
                                 </div>
                             )) : (

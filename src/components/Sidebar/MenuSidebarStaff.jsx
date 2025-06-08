@@ -87,12 +87,6 @@ const MenuSidebar = () => {
                 roles: [ROLE.RECEPTIONIST]
             },
             {
-                key: 'sub22',
-                label: (<NavLink to={PATHS.RECEPTIONIST.MEDICAL_RECORD}>Hồ sơ khám bệnh</NavLink>),
-                icon: <i className="fa-solid fa-file-medical"></i>,
-                roles: [ROLE.RECEPTIONIST]
-            },
-            {
                 key: 'sub3',
                 label: (<NavLink to={PATHS.RECEPTIONIST.CASHIER}>Thanh toán</NavLink>),
                 icon: <i className="fa-solid fa-list"></i>,
@@ -102,7 +96,7 @@ const MenuSidebar = () => {
                 key: 'sub4',
                 label: 'Danh sách khám bệnh',
                 icon: <i className="fa-solid fa-list"></i>,
-                roles: [ROLE.DOCTOR],
+                roles: [ROLE.DOCTOR, ROLE.NURSE],
                 children: [
                     {
                         key: '9',
@@ -122,16 +116,24 @@ const MenuSidebar = () => {
                 ],
             },
             {
+                key: 'sub22',
+                label: (<NavLink to={PATHS.RECEPTIONIST.MEDICAL_RECORD}>Hồ sơ khám bệnh</NavLink>),
+                icon: <i className="fa-solid fa-file-medical"></i>,
+                roles: [ROLE.RECEPTIONIST, ROLE.DOCTOR, ROLE.NURSE]
+            },
+            {
                 key: 'sub1',
                 label: (<NavLink to={PATHS.RECEPTIONIST.PRESCRIBE}>Lấy thuốc</NavLink>),
                 icon: <i className="fa-solid fa-pills"></i>,
                 roles: [ROLE.PHARMACIST]
             },
-            {
-                key: 'sub5',
-                label: (<NavLink to={PATHS.STAFF.HANDBOOK}>Cẩm nang</NavLink>),
-                icon: <i className="fa-solid fa-book"></i>,
-            },
+            ...((user.role === ROLE.DOCTOR || user.role === ROLE.NURSE) ? [
+                {
+                    key: 'sub5',
+                    label: (<NavLink to={PATHS.STAFF.HANDBOOK}>Cẩm nang</NavLink>),
+                    icon: <i className="fa-solid fa-book"></i>,
+                },
+            ] : []),
             {
                 key: 'sub6',
                 label: (<NavLink to={PATHS.STAFF.SCHEDULE}>Lịch trực</NavLink>),

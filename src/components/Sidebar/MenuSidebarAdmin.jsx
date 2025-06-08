@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HomeOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { Badge, Menu } from 'antd';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAddressCard, faCalendarDays, faHospital } from '@fortawesome/free-regular-svg-icons';
 import { PATHS } from '@/constant/path';
@@ -13,11 +13,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleLogout } from '@/redux/actions/authenActions';
 import { useNotification } from '@/contexts/NotificationContext';
 const MenuSidebar = () => {
-    let { user } = useSelector((state) => state.authen);
     let dispatch = useDispatch();
     const [openKeys, setOpenKeys] = useState([]);
-    const [selectedKeys, setSelectedKeys] = useState("sub2");
-
+    const navigate = useNavigate();
     const { totalUnreadCount } = useNotification();
 
     // Force re-render on notification changes
@@ -73,12 +71,18 @@ const MenuSidebar = () => {
                 {
                     key: 'personalAdmin1',
                     label: 'Thông tin cá nhân',
-                    onClick: () => { emitter.emit(EMIT.EVENT_PROFILE.key, EMIT.EVENT_PROFILE.info); }
+                    onClick: () => {
+                        navigate(PATHS.ADMIN.PROFILE)
+                        emitter.emit(EMIT.EVENT_PROFILE.key, EMIT.EVENT_PROFILE.info);
+                    }
                 },
                 {
                     key: 'personalAdmin2',
                     label: 'Đổi mật khẩu',
-                    onClick: () => { emitter.emit(EMIT.EVENT_PROFILE.key, EMIT.EVENT_PROFILE.changePassword); }
+                    onClick: () => {
+                        navigate(PATHS.ADMIN.PROFILE)
+                        emitter.emit(EMIT.EVENT_PROFILE.key, EMIT.EVENT_PROFILE.changePassword);
+                    }
                 },
             ],
         },

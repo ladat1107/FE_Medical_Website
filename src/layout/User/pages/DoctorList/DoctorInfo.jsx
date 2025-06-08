@@ -62,7 +62,7 @@ const DoctorInfo = () => {
               [&.ant-input-affix-wrapper]:h-[50px] "
               onChange={(e) => { setSearch(e.target.value), setPageSize({ ...pageSize, currentPage: 1 }) }}
               value={search}
-              inputRef={searchRef}
+              inputref={searchRef}
               placeholder="Tìm kiếm bác sĩ" prefix={<SearchOutlined className="text-gray-400" />} />
             <div className="px-2 w-1/2 sm:w-1/3" >
               <div className="w-full flex justify-center items-center bg-white rounded-[30px] shadow-md h-[50px] ">

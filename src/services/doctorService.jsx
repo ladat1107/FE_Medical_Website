@@ -38,6 +38,12 @@ export const checkOutParaclinical = (data) => {
 export const checkOutExamination = (data) => {
     return axios.post(`/api/paymentExaminationMomo`, data);
 }
+export const checkOutExaminationAdvance = (data) => {
+    return axios.post(`/api/paymentExaminationAdvanceMomo`, data);
+}
+export const checkOutDischarged = (data) => {
+    return axios.post(`/api/paymentDischargedMomo`, data);
+}
 export const checkOutPrescription = (data) => {
     return axios.post(`/api/paymentPrescriptionMomo`, data);
 }
@@ -207,6 +213,14 @@ export const getConversationsForStaff = async () => {
     return axios.get(`/api/getConversationForStaff`);
 }
 
+export const searchConversation = async (search) => {
+    return axios.get(`/api/searchConversation?search=${search}`);
+}
+
+export const getConversationFromSearch = async (conversationId) => {
+    return axios.put(`/api/getConversationFromSearch`, { conversationId });
+}
+
 export const deleteAssistantForCustomer = async () => {
     return axios.delete(`/api/deleteAssistantForCustomer`);
 }
@@ -215,11 +229,11 @@ export const getScheduleByStaffIdFromToday = async () => {
     return axios.get(`/api/getScheduleByStaffIdFromToday`);
 }
 
-export const getAvailableRooms = async () => {
-    return axios.get(`/api/getAvailableRooms`);
+export const getAvailableRooms = async (medicalTreatmentTier) => {
+    return axios.get(`/api/getAvailableRooms?medicalTreatmentTier=${medicalTreatmentTier || ''}`);
 }
 
-export const getListAdvanceMoney = async (page = 1, limit = 20, search ='', statusPay = 4) => {
+export const getListAdvanceMoney = async (page = 1, limit = 20, search = '', statusPay = 4) => {
     return axios.get(`/api/getListAdvanceMoney?page=${page}&limit=${limit}&search=${search}&statusPay=${statusPay}`);
 }
 
@@ -254,6 +268,14 @@ export const createAdvanceMoney = async (data) => {
 
 export const deletePrescription = async (id) => {
     return axios.delete(`/api/deletePrescription`, {
+        params: {
+            id: id
+        }
+    });
+}
+
+export const deleteAdvanceMoney = async (id) => {
+    return axios.delete(`/api/deleteAdvanceMoney`, {
         params: {
             id: id
         }

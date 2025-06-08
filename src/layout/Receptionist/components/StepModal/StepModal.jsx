@@ -56,6 +56,7 @@ const StepModal = ({ isOpen, onClose, examinationData }) => {
             width={1000}
             footer={null}
             className="step-modal"
+            centered={true}
         >
             <div className="modal-content">
                 {examinationData?.DT?.mainExamination &&
@@ -77,14 +78,7 @@ const StepModal = ({ isOpen, onClose, examinationData }) => {
 StepModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    examinationData: PropTypes.shape({
-        EC: PropTypes.number,
-        EM: PropTypes.string,
-        DT: PropTypes.shape({
-            mainExamination: PropTypes.object,
-            paraclinicalTests: PropTypes.object
-        })
-    })
+    examinationData: PropTypes.object
 };
 
 export default StepModal;

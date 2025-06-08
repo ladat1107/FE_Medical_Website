@@ -21,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             Skeleton: {
               gradientFromColor: "rgba(0, 181, 241, 0.06)",
               gradientToColor: "rgba(0, 181, 241, 0.12)",
-            },
+            }
           },
         }}
       >

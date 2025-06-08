@@ -7,7 +7,6 @@ import "./AdminHeader.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faLanguage } from "@fortawesome/free-solid-svg-icons";
 import { faBell, faEnvelope } from '@fortawesome/free-regular-svg-icons'
-const onSearch = (value, _e, info) => console.log(info?.source, value);
 const AdminHeader = (props) => {
     const {
         token: { colorBgContainer },
@@ -51,7 +50,6 @@ const AdminHeader = (props) => {
                             <FontAwesomeIcon icon={faBell} size="xl" />
                         </div>
                         <div />
-
                     </div>
                 </div>
 

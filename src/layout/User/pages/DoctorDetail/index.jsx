@@ -39,18 +39,17 @@ const DoctorDetail = () => {
       getDoctorDetail();
     }
   }, [location]);
-  const handbook = handbookData?.DT?.length > 0 ? handbookData.DT : [{}];
-  const doctorList = doctorListData?.DT?.length > 0 ? doctorListData.DT : [{}];
+  const handbook = handbookData?.DT?.length > 0 ? handbookData.DT : [];
+  const doctorList = doctorListData?.DT?.length > 0 ? doctorListData.DT : [];
   return (
     <div className="bg-bgHomePage py-10" >
       {doctorLoading || !doctor ? <DoctorDetailSkeleton /> :
-        doctor && handbook.length > 0 && doctorList.length > 0 &&
         <Container>
           <DoctorDetailHeader data={doctor} />
-          <DoctorDetailBody data={doctor} handbook={handbook} />
+          <DoctorDetailBody data={doctor} handbook={handbook} handbookLoading={handbookLoading} />
           <div className="mt-5"></div>
-          {doctorList.length > 0 &&
-            <DoctorRelated doctorList={doctorList} />}
+
+          <DoctorRelated doctorList={doctorList} doctorListLoading={doctorListLoading} />
         </Container>
       }
     </div>

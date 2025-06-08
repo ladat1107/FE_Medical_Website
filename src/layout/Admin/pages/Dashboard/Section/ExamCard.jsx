@@ -1,9 +1,6 @@
-import { STATUS_BE } from "@/constant/value";
 import IconCircle from "@/layout/Admin/components/IconCircle/IconCircle";
-import { getStatisticalAppoinment } from "@/services/adminService";
 import { faCalendarCheck, faClock } from "@fortawesome/free-regular-svg-icons";
-import { faCircleH, faHeartCircleCheck, faHourglassHalf, faSyringe, faThumbsUp, faTruckMedical, faUserDoctor, faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
+import { faCircleH, faHeartCircleCheck, faSyringe, faTruckMedical, faUserDoctor, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 
 const ExamCard = ({ inPatient, outPatient }) => {

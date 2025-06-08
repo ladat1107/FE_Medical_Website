@@ -42,7 +42,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                     lastName: patientData?.examinationStaffData?.staffUserData?.lastName,
                     position: patientData?.examinationStaffData?.position,
                 },
-                price: patientData?.examinationStaffData?.price,
+                price: patientData?.price,
                 description: 'Khám bệnh',
                 isWrongTreatment: patientData?.isWrongTreatment,
             };
@@ -117,7 +117,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                 } else {
                     let response = await checkOutExamination(paymentData);
                     if (response.EC === 0) {
-                        window.location.href = response?.DT?.shortLink;
+                        window.location.href = response?.DT?.payUrl;
                     } else {
                         message.error(response.EM);
                     }
@@ -138,10 +138,10 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                             message.error('Cập nhật bệnh nhân thất bại');
                         }
                     } else {
-                        const response = await checkOutParaclinical({ ids });
+                        const response = await checkOutParaclinical({ ids, insurance });
 
                         if (response.EC === 0) {
-                            window.location.href = response?.DT?.shortLink;
+                            window.location.href = response?.DT?.payUrl;
                         } else {
                             message.error(response.EM);
                         }
@@ -257,7 +257,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                         </>
                     ) : (
                         <>
-                            {data?.paraclinicalItems.length > 0 && data.paraclinicalItems.map((item, index) => (
+                            {data?.paraclinicalItems?.length > 0 && data?.paraclinicalItems?.map((item, index) => (
                                 <div className='col-12 d-flex flex-column mt-2 pres-item' key={index}>
                                     <div className='col-12 d-flex align-items-center'>
                                         <p style={{ fontWeight: "500", color: "#007BFF" }}>Cận lâm sàng: {item?.paracName}</p>
@@ -292,10 +292,10 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                             <p style={{ fontWeight: "400" }}>Số BHYT:</p>
                         </div>
                         <div className='col-3'>
-                            <input 
-                                className='input-add-exam' 
+                            <input
+                                className='input-add-exam'
                                 style={{ width: "93%" }} maxLength={10}
-                                type='text' value={insurance} 
+                                type='text' value={insurance}
                                 readOnly
                                 placeholder='Nhập số BHYT...' />
                         </div>
@@ -342,7 +342,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                         </div>
                         <div className='col-1' />
                         <div className='col-5 d-flex'>
-                            {+patientData?.status >= STATUS_BE.PAID ? 
+                            {+patientData?.status >= STATUS_BE.PAID ?
                                 <div>
                                     Đã thanh toán
                                 </div> : <>
@@ -376,7 +376,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                     {+patientData?.status === STATUS_BE.PAID ? <></>
                         :
                         <button className='payment-btn' onClick={handlePay}>
-                        {isLoading ? (
+                            {isLoading ? (
                                 <>
                                     <i className="fa-solid fa-spinner fa-spin me-2"></i>
                                     Đang xử lý...

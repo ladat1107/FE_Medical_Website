@@ -5,7 +5,7 @@ import PrescriptionChangeModal from './InpatientModals/PrescriptionChangeModal';
 import { message, Popconfirm } from 'antd';
 import { deletePrescription } from '@/services/doctorService';
 
-const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) => {
+const InpatientPres = ({ prescriptionData, examinationId, refresh, isEditMode }) => {
     const [showModal, setShowModal] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [localPresData, setLocalPresData] = useState([]);
@@ -13,10 +13,10 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
     useEffect(() => {
         setLocalPresData(Array.isArray(prescriptionData) ? [...prescriptionData] : []);
     }, [prescriptionData]);
-    
+
     const prescriptionExamData = localPresData;
     moment.locale('vi');
-    
+
     // Hàm để hiển thị thứ trong tuần bằng tiếng Việt
     const getDayOfWeekVi = (date) => {
         const day = moment(date).day();
@@ -54,7 +54,7 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
         if (prescription.prescriptionDetails) {
             prescription.prescriptionDetails.forEach(medicine => {
                 const sessionArr = medicine.PrescriptionDetail.session.split(',');
-                
+
                 sessionArr.forEach(session => {
                     if (sessions[session]) {
                         sessions[session].push({
@@ -105,31 +105,31 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
             setDeletingId(null);
         }
     }
-    
+
     return (
         <div className="inpatient-vitals-content">
             {isEditMode && (
                 <div className='d-flex justify-content-end align-items-center mb-3'>
-                    <button 
-                        className='restore-button' 
+                    <button
+                        className='restore-button'
                         onClick={handleChangePrescription}
                         type="primary"
                     >
                         Thay đổi đơn thuốc
-                    </button> 
-                </div> 
-            )} 
+                    </button>
+                </div>
+            )}
             {sortedDates.length === 0 ? (
                 <div className="text-center p-4">Không có dữ liệu đơn thuốc</div>
             ) : (
                 sortedDates.map(date => {
                     return groupedData[date].map(prescription => {
                         const medicineBySession = organizeMedicineBySession(prescription);
-                        
+
                         return (
                             <div className="flex mb-4" key={prescription.id}>
-                                <div className="inpatient-pres-date" style={{width: '15%'}}>
-                                    <p style={{fontSize: '18px', fontWeight: '500'}}>
+                                <div className="inpatient-pres-date" style={{ width: '15%' }}>
+                                    <p style={{ fontSize: '18px', fontWeight: '500' }}>
                                         {prescription.status === 2 ? moment(date).format('D [Tháng] M') : "Đơn mang về"}
                                     </p>
                                     <p className="gray-p">{
@@ -138,12 +138,12 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
                                     {prescription.status !== 2 && isEditMode && <>
                                         <Popconfirm
                                             title="Xác nhận xóa"
-                                            description="Bạn có chắc chắn muốn xóa xét nghiệm này?"
+                                            description="Bạn có chắc chắn muốn xóa đơn thuốc này?"
                                             onConfirm={() => handleDeletePrescription(prescription.id)}
                                             okText="Xóa"
                                             cancelText="Hủy"
                                         >
-                                            <button 
+                                            <button
                                                 className="action-btn action-delete"
                                                 disabled={deletingId === prescription.id}
                                             >
@@ -156,49 +156,49 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
                                         </Popconfirm>
                                     </>}
                                 </div>
-                                <div className="d-flex flex" style={{width: '85%'}}>
+                                <div className="d-flex flex" style={{ width: '85%' }}>
                                     {/* Buổi sáng */}
                                     {medicineBySession["1"].length > 0 &&
                                         <div className="inpatient-pres-detail medicine-sess m-0 me-2">
-                                            <p className="text-center" style={{fontWeight: '500'}}>Sáng</p>
+                                            <p className="text-center" style={{ fontWeight: '500' }}>Sáng</p>
                                             <div className="medicine-session morning"></div>
                                             <div>
                                                 {medicineBySession["1"].map(med => (
                                                     <div key={med.id}>
-                                                        <p className='mt-1' style={{fontWeight: '500'}}>{med.name}</p>
-                                                        <p className="gray-p" style={{fontWeight: '500'}}>{med.dose}</p>
+                                                        <p className='mt-1' style={{ fontWeight: '500' }}>{med.name}</p>
+                                                        <p className="gray-p" style={{ fontWeight: '500' }}>{med.dose}</p>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     }
-                                    
+
                                     {/* Buổi trưa */}
-                                    {medicineBySession["2"].length > 0  && 
+                                    {medicineBySession["2"].length > 0 &&
                                         <div className="inpatient-pres-detail medicine-sess m-0 me-2">
-                                            <p className="text-center" style={{fontWeight: '500'}}>Trưa</p>
+                                            <p className="text-center" style={{ fontWeight: '500' }}>Trưa</p>
                                             <div className="medicine-session lunch"></div>
                                             <div>
                                                 {medicineBySession["2"].map(med => (
                                                     <div key={med.id}>
-                                                        <p className='mt-1' style={{fontWeight: '500'}}>{med.name}</p>
-                                                        <p className="gray-p" style={{fontWeight: '500'}}>{med.dose}</p>
+                                                        <p className='mt-1' style={{ fontWeight: '500' }}>{med.name}</p>
+                                                        <p className="gray-p" style={{ fontWeight: '500' }}>{med.dose}</p>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     }
-                                    
+
                                     {/* Buổi chiều */}
                                     {medicineBySession["3"].length > 0 &&
                                         <div className="inpatient-pres-detail medicine-sess m-0 me-2">
-                                            <p className="text-center" style={{fontWeight: '500'}}>Chiều</p>
+                                            <p className="text-center" style={{ fontWeight: '500' }}>Chiều</p>
                                             <div className="medicine-session afternoon"></div>
                                             <div>
                                                 {medicineBySession["3"].map(med => (
                                                     <div key={med.id}>
-                                                        <p className='mt-1' style={{fontWeight: '500'}}>{med.name}</p>
-                                                        <p className="gray-p" style={{fontWeight: '500'}}>{med.dose}</p>
+                                                        <p className='mt-1' style={{ fontWeight: '500' }}>{med.name}</p>
+                                                        <p className="gray-p" style={{ fontWeight: '500' }}>{med.dose}</p>
                                                     </div>
                                                 ))}
                                             </div>
@@ -207,13 +207,13 @@ const InpatientPres = ({prescriptionData, examinationId, refresh, isEditMode}) =
                                     {/* Buổi tối */}
                                     {medicineBySession["4"].length > 0 &&
                                         <div className="inpatient-pres-detail medicine-sess m-0">
-                                            <p className="text-center" style={{fontWeight: '500'}}>Tối</p>
+                                            <p className="text-center" style={{ fontWeight: '500' }}>Tối</p>
                                             <div className="medicine-session night"></div>
                                             <div>
                                                 {medicineBySession["4"].map(med => (
                                                     <div key={med.id}>
-                                                        <p className='mt-1' style={{fontWeight: '500'}}>{med.name}</p>
-                                                        <p className="gray-p" style={{fontWeight: '500'}}>{med.dose}</p>
+                                                        <p className='mt-1' style={{ fontWeight: '500' }}>{med.name}</p>
+                                                        <p className="gray-p" style={{ fontWeight: '500' }}>{med.dose}</p>
                                                     </div>
                                                 ))}
                                             </div>

@@ -15,7 +15,7 @@ const FreeTextInputWithSuggestions = ({
   const [inputValue, setInputValue] = useState(value || '');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredOptions, setFilteredOptions] = useState([]);
-  const inputRef = useRef(null);
+  const inputref = useRef(null);
   const dropdownRef = useRef(null);
 
   // Hàm để lấy text từ option (xử lý cả trường hợp option là object hoặc chuỗi)
@@ -63,7 +63,7 @@ const FreeTextInputWithSuggestions = ({
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
-          inputRef.current && !inputRef.current.contains(event.target)) {
+          inputref.current && !inputref.current.contains(event.target)) {
         setShowSuggestions(false);
       }
     };
@@ -95,7 +95,7 @@ const FreeTextInputWithSuggestions = ({
       onChange(optionValueKey ? optionValue : optionText, option);
     }
     setShowSuggestions(false);
-    inputRef.current.focus();
+    inputref.current.focus();
   };
 
   const handleInputFocus = () => {
@@ -111,7 +111,7 @@ const FreeTextInputWithSuggestions = ({
   return (
     <div className="relative w-full">
       <input
-        ref={inputRef}
+        ref={inputref}
         type="text"
         value={inputValue}
         onChange={handleInputChange}

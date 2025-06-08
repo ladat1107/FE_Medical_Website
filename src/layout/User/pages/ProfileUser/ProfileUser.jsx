@@ -17,7 +17,6 @@ const ProfileUser = () => {
         } else {
             document.body.style.overflow = 'unset';
         }
-
         return () => {
             document.body.style.overflow = 'unset';
         };
@@ -52,6 +51,12 @@ const ProfileUser = () => {
                     >
                         Lịch sử khám bệnh
                     </button>
+                    <button
+                        className="bg-gradient-primary text-white py-2 px-4 rounded-lg mr-2 mb-2 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => { emitter.emit(EMIT.EVENT_PROFILE.key, EMIT.EVENT_PROFILE.insurance) }}
+                    >
+                        Bảo hiểm y tế
+                    </button>
                 </div>
                 <Profile />
             </Container>
@@ -59,6 +64,7 @@ const ProfileUser = () => {
                 <HistoryModal
                     isModalOpen={isModalOpen}
                     handleCancel={handleCancel}
+                    userId = {user?.id || ''}
                 />
             </div>
         </div>

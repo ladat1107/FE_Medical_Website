@@ -1,4 +1,4 @@
-import { getConversationsForStaff } from "@/services/doctorService"
+import { getConversationFromSearch, getConversationsForStaff, searchConversation } from "@/services/doctorService"
 import userService from "@/services/userService"
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query"
 
@@ -39,3 +39,16 @@ export const useGetNumberMessageUnread = (enabled) => {
     });
 };
 
+export const useSearchConversation = (search) => {
+    return useQuery({
+        queryKey: ['searchConversation', search],
+        queryFn: () => searchConversation(search),
+        enabled: search !== "",
+    })
+}
+
+export const useGetConversationFromSearch = () => {
+    return useMutation({
+        mutationFn: (conversationId) => getConversationFromSearch(conversationId),
+    })
+}

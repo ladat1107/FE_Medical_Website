@@ -7,6 +7,10 @@
   box-sizing: border-box;
 }
 
+.custom-confirm-modal .ant-modal-content {
+  padding: 15px !important;
+}
+
 p {
   margin: 0 !important;
 }

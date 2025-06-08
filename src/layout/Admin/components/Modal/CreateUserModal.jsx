@@ -126,12 +126,9 @@ const CreateUser = (props) => {
                     <Form
                         form={form}
                         name="insertUser"
-                        labelCol={{
-                            span: 24,
-                        }}
-                        wrapperCol={{
-                            span: 24,
-                        }}
+                        className='p-3'
+                        labelCol={{ span: 24, }}
+                        wrapperCol={{ span: 24, }}
                         validateTrigger="onBlur"
                         initialValues={{}}
                         autoComplete="on"

@@ -13,7 +13,7 @@ import { generateUniqueKey } from "@/utils/UniqueKey";
 const SendNoti = ({ dataUser }) => {
 
     const textAreaRef = useRef(null);
-    const fileInputRef = useRef(null);
+    const fileinputref = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [files, setFiles] = useState([]);
@@ -115,8 +115,8 @@ const SendNoti = ({ dataUser }) => {
             }
 
             // Reset the file input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
+            if (fileinputref.current) {
+                fileinputref.current.value = "";
             }
 
             setIsUploading(false);
@@ -137,8 +137,8 @@ const SendNoti = ({ dataUser }) => {
     };
 
     const handleUploadClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
+        if (fileinputref.current) {
+            fileinputref.current.click();
         }
     };
 
@@ -219,7 +219,7 @@ const SendNoti = ({ dataUser }) => {
         if (isSending) {
             return;
         }
-
+        
         setIsSending(true);
 
         try {
@@ -370,7 +370,7 @@ const SendNoti = ({ dataUser }) => {
                                 </button>
                                 <input
                                     type="file"
-                                    ref={fileInputRef}
+                                    ref={fileinputref}
                                     onChange={handleFileSelect}
                                     style={{ display: 'none' }}
                                     multiple

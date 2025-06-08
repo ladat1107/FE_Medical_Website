@@ -23,7 +23,7 @@ export const NotificationProvider = ({ children }) => {
     const fetchNotifications = async () => {
       try {
         const response = await getAllNotification();
-        console.log('DB Notifications response:', response);
+
         if (response && response.DT) {
           const notifications = response.DT.notifications.rows || [];
           setDbNotifications(notifications);
@@ -49,7 +49,6 @@ export const NotificationProvider = ({ children }) => {
   // Socket event handling
   useEffect(() => {
     const handleNewNotification = (data) => {
-      console.log('New socket notification received:', data);
 
       const notificationExists = socketNotifications.some(
         noti => noti.notiCode === data.notiCode
@@ -76,7 +75,6 @@ export const NotificationProvider = ({ children }) => {
 
     const handleConnect = () => {
       setIsConnected(true);
-      console.log('Socket connected');
     };
 
     const handleDisconnect = () => {
@@ -111,7 +109,6 @@ export const NotificationProvider = ({ children }) => {
   // Đánh dấu một thông báo cụ thể là đã đọc
   const markNotificationAsRead = async (notificationId) => {
     try {
-      console.log('Marking notification as read:', notificationId);
 
       // Cập nhật trạng thái trong state
       setSocketNotifications(prev =>
@@ -141,7 +138,6 @@ export const NotificationProvider = ({ children }) => {
   // Trong NotificationContext.js
   const markAllNotificationsAsRead = async () => {
     try {
-      console.log('Marking all notifications as read');
 
       // Call API to mark all as read
       await markAllRead();
