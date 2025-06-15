@@ -1,17 +1,19 @@
 import { handleLogoutService } from '@/services/adminService';
-import { logout } from '../authenSlice';
+import { logout, setIsLogout } from '../authenSlice';
 import { PATHS } from '@/constant/path';
 
 // Hàm logout chung
-export const handleLogout = () => async (dispatch) => {
+export const handleLogout = (navigate) => async (dispatch) => {
     try {
-        // Gọi API để xóa refresh token trong cookie
         const response = await handleLogoutService();
         if (response?.EC === 0) {
-            dispatch(logout())
-            window.location.href = PATHS.HOME.LOGIN;
+            dispatch(logout());
+            navigate(PATHS.HOME.LOGIN); // 👉 không reload trang
+
+            setTimeout(() => {
+                dispatch(setIsLogout(false));
+            }, 500);
         }
-        
     } catch (error) {
         console.error('Error during logout:', error);
     }

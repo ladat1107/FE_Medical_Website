@@ -16,8 +16,6 @@ import {
   Weight,
   Ruler,
   Droplet,
-  Printer,
-  Edit,
   CheckCircle,
   XCircle,
   Clock,
@@ -33,7 +31,7 @@ import {
   CheckCircle2,
   EyeOff,
 } from "lucide-react"
-import { MEDICAL_TREATMENT_TIER, PAYMENT_METHOD, PAYMENT_STATUS, SPECIAL_EXAMINATION, STATUS_BE } from "@/constant/value"
+import { COVERED, MEDICAL_TREATMENT_TIER, PAYMENT_METHOD, PAYMENT_STATUS, SPECIAL_EXAMINATION, STATUS_BE } from "@/constant/value"
 import HistoryModal from "@/layout/Doctor/components/HistoryModal/HistoryModal"
 import { useEffect, useState } from "react"
 import { formatDate } from "@/utils/formatDate"
@@ -120,13 +118,15 @@ const formatSpecialExamination = (specialExamination) => {
   return ArraySpecialExamination.find((item) => item.value.includes(specialExamination))?.label || "Không xác định"
 }
 
-
+const getCoveredValue = (level) => {
+  return COVERED.hasOwnProperty(level) ? +COVERED[level] * 100 : 0;
+};
 const ExaminationDrawer = ({ open, onClose, examinationId }) => {
   const { data: examination, isLoading } = useGetExaminationById(examinationId)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [statusExamination, setStatusExamination] = useState("default")
   const examinationData = examination?.DT || {}
-  const percentInsuranceCoverage = examinationData?.insuranceCoverage === 1 ? 100 : examinationData?.insuranceCoverage === 2 ? 95 : examinationData?.insuranceCoverage === 3 ? 80 : examinationData?.insuranceCoverage === 4 ? 100 : 0
+  // const percentInsuranceCoverage = examinationData?.insuranceCoverage === 1 ? 100 : examinationData?.insuranceCoverage === 2 ? 95 : examinationData?.insuranceCoverage === 3 ? 80 : examinationData?.insuranceCoverage === 4 ? 100 : 0
   const [totalPricePrescription, setTotalPricePrescription] = useState(0)
   const [insuranceCoveredPrescription, setInsuranceCoveredPrescription] = useState(0)
   const [coveredPricePrescription, setCoveredPricePrescription] = useState(0)
@@ -189,9 +189,6 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
       </div>
 
       <div className="flex flex-wrap gap-2 mt-4">
-        <Button icon={<Printer size={16} />} className="flex items-center">
-          In đơn khám
-        </Button>
         <Button type="primary" style={{ backgroundColor: "#00B5F1" }} className="flex items-center" onClick={() => setIsModalOpen(true)}>
           Xem lịch sử
         </Button>
@@ -216,9 +213,6 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
           <div className="flex justify-end">
             <Button onClick={onClose} className="mr-2">
               Đóng
-            </Button>
-            <Button type="primary" style={{ backgroundColor: "#00B5F1" }} icon={<Printer size={16} />}>
-              In đơn khám
             </Button>
           </div>
         }
@@ -283,7 +277,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                       <div className="flex justify-between">
                         <Text type="secondary">Mức hưởng BHYT:</Text>
                         <Text>
-                          {percentInsuranceCoverage}%
+                          {getCoveredValue(examinationData?.insuranceCoverage || 0)}%
                         </Text>
                       </div>
                       <div className="flex justify-between">
@@ -371,7 +365,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                       </div>
                     </div>
                   </Col>
-                  {examinationData.examinationVitalSignData[0].fetalWeight && (
+                  {/* {examinationData.examinationVitalSignData[0].fetalWeight && (
                     <Col xs={12} sm={8} md={6} lg={4}>
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
                         <Weight className="text-primary-tw mx-auto mb-1" size={20} />
@@ -381,7 +375,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                         </div>
                       </div>
                     </Col>
-                  )}
+                  )} */}
                 </Row>
               ) : (
                 <Empty description="Không có dữ liệu sinh hiệu" image={Empty.PRESENTED_IMAGE_SIMPLE} />
@@ -566,7 +560,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                     />
                     <div className="mt-2 text-xs text-gray-500">
                       {examinationData?.insuranceCoverage
-                        ? `Mức hưởng: ${percentInsuranceCoverage}%`
+                        ? `Mức hưởng: ${getCoveredValue(examination?.insuranceCoverage || 0)}%`
                         : "Không có BHYT"}
                     </div>
                   </Card>

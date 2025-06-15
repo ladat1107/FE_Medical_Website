@@ -1,6 +1,7 @@
 import { useMobile } from "@/hooks/useMobile"
 import { MapPin, Globe, Mail, Phone, Facebook, Twitter, Instagram, Youtube } from "lucide-react"
 import FooterSectionCollapse from "./FooterSectionCollapse";
+import { PATHS } from "@/constant/path";
 
 const Footer = () => {
   const isMobile = useMobile();
@@ -71,7 +72,7 @@ const Footer = () => {
                   <Instagram className="w-5 h-5" />
                 </a>
                 <a
-                  href="#"
+                  href={PATHS.SYSTEM.GET_NUMBER}
                   className="w-9 h-9 rounded-full bg-cyan-500 flex items-center justify-center text-white hover:bg-cyan-600 transition-colors"
                 >
                   <Youtube className="w-5 h-5" />

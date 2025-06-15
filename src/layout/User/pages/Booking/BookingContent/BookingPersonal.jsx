@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faLeftLong } from "@fortawesome/free-solid-svg-icons"
-import { Col, DatePicker, Form, Input, message, Row, Select } from "antd"
+import { Col, DatePicker, Form, Input, Row, Select } from "antd"
 import dayjs from "dayjs"
 import { GENDER, SPECIAL_EXAMINATION } from "@/constant/value"
 import { apiService } from "@/services/apiService"
@@ -19,7 +19,6 @@ const BookingPersonal = (props) => {
     let [province, setProvince] = useState([]);
     let [listFolk, setListFolk] = useState([]);
     let [showOldParaclinicalModal, setShowOldParaclinicalModal] = useState(false);
-    let [showInsuaranceModal, setShowInsuaranceModal] = useState(false);
     let [oldParaclinical, setOldParaclinical] = useState(null);
     let [currentProvinceId, setCurrentProvinceId] = useState(+currentResidentData[3] || null);
     let [currentDistrictId, setCurrentDistrictId] = useState(+currentResidentData[2] || null);

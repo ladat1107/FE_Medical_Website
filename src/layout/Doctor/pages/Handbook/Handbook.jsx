@@ -29,8 +29,8 @@ const Handbook = () => {
         data: dataHandbook,
         loading: listHandbookLoading,
         execute: fetchHandbooks,
-    } = useMutation((query) => getAllHandbooks(currentPage, rowsPerPage, searchDebounce,filter.join(','), status.value))
-    
+    } = useMutation((query) => getAllHandbooks(currentPage, rowsPerPage, searchDebounce, filter.join(','), status.value))
+
     useEffect(() => {
         if (dataHandbook && dataHandbook.EC === 0) {
             let handbook = dataHandbook.DT.handBooks;
@@ -166,6 +166,7 @@ const Handbook = () => {
                                 handbookId={idUpdate}
                                 allTags={allTags}
                                 setAllTags={(tags) => setAllTags(tags)}
+                                setAction={() => setAction(1)}
                                 refresh={refresh}
                             // key={idUpdate ? idUpdate + " " + Date.now() : "modal-closed"}
                             />

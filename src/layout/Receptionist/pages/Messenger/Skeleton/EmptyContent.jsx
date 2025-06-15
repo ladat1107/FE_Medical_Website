@@ -4,7 +4,7 @@ const EmptyContent = () => {
         <div className="flex items-center justify-center w-full bg-secondary-color p-[8px]">
             <div className="text-center w-full p-10 bg-white rounded-2xl shadow-lg">
                 <div className="mb-8 text-primary-color flex flex-col items-center">
-                    <img className="mt-5 animate-float shadow-lg" src="https://res.cloudinary.com/degcwwwii/image/upload/v1733207843/logo/rr7ytbrcco0hgilykrmo.png" alt="Hoa Sen Hospital" style={{ width: '150px', marginBottom: '10px', borderRadius: '50%' }} />
+                    <img className="mt-5 animate-float shadow-lg" src="https://res.cloudinary.com/degcwwwii/image/upload/v1749983092/logoHoaSen_hrngsh.png" alt="Hoa Sen Hospital" style={{ width: '150px', marginBottom: '10px', borderRadius: '50%' }} />
                 </div>
                 <h2 className="text-primary-color text-2xl font-semibold mb-4">Chào mừng đến với Bệnh viện Hoa Sen</h2>
                 <p className="text-gray-600 text-base mb-10">Chọn một cuộc trò chuyện để bắt đầu nhắn tin với bệnh nhân</p>

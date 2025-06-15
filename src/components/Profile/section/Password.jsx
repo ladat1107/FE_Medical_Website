@@ -1,13 +1,17 @@
+import { logout } from "@/redux/authenSlice";
 import { updateProfilePassword } from "@/services/adminService";
-import { Button,  Form, Input, message } from "antd";
+import { Button, Form, Input, message } from "antd";
+import { useDispatch } from "react-redux";
 const Password = (props) => {
-    let [form] = Form.useForm();
-    let handleChangePass = () => {
+    const [form] = Form.useForm();
+    const dispatch = useDispatch();
+    const handleChangePass = () => {
         form.validateFields().then(async (values) => {
             let response = await updateProfilePassword({ ...values, id: props.data });
             if (response?.EC === 0) {
-                message.success(response?.EM || "Cập nhật thành công!");
                 form.resetFields();
+                message.success("Đổi mật khẩu thành công. Vui lòng đăng nhập lại!");
+                dispatch(logout())
             } else {
                 message.error(response?.EM || "Cập nhật thất bại!");
             }
@@ -15,7 +19,7 @@ const Password = (props) => {
             console.log(error);
         })
     }
-    let handleCancel = () => {
+    const handleCancel = () => {
         form.resetFields();
     }
     return (

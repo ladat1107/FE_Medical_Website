@@ -147,6 +147,15 @@ const Examination = () => {
         //message.success('Đơn thuốc đã được sao chép. Chuyển đến tab đơn thuốc.');
     };
 
+    const handleChangeEditMode = () => {
+        setIsEditMode(!isEditMode);
+        if (isEditMode) {
+            message.info("Chế độ chỉnh sửa đã được TẮT.");
+        } else {
+            message.info("Chế độ chỉnh sửa đã được BẬT.");
+        }
+    }
+
     return (
         <>
             <div className="container">
@@ -158,7 +167,7 @@ const Examination = () => {
                     ) : (
                         <>
                             <div className="exam-content">
-                                <div className="d-flex justify-content-between ">
+                                <div className="d-flex justify-content-between">
                                     <p className="exam-header">Thông tin bệnh nhân</p>
                                     <div className="d-flex justify-content-end gap-2">
                                         {examinationData?.oldParaclinical &&
@@ -168,7 +177,7 @@ const Examination = () => {
                                         }
                                         <button
                                             onClick={showModal}
-                                            className='history-button'>
+                                            className='history-button bg-gradient-primary'>
                                             Lịch sử khám bệnh
                                         </button>
                                     </div>
@@ -236,7 +245,13 @@ const Examination = () => {
                                 </div>
                             </div>
                             <div className="exam-content">
-                                <p className="exam-header">Thông tin khám bệnh</p>
+                                <div className="d-flex justify-content-between">
+                                    <p className="exam-header">Thông tin khám bệnh</p>
+                                    {dataExamination.DT.status === 7 && (
+                                        <i className={`fa-solid fa-gear fa-xl cursor-pointer hover:scale-110 hover:text-primary-tw-light duration-100 translate-all ${isEditMode ? 'text-primary-tw-light' : 'text-gray-500'}`}
+                                            onClick={handleChangeEditMode}></i>      
+                                    )}                          
+                                </div>
                                 <div className="radio-inputs row">
                                     <div className="col-6 col-lg-2 d-flex justify-content-center">
                                         <label className="radio">

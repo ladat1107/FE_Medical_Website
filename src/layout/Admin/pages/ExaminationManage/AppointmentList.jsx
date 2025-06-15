@@ -2,21 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { Table, Tag, Button, Input, Space, Select, DatePicker, Modal, Tooltip, message } from "antd"
-import { EyeOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons"
+import { EyeOutlined, DeleteOutlined, SearchOutlined, PlusOutlined } from "@ant-design/icons"
 import ExaminationDrawer from "./ExaminationDetail"
-import { STATUS_BE, TIMESLOTS } from "@/constant/value"
+import { STATUS_BE, TABLE, TIMESLOTS } from "@/constant/value"
 import dayjs from "dayjs"
+import CreateAppointmentModal from "../../components/Modal/CreateAppointmentModal"
+import DeleteModal from "../../components/Modal/DeleteModal"
 
 const { RangePicker } = DatePicker
 const { Option } = Select
 
-const AppointmentList = ({ appointmentList }) => {
+const AppointmentList = ({ appointmentList, refetchAppointment, loading }) => {
   const [appointments, setAppointments] = useState([])
-  const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [dateRange, setDateRange] = useState(null)
-  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [isShowCreateModal, setIsShowCreateModal] = useState(false)
+  const [appointmentDelete, setAppointmentDelete] = useState(null)
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false)
   const [currentAppointment, setCurrentAppointment] = useState(null)
   const [pagination, setPagination] = useState({
@@ -63,7 +65,13 @@ const AppointmentList = ({ appointmentList }) => {
 
   }, [appointmentList, pagination.current, pagination.pageSize, filterStatus, dateRange, searchText])
 
-
+  useEffect(() => {
+    if (isShowCreateModal) {
+      document.body.style.overflow = 'hidden'; // ❌ khóa scroll
+    } else {
+      document.body.style.overflow = 'auto';   // ✅ cho scroll lại khi đóng
+    }
+  }, [isShowCreateModal]);
 
   const handleTableChange = (pagination) => {
     setPagination(pagination)
@@ -84,40 +92,9 @@ const AppointmentList = ({ appointmentList }) => {
     setPagination({ ...pagination, current: 1 })
   }
 
-  const showModal = (record = null) => {
-    const initialValues = record ? { ...record, is_appointment: 1 } : { is_appointment: 1 }
-    setCurrentAppointment(initialValues)
-    setIsModalVisible(true)
-  }
-
   const showDetailModal = (record) => {
     setCurrentAppointment(record)
     setIsDetailModalVisible(true)
-  }
-
-  const handleModalCancel = () => {
-    setIsModalVisible(false)
-    setCurrentAppointment(null)
-  }
-
-  const handleDetailModalCancel = () => {
-    setIsDetailModalVisible(false)
-    setCurrentAppointment(null)
-  }
-
-  const handleDelete = (id) => {
-    Modal.confirm({
-      title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa lịch hẹn này không?",
-      okText: "Xóa",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk() {
-        // Delete logic here
-        message.success("Xóa lịch hẹn thành công")
-        fetchAppointments()
-      },
-    })
   }
 
   const getTimeSlot = (timeCode) => {
@@ -137,7 +114,7 @@ const AppointmentList = ({ appointmentList }) => {
       dataIndex: "patientName",
       key: "patientName",
       render: (text, record) =>
-        <div className="cursor-pointer" onClick={() => showDetailModal(record)}>{record?.userExaminationData?.firstName || ""} {record?.userExaminationData?.lastName || ""}</div>,
+        <div className="cursor-pointer" onClick={() => showDetailModal(record)}>{record?.userExaminationData?.lastName || ""} {record?.userExaminationData?.firstName || ""}</div>,
     },
     {
       title: "Thời gian",
@@ -178,7 +155,6 @@ const AppointmentList = ({ appointmentList }) => {
       render: (status, record) => {
         let color = "blue"
         let text = "Không xác định"
-        console.log(record)
         if ((!record?.paymentData || record?.paymentData?.status === 1) && status !== STATUS_BE.INACTIVE) {
           color = "orange"
           text = "Chưa thanh toán"
@@ -210,7 +186,7 @@ const AppointmentList = ({ appointmentList }) => {
             <Button
               type="text"
               icon={<DeleteOutlined style={{ color: "#ff4d4f" }} />}
-              onClick={() => handleDelete(record.id)}
+              onClick={() => { setAppointmentDelete(record) }}
             />
           </Tooltip>
         </Space>
@@ -236,17 +212,16 @@ const AppointmentList = ({ appointmentList }) => {
             <Option value="cancel">Hủy</Option>
           </Select>
           <RangePicker allowClear={true} onChange={handleDateRangeChange} format="DD/MM/YYYY" />
-
         </div>
         <div>
-          {/* <Button
+          <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => showModal()}
+            onClick={() => setIsShowCreateModal(true)}
             style={{ backgroundColor: "#00B5F1" }}
           >
             Tạo lịch hẹn mới
-          </Button> */}
+          </Button>
         </div>
       </div>
 
@@ -265,7 +240,22 @@ const AppointmentList = ({ appointmentList }) => {
         <ExaminationDrawer open={isDetailModalVisible}
           onClose={() => setIsDetailModalVisible(false)}
           examinationId={currentAppointment.id} />}
+      <CreateAppointmentModal
+        visible={isShowCreateModal}
+        onSubmit={refetchAppointment}
+        onCancel={() => setIsShowCreateModal(false)}
+      />
+      {appointmentDelete &&
+        <DeleteModal
+          show={appointmentDelete?.id ? true : false}
+          isShow={() => setAppointmentDelete(null)}
+          data={appointmentDelete}
+          table={TABLE.EXAMINATION}
+          refresh={refetchAppointment}
+        />
+      }
     </div>
+
   )
 }
 

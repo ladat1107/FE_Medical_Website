@@ -6,15 +6,20 @@ import { checkOutExamination, checkOutParaclinical, updateExamination, updateLis
 import './PayModal.scss';
 import { PAYMENT_METHOD, STATUS_BE } from '@/constant/value';
 import { insuranceCovered } from '@/utils/coveredPrice';
+import { PATHS } from '@/constant/path';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPrintCheckout } from '@/redux/printCheckoutSlice';
 
 const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData }) => {
+    const { user } = useSelector(state => state.authen);
+    const dispatch = useDispatch();
     const [paymentMethod, setPaymentMethod] = useState(PAYMENT_METHOD.CASH);
     const [insurance, setInsurance] = useState('');
     const [insuranceCoverage, setInsuranceCoverage] = useState(null);
     const [special, setSpecial] = useState('normal');
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({
-        infouser: { firstName: '', lastName: '', cid: '' },
+        infouser: { firstName: '', lastName: '', cid: '', dob: '', gender: '' },
         infostaff: { firstName: '', lastName: '', position: '' },
         price: 0,
         description: '',
@@ -36,6 +41,8 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                     firstName: patientData?.userExaminationData?.firstName,
                     lastName: patientData?.userExaminationData?.lastName,
                     cid: patientData?.userExaminationData?.cid,
+                    dob: patientData?.userExaminationData?.dob,
+                    gender: patientData?.userExaminationData?.gender,
                 },
                 infostaff: {
                     firstName: patientData?.examinationStaffData?.staffUserData?.firstName,
@@ -56,12 +63,9 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                     firstName: patientData?.userExaminationData?.firstName,
                     lastName: patientData?.userExaminationData?.lastName,
                     cid: patientData?.userExaminationData?.cid,
+                    dob: patientData?.userExaminationData?.dob,
+                    gender: patientData?.userExaminationData?.gender,
                 },
-                // infostaff: {
-                //     firstName: patientData?.doctorParaclinicalData?.staffUserData?.firstName,
-                //     lastName: patientData?.doctorParaclinicalData?.staffUserData?.lastName,
-                //     position: patientData?.doctorParaclinicalData?.position,
-                // },
                 price: patientData?.totalParaclinicalPrice,
                 paraclinicalItems: patientData?.paraclinicalItems,
                 isWrongTreatment: patientData?.isWrongTreatment,
@@ -162,6 +166,35 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
     const resetForm = () => {
         setInsurance('');
         setInsuranceCoverage(null);
+    };
+
+    const handlePrint = () => {
+        let _patientData = {
+            name: (data.infouser.lastName || '') + ' ' + (data.infouser.firstName || ''),
+            cid: data.infouser.cid,
+            insurance: insurance,
+            dob: data.infouser.dob,
+            gender: data.infouser.gender,
+        };
+        let _staffData = (user?.lastName || '') + ' ' + (user?.firstName || '');
+        let _tableData = type === 'paraclinical' ? data.paraclinicalItems?.map(item => ({
+            room: item?.roomInfo?.name,
+            service: item?.paracName,
+            doctor: item?.doctorInfo?.doctorName,
+            price: insurance ? item?.price - insuranceCovered(+item?.price, +insuranceCoverage) : item?.price,
+        })) : [{
+            room: patientData?.roomName || '',
+            service: 'Khám bệnh',
+            doctor: data.infostaff.lastName + ' ' + data.infostaff.firstName,
+            price: insurance ? data.price - insuranceCovered(+data.price, +insuranceCoverage) : data.price,
+        }];
+        dispatch(setPrintCheckout({
+            examId: examId,
+            patientData: _patientData,
+            staffData: _staffData,
+            tableData: _tableData,
+        }));
+        window.open(PATHS.SYSTEM.PRINT_CHECKOUT, '_blank');
     };
 
     const SpecialText = ({ special }) => {
@@ -373,6 +406,7 @@ const PayModal = ({ isOpen, onClose, onPaySusscess, examId, type, patientData })
                 </div>
                 <div className='payment-footer mt-4'>
                     <button className="close-user-btn" onClick={onClose}>Đóng</button>
+                    <button className="close-user-btn" onClick={handlePrint}>In hóa đơn</button>
                     {+patientData?.status === STATUS_BE.PAID ? <></>
                         :
                         <button className='payment-btn' onClick={handlePay}>

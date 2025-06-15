@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import BookingDoctor from "./BookingDoctor";
 import BookingSpecialty from "./BookingSpecialty";
 import BookingCalendar from "./BookingCalendar";

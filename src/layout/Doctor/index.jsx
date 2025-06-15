@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from 'antd';
 import './Doctor.scss';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ROLE } from '@/constant/role';
 import DoctorHeader from './components/DoctorHeader';
 import DoctorFooter from './components/DoctorFooter';
@@ -17,11 +17,13 @@ const DoctorLayout = () => {
     let { user } = useSelector((state) => state.authen);
     let dispatch = useDispatch();
     const location = useLocation();
+    const navigate = useNavigate();
+
     useEffect(() => {
         if (!user || user.role === ROLE.ADMIN || user.role === ROLE.PATIENT) {
-            dispatch(handleLogout());
+            dispatch(handleLogout(navigate));
         }
-    }, [location]);
+    }, [location, user.role]);
 
     // Cập nhật kích thước màn hình khi thay đổi
     useEffect(() => {

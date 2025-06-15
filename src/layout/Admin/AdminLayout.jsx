@@ -13,15 +13,15 @@ const { Content } = Layout;
 const AdminLayout = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
-    let navigate = useNavigate();
     let { user } = useSelector((state) => state.authen);
     let dispatch = useDispatch();
     const location = useLocation();
+    const navigate = useNavigate();
     useEffect(() => {
         if (user.role !== ROLE.ADMIN) {  // Clears the localStorage (optional)
-            dispatch(handleLogout());
+            dispatch(handleLogout(navigate));
         }
-    }, [location, user.role, dispatch, navigate]);
+    }, [location, user.role]);
     // Cập nhật kích thước màn hình khi thay đổi
     useEffect(() => {
         const handleResize = () => {

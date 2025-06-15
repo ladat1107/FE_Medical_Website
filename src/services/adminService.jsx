@@ -15,9 +15,6 @@ export const handleLogoutService = () => {
 export const handleForgotPassword = (data) => {
     return axios.post(`/api/forgotPassword`, data)
 }
-export const logoutUser = () => {
-    return axios.post(`/api/handleLogout`)
-}
 // USER MANAGEMENT
 export const createUser = (data) => {
     return axios.post(`/api/createUser`, data)
@@ -199,5 +196,12 @@ export const getExaminationByIdAdmin = (id) => {
 // PAYMENT MANAGEMENT
 export const getPaymentAdmin = (query = null) => {
     return axios.get(`/api/admin/getPaymentAdmin`, { params: query })
+}
+
+export const deleteExamination = (data) => {
+    return axios.delete(`/api/admin/deleteExamination`, { data: { id: data.id } })
+}
+export const blockExamination = (data) => {
+    return axios.put(`/api/admin/blockExamination`, data)
 }
 

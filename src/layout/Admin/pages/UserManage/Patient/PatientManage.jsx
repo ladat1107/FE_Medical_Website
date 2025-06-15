@@ -35,15 +35,13 @@ const PatientManage = () => {
     let { data: dataUser, loading: loadingUser, execute: fetchUsers, } = useMutation(() => getUser(currentPage, rowsPerPage, searchDebounce, arr))
 
     useEffect(() => {
-        if (dataUser && dataUser.DT && dataUser.DT.rows && dataUser.DT.count) {
-            let _listUser = [...dataUser.DT.rows];
-            for (let i = 0; i < _listUser.length; i++) {
-                _listUser[i].checked = false;
-            }
+        if (dataUser?.EC === 0) {
+            let _listUser = dataUser?.DT?.rows.map(item => ({ ...item })) || [];
             setListUser(_listUser);
-            setTotalPage(dataUser.DT.count / rowsPerPage);
+            setTotalPage(dataUser?.DT?.count / rowsPerPage);
         }
     }, [dataUser])
+
     useEffect(() => {
         if (obUpdate) {
             setShowCreateUserModal(true)
@@ -155,7 +153,7 @@ const PatientManage = () => {
                                                                 <div >{item?.id || "_"}</div>
                                                             </td>
                                                             <th scope="row" className="ps-2 py-3 min-content-width g-0" onClick={() => handelPatientClick(item)}>
-                                                                <img className="image" src={item.avatar || LINK.AVATAR_NULL} alt="Jese image" />
+                                                                <img className="image" src={item?.avatar || LINK.AVATAR_NULL} alt="Jese image" />
                                                                 <div className="ps-2 email ">
                                                                     <div className="fw-semibold">{item.lastName + " " + item.firstName}</div>
                                                                     <div className="fw-normal">{item.email}</div>

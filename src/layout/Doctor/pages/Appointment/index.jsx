@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PatientItem from "@/layout/Receptionist/components/PatientItem/PatientItem";
 import dayjs from "dayjs";
 import { setSchedule } from "@/redux/scheduleSlice";
+import socket from '@/Socket/socket'
 
 const Appointment = () => {
     const navigate = useNavigate();
@@ -82,6 +83,17 @@ const Appointment = () => {
         }
     }, [dataExaminations]);
 
+    useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
     // #endregion
 
     return (
@@ -146,7 +158,7 @@ const Appointment = () => {
                                 />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                         )}

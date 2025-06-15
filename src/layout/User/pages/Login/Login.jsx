@@ -32,6 +32,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(rememberLogins.length > 0 ? true : false);
     const [isLoading, setIsLoading] = useState(false);
     const { user } = useSelector((state) => state.authen);
+
     useEffect(() => {
         let confirmToken = queryParams.get('confirm');
         if (confirmToken !== null) {
@@ -45,14 +46,33 @@ const Login = () => {
             };
             fetchConfirmAsync();
         }
+
         let loginGoogle = queryParams.get('google');
         if (loginGoogle !== null) {
-            let dataLogin = JSON.parse(loginGoogle);
-            dispatch(login(dataLogin));
+            try {
+                let dataLogin = JSON.parse(loginGoogle);
+                if (dataLogin && dataLogin.user && dataLogin.accessToken) {
+                    dispatch(login(dataLogin));
+                } else {
+                    message.error('Đăng nhập Google thất bại - Dữ liệu không hợp lệ');
+                }
+            } catch (error) {
+                console.error('Error parsing Google login data:', error);
+                message.error('Đăng nhập Google thất bại - Lỗi xử lý dữ liệu');
+            }
         }
+
+        // Xử lý các error từ Google login
+        let errorParam = queryParams.get('error');
+        if (errorParam === 'google_login_failed') {
+            message.error('Đăng nhập Google thất bại. Vui lòng thử lại!');
+        } else if (errorParam === 'server_error') {
+            message.error('Có lỗi xảy ra từ server. Vui lòng thử lại sau!');
+        }
+
         setLoading(false);
     }, []);
-    
+
     useEffect(() => {
         if (user && user?.role) {
             navigate(urlAuthorization(user?.role));
@@ -110,7 +130,7 @@ const Login = () => {
                             </span>
                             <div
                                 className="w-12 h-12 bg-cover bg-center bg-no-repeat rounded-full cursor-pointer mb-[-10px]"
-                                style={{ backgroundImage: "url('https://res.cloudinary.com/degcwwwii/image/upload/v1733207843/logo/rr7ytbrcco0hgilykrmo.png')" }}
+                                style={{ backgroundImage: "url('https://res.cloudinary.com/degcwwwii/image/upload/v1749983092/logoHoaSen_hrngsh.png')" }}
                                 onClick={() => navigate(PATHS.HOME.HOMEPAGE)}
                             ></div>
                             <h2 className="text-2xl font-bold text-primary-tw text-center my-6 tracking-wider"

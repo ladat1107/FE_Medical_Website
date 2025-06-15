@@ -57,7 +57,6 @@ const TableRevenue = ({ tableRevenue, isLoading }) => {
             item.status = item.status
             item.type = type
         })
-        console.log(paymentFilter)
         if (filter.type) {
             paymentFilter = paymentFilter.filter(item => item.type.id === filter.type)
         }

@@ -35,7 +35,7 @@ const ExamInfo = ({ examData, refresh, comorbiditiesOptions, isEditMode }) => {
         comorbidities: examData.comorbidities ? examData.comorbidities.split(',') : [],
         treatmentResult: examData.treatmentResult || '',
         admissionDate: formatSafeDate(examData.admissionDate) || null,
-        dischargeDate: examData.dischargeDate || null,
+        dischargeDate: examData.dischargeDate || new Date(),
         price: examData.price || 0,
         special: examData.special || '0',
         reExaminationDate: examData.reExaminationDate ? examData.reExaminationDate : null,

@@ -183,7 +183,7 @@ const ExaminationDashboard = () => {
             }
             key="2"
           >
-            <AppointmentList appointmentList={appointments} />
+            <AppointmentList appointmentList={appointments} refetchAppointment={refetchAppointment} loading={isLoadingAppointment || isFetchingAppointment} />
           </TabPane>
           <TabPane
             tab={

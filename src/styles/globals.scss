@@ -94,3 +94,16 @@ table {
     background-color: #bdbdbd; // Màu đậm hơn khi hover
   }
 }
+
+.ant-modal-wrap {
+  overflow: hidden !important;
+
+  &.ant-modal-wrap-open {
+    overflow: hidden !important;
+  }
+}
+
+// Ngăn body scroll khi modal mở
+body.ant-scrolling-effect {
+  overflow: hidden !important;
+}

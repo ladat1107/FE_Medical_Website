@@ -65,7 +65,6 @@ const Banner = () => {
     550: { slidesPerView: 3, spaceBetween: 10, },
     840: { slidesPerView: 5, spaceBetween: 10, },
     1240: { slidesPerView: 6, spaceBetween: 20, },
-    1700: { slidesPerView: 8, spaceBetween: 20, },
   }
   return (
     <div className="flex flex-col items-center py-8 md:py-12">

@@ -177,7 +177,7 @@ const MenuSidebar = () => {
             key: 'logout',
             label: ("Đăng xuất"),
             icon: <FontAwesomeIcon icon={faArrowRightFromBracket} rotation={180} />,
-            onClick: () => { dispatch(handleLogout()) },
+            onClick: () => { dispatch(handleLogout(navigate)) },
         },
     ];
 

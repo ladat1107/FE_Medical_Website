@@ -117,6 +117,7 @@ const ScheduleModal = (props) => {
                 </Button>,
             ]}
             maskClosable={false}
+            centered
         >
             <Form
                 className='px-3'

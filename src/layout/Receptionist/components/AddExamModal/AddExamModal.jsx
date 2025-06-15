@@ -564,8 +564,8 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                                                             type='text'
                                                             value={insurance}
                                                             onChange={(e) => {
-                                                                const onlyNums = e.target.value.replace(/\D/g, ""); // chỉ lấy số
-                                                                setInsurance(onlyNums);
+                                                                //const onlyNums = e.target.value.replace(/\D/g, ""); // chỉ lấy số
+                                                                setInsurance(e.target.value);
                                                             }}
                                                             placeholder='Nhập số BHYT...'
                                                         />

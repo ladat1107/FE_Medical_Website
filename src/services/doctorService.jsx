@@ -7,6 +7,9 @@ export const getUserByCid = (cid) => {
 export const getUserById = (id) => {
     return axios.get(`/api/getUserById?id=${id}`)
 }
+export const getDoctorBooking = (query) => {
+    return axios.get(`/api/getDoctorBooking`, { params: query })
+}
 // Examination
 export const getExaminations = async (date, toDate, status, staffId, is_appointment, page, limit, search, time) => {
     return axios.get(`/api/getExaminations?date=${date}&toDate=${toDate}&status=${status}&staffId=${staffId || ''}&is_appointment=${is_appointment}&page=${+page}&limit=${+limit}&search=${search}&time=${time || ''}`);
@@ -19,7 +22,9 @@ export const getListToPay = async (date, statusPay, page, limit, search) => {
 export const getExaminationById = (id) => {
     return axios.get(`/api/getExaminationById?id=${id}`)
 }
-
+export const createAppointment = async (data) => {
+    return axios.post(`/api/createAppointment`, data);
+}
 export const createExamination = async (data) => {
     return axios.post(`/api/createExamination`, data);
 };
@@ -151,6 +156,10 @@ export const getAllTags = async () => {
 
 export const getScheduleByStaffId = async (staffId) => {
     return axios.get(`/api/getScheduleByStaffId?staffId=${staffId}`);
+}
+
+export const getScheduleByDateAndDoctor = async (query) => {
+    return axios.get(`/api/getScheduleByDateAndDoctor`, { params: query });
 }
 
 //specialty

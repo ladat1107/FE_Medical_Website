@@ -10,8 +10,9 @@ import ExamCard from "./Section/ExamCard";
 import { useGetExamination } from "@/hooks";
 import ExamTable from "./Section/ExamTable";
 import PrescriptionUsed from "./Section/PrescriptionUsed";
-import { diffDate } from "@/utils/formatDate";
 import CommonDisease from "./Section/CommonDisease";
+import { diffDate } from "@/utils/formatDate";
+
 const AdminDashboard = () => {
     const [dateRange, setDateRange] = useState([dayjs().subtract(1, "month"), dayjs()]);
     const [cardRevenue, setCardRevenue] = useState({ totalRevenue: 0, totalBank: 0, totalCash: 0, totalInsurance: 0 })

@@ -43,7 +43,7 @@ const BodyBlogList = (props) => {
     <div className="my-16"  >
       <div className="flex justify-between items-center gap-3" >
         <span className="w-full block h-[2px] bg-primary-tw"></span>
-        <h3 className="text-2xl font-bold whitespace-nowrap">DINH DƯỠNG HỢP LÝ</h3>
+        <h3 className="text-2xl font-bold whitespace-nowrap">CẨM NANG Y TẾ</h3>
         <span className="w-full block h-[2px] bg-primary-tw"></span>
       </div>
       <div className="my-3">

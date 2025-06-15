@@ -400,7 +400,7 @@ function Header() {
                   <div className="flex items-center gap-3">
                     <span className="font-bold text-primary-tw text-xl">Chào, {user.firstName}</span>
                     <div
-                      onClick={() => dispatch(handleLogout())}
+                      onClick={() => dispatch(handleLogout(navigate))}
                       className="text-base w-fit px-4  h-10 border-none text-white bg-gradient-primary rounded-full cursor-pointer flex items-center justify-center transition duration-300 hover:opacity-90"
                     >
                       <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />

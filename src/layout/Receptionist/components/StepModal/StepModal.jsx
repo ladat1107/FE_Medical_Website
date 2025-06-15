@@ -18,7 +18,7 @@ const StepModal = ({ isOpen, onClose, examinationData }) => {
 
                             {/* Circle */}
                             <div className={`step-circle ${step.isCompleted ? 'completed' :
-                                    step.isActive ? 'active' : ''
+                                step.isActive ? 'active' : ''
                                 }`}>
                                 {step.isCompleted ? (
                                     <i className="fa-solid fa-check"></i>
@@ -57,6 +57,12 @@ const StepModal = ({ isOpen, onClose, examinationData }) => {
             footer={null}
             className="step-modal"
             centered={true}
+            maskClosable={false}
+            style={{
+                top: 50,
+                maxHeight: 'calc(100vh - 100px)',
+                paddingBottom: 0
+            }}
         >
             <div className="modal-content">
                 {examinationData?.DT?.mainExamination &&

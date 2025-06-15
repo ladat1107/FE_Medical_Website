@@ -14,11 +14,13 @@ function MainLayout() {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useSelector((state) => state.authen);
+
     useEffect(() => {
         if (user?.role && user.role !== ROLE.PATIENT) {
             navigate(urlAuthorization(user.role));
         }
     }, [location, user])
+    
     return (
         <>
             <Header />

@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import PatientItem from "../../components/PatientItem/PatientItem";
 import ParacModal from "./ParacModal/ParacModal";
 import dayjs from "dayjs";
+import socket from '@/Socket/socket'
 
 
 const ParaclinicalList = () => {
@@ -76,6 +77,18 @@ const ParaclinicalList = () => {
             
         }
     }, [dataExaminations]);
+
+        useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
     // #endregion
 
 
@@ -133,7 +146,7 @@ const ParaclinicalList = () => {
                                     />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                         )}

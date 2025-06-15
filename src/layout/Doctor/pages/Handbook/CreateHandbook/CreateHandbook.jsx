@@ -95,6 +95,7 @@ const CreateHandbook = (props) => {
                     if (response && response.EC === 0) {
                         message.success(response.EM);
                         form.resetFields();
+                        props.setAction();
                         props.refresh();
 
                         if (!props?.handbookId) {

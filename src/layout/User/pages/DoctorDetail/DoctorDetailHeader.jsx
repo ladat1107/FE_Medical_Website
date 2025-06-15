@@ -7,16 +7,23 @@ import { PATHS } from "@/constant/path";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import userService from "@/services/userService";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BOOKING_CONTENT } from "@/constant/value";
 import { clearBooking, setCurrentContent, setDoctor } from "@/redux/bookingSlice";
 // Tạo instance của classnames với bind styles
 const DoctorDetailHeader = (props) => {
   let { data } = props;
+  const { isLoggedIn } = useSelector((state) => state.authen);
   let navigate = useNavigate()
   const dispatch = useDispatch()
+
   const handleBookingDoctor = async (doctorId) => {
     try {
+      if (!isLoggedIn) {
+        message.info("Vui lòng đăng nhập để đặt lịch khám")
+        navigate(PATHS.HOME.LOGIN)
+        return;
+      }
       let response = await userService.getDoctorBookingById({ id: doctorId })
       if (response?.EC === 0) {
         dispatch(clearBooking())

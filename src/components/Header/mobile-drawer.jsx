@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Drawer } from "antd"
 import {
     Calendar,
-    Clock,
     Stethoscope,
     Building2,
     Hospital,
@@ -23,15 +22,17 @@ import {
     Search,
     Newspaper,
     X,
+    LogIn,
 } from "lucide-react"
 import { BOOKING_CONTENT } from "@/constant/value"
-import { clearBooking, setCurrentContent } from "@/redux/bookingSlice"
 import { useDispatch } from "react-redux"
+import { useNavigate } from "react-router-dom"
+import { PATHS } from "@/constant/path"
 
 const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, paths, tags, role }) => {
     // State for expanded menu items
     const [expandedItems, setExpandedItems] = useState({})
-    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     // Toggle expanded state for menu items
     const toggleExpand = (itemTitle) => {
@@ -284,15 +285,20 @@ const MobileDrawer = ({ visible, onClose, user, handleNavigation, handleLogout, 
                 </div>
 
                 {/* Logout button */}
-                {user && (
-                    <div
-                        className="mt-auto mx-4 px-3 py-2 mb-4 bg-gradient-primary text-white rounded-xl text-center cursor-pointer flex items-center justify-center gap-2"
+                {user ?
+                    <div className="mt-auto mx-4 px-3 py-2 mb-4 bg-gradient-primary text-white rounded-xl text-center cursor-pointer flex items-center justify-center gap-2"
                         onClick={handleLogout}
                     >
                         <LogOut size={18} />
                         <span className="font-medium">Đăng xuất</span>
                     </div>
-                )}
+                    :
+                    <div className="mt-auto mx-4 px-3 py-2 mb-4 bg-gradient-primary text-white rounded-xl text-center cursor-pointer flex items-center justify-center gap-2"
+                        onClick={() => navigate(PATHS.HOME.LOGIN)}
+                    >
+                        <LogIn size={18} />
+                        <span className="font-medium">Đăng nhập</span>
+                    </div>}
             </div>
         </Drawer>
     )

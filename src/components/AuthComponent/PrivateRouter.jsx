@@ -5,9 +5,9 @@ import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import { message } from "antd";
 const PrivateRouter = () => {
-    let { user, isLoggedIn } = useSelector((state) => state.authen);
+    let { user, isLoggedIn, isLogout } = useSelector((state) => state.authen);
     useEffect(() => {
-        if (!user || isLoggedIn === false) {
+        if ((!user || isLoggedIn === false) && isLogout === false) {
             message.info("Vui lòng đăng nhập để sử dụng tính năng này");
         }
     }, [user])

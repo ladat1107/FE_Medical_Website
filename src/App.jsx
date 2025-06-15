@@ -60,6 +60,7 @@ import MedicalRecord from "./layout/Receptionist/pages/Dashboard/medicalRecord";
 import Numerical from "./layout/User/pages/Numerical/Numerical";
 import { clearBooking, setCurrentContent } from "./redux/bookingSlice";
 import { BOOKING_CONTENT } from "./constant/value";
+import PrintCheckout from "./components/Print/PrintCheckout";
 
 function App() {
   const location = useLocation();
@@ -141,6 +142,7 @@ function App() {
           </Route>
           <Route path={PATHS.SYSTEM.GET_NUMBER} element={<GetNumber />} />
           <Route path={`${PATHS.SYSTEM.PRECRIPTION_PDF}/:id`} element={<PrintPrescription />} />
+          <Route path={PATHS.SYSTEM.PRINT_CHECKOUT} element={<PrintCheckout />} />
           <Route path={PATHS.STAFF.CONSULTANT} element={<MessengerReceptionist />} />
           <Route element={<PrivateRoute />}>
             <Route element={<AdminLayout />}>

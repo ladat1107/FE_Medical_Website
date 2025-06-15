@@ -41,13 +41,10 @@ const StaffManage = () => {
         fetchUsers();
     }
     useEffect(() => {
-        if (dataUser && dataUser.DT && dataUser.DT.rows && dataUser.DT) {
-            let _listUser = [...dataUser.DT.rows];
-            for (let i = 0; i < _listUser.length; i++) {
-                _listUser[i].checked = false;
-            }
+        if (dataUser?.EC === 0) {
+            let _listUser = dataUser?.DT?.rows.map(item => ({ ...item, avatar: item?.avatar || LINK.AVATAR_NULL })) || [];
             setListUser(_listUser);
-            setTotalPage(dataUser.DT.count / rowsPerPage);
+            setTotalPage(dataUser?.DT?.count / rowsPerPage);
         }
     }, [dataUser])
 

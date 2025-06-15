@@ -7,6 +7,7 @@ import { useMutation } from '@/hooks/useMutation';
 import { getMedicalHistories } from '@/services/doctorService';
 import { convertDateTime } from '@/utils/formatDate';
 import { convertGender } from '@/utils/convertGender';
+import dayjs from 'dayjs';
 
 const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescription }) => {
 
@@ -144,13 +145,13 @@ const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescripti
                                 </div>
                                 <div className="col-2">
                                     {historyData?.userInsuranceData?.dateOfIssue && historyData?.userInsuranceData?.exp
-                                        ? `${historyData.userInsuranceData.dateOfIssue} - ${historyData.userInsuranceData.exp}` : ''}
+                                        ? dayjs(historyData.userInsuranceData.dateOfIssue).format("DD/MM/YYYY") - dayjs(historyData.userInsuranceData.exp).format("DD/MM/YYYY") : ''}
                                 </div>
                                 <div className="col-2">
                                     Thời hạn đủ 5 năm liên tục:
                                 </div>
                                 <div className="col-6">
-                                    {historyData?.userInsuranceData?.continuousFiveYearPeriod}
+                                    {historyData?.userInsuranceData?.continuousFiveYearPeriod ? dayjs(historyData?.userInsuranceData?.continuousFiveYearPeriod).format("DD/MM/YYYY") : ""}
                                 </div>
                             </div>
                         </div>
@@ -158,10 +159,10 @@ const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescripti
                             <p style={{ fontWeight: '600', fontSize: '17px' }}>Hồ sơ bệnh án</p>
                             <div className="col-12 mt-3 row">
                                 {historyData?.userExaminationData && historyData?.userExaminationData.map((item, index) => (
-                                    <HistoryItem 
-                                        key={index} 
-                                        id={index} 
-                                        data={item} 
+                                    <HistoryItem
+                                        key={index}
+                                        id={index}
+                                        data={item}
                                         onCopyPrescription={onCopyPrescription ? handleCopyPrescription : null}
                                     />
                                 ))}

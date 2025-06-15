@@ -850,14 +850,16 @@ const InpatientDetail = () => {
                         <div className='col-6 flex'>
                             {isEditMode ? <>
                                 {dataExamination?.DT?.status === 7 && <>
-                                    <button style={{ background: "#F44343", color: 'white' }}  
-                                            className='restore-button' 
-                                            onClick={() => {
-                                                setIsEditMode(false);
-                                                resetFormData();
-                                            }}>
-                                        Hủy
-                                    </button>  
+                                    <div style={{fontWeight: '500'}}>
+                                        <button style={{ background: "#F44343", color: 'white' }}  
+                                                className='restore-button' 
+                                                onClick={() => {
+                                                    setIsEditMode(false);
+                                                    resetFormData();
+                                                }}>
+                                            Hủy
+                                        </button>  
+                                    </div>
                                 </>} 
                                 <>
                                     <div style={{fontWeight: '500'}}>
@@ -885,9 +887,11 @@ const InpatientDetail = () => {
                                     )}      
                                 </>
                             </> : <>
-                                <button className='restore-button' onClick={() => setIsEditMode(true)}>
-                                    Chỉnh sửa
-                                </button>  
+                                <div style={{fontWeight: '500'}}>
+                                    <button className='restore-button' onClick={() => setIsEditMode(true)}>
+                                        Chỉnh sửa
+                                    </button>  
+                                </div>
                             </>}  
                         </div>
                     </div>

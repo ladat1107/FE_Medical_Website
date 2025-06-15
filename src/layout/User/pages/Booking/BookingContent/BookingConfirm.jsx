@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faIdCard, faLeftLong, faMarsAndVenus, faPeopleGroup, faMobileScreenButton, faHandHoldingMedical, faMapMarkerAlt, faHouse } from "@fortawesome/free-solid-svg-icons";
-import { faUser, faCalendarCheck, faEnvelopeOpen, faCircleCheck } from "@fortawesome/free-regular-svg-icons";
+import { faUser, faCalendarCheck, faEnvelopeOpen } from "@fortawesome/free-regular-svg-icons";
 import { formatDate, formatDateDD_MM } from "@/utils/formatDate";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { Button, message } from "antd";
@@ -9,8 +9,6 @@ import userService from "@/services/userService";
 import Loading from "@/components/Loading/Loading";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "@/constant/path";
-import { insuranceCovered } from "@/utils/coveredPrice";
-import { getThirdDigitFromLeft } from "@/utils/numberSeries";
 
 const BookingConfirm = (props) => {
     let navigate = useNavigate();
@@ -81,10 +79,10 @@ const BookingConfirm = (props) => {
             </div>
             {isConfirm ?
                 <div className="p-5 min-h-[300px]">
-                    <div className="flex flex-col items-center mt-8" style={{color: "#FFA500"}}>
+                    <div className="flex flex-col items-center mt-8" style={{ color: "#FFA500" }}>
                         <i className="fa-regular fa-envelope text-6xl"></i>
                         <span className="text-lg font-semibold my-4">Vui lòng kiểm tra email và xác nhận để hoàn tất đặt lịch khám!</span>
-                        <div className="text-md font-medium mt-2" style={{color: 'black'}}>
+                        <div className="text-md font-medium mt-2" style={{ color: 'black' }}>
                             Thời gian còn lại: <span className="font-bold" style={{ color: textColor }}>{formatTime(secondsLeft)}</span>
                         </div>
                     </div>

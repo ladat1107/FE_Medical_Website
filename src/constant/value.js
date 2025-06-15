@@ -322,9 +322,10 @@ export const TYPE_NUMBER = {
 
 export const COVERED = {
     1: 1,
-    2: 0.95,
-    3: 0.8,
-    4: 1
+    2: 1,
+    3: 0.95,
+    4: 0.8,
+    5: 1
 }
 
 export const STATUS_MESSAGE = {

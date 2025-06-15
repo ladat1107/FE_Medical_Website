@@ -14,6 +14,7 @@ import {
     faCircleXmark,
     faHourglassHalf,
     faFileCirclePlus,
+    faSpinner,
 } from "@fortawesome/free-solid-svg-icons"
 import dayjs from "dayjs"
 import Container from "@/components/Container"
@@ -26,8 +27,11 @@ import ConfirmModal from "../../components/ConfirmModal/ConfirmModal"
 import { OldParaclinicalModal } from "@/components/Modals"
 import "./AppoimentList.css"
 import { formatCurrency } from "@/utils/formatCurrency"
+import { getPatienSteps } from "@/services/doctorService"
+import StepModal from "@/layout/Receptionist/components/StepModal/StepModal"
 const AppointmentList = () => {
     const [show, setShow] = useState(false)
+    const [isModalStepOpen, setIsModalStepOpen] = useState(false);
     const [showOldParaclinicalModal, setShowOldParaclinicalModal] = useState(false)
     const [obAppoinment, setObAppoinment] = useState(null)
     const [listAppoinment, setListAppoinment] = useState([])
@@ -38,6 +42,8 @@ const AppointmentList = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [pageSize, setPageSize] = useState(5)
     const [showDatePicker, setShowDatePicker] = useState(false)
+    const [listStep, setListStep] = useState([])
+    const [loadingSteps, setLoadingSteps] = useState(false)
 
     const location = useLocation()
     const navigate = useNavigate()
@@ -105,6 +111,27 @@ const AppointmentList = () => {
             message.error("Lỗi cập nhật phiếu khám cũ")
         }
     }
+
+    const handleClickStep = async (id) => {
+        const selectedPatient = listAppoinment.find(item => item.id === id);
+        if (selectedPatient) {
+            try {
+                setLoadingSteps(true);
+                const response = await getPatienSteps(selectedPatient.id);
+                if (response.EC === 0) {
+                    setListStep(response);
+                    setIsModalStepOpen(true);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                message.error('Lấy dữ liệu bước khám thất bại');
+            } finally {
+                setLoadingSteps(false);
+            }
+        } else {
+            message.error('Không tìm thấy thông tin bệnh nhân');
+        }
+    };
 
     const dateFilterOptions = [
         { key: "all", label: "Tất cả ngày" },
@@ -186,7 +213,7 @@ const AppointmentList = () => {
             label: (
                 <div className="flex items-center gap-2">
                     <FontAwesomeIcon icon={faCircleCheck} />
-                    <span>Đã hoàn thành</span>
+                    <span>Đã xác nhận</span>
                     <Badge count={completedCount} className="ml-1" />
                 </div>
             ),
@@ -510,6 +537,22 @@ const AppointmentList = () => {
                                                     </div>
 
                                                     {/* Actions Section */}
+
+                                                    {(profile.status === STATUS_BE.EXAMINING || profile.status === STATUS_BE.PAID || profile.status === STATUS_BE.WAITING) &&
+                                                        <div className="px-6 pb-6 flex flex-wrap justify-end gap-3">
+                                                            <button
+                                                                disabled={loadingSteps}
+                                                                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-xl font-medium transition-all hover:from-green-600 hover:to-green-700 hover:shadow-md flex items-center group text-sm"
+                                                                onClick={() => handleClickStep(profile.id)}
+                                                            >
+                                                                <FontAwesomeIcon
+                                                                    icon={loadingSteps ? faSpinner : faFileCirclePlus}
+                                                                    className="mr-2 transform group-hover:scale-110 transition-transform"
+                                                                />
+                                                                Xem tiến trình
+                                                            </button>
+                                                        </div>
+                                                    }
                                                     {profile?.status === STATUS_BE.PENDING && (
                                                         <div className="px-6 pb-6 flex flex-wrap justify-end gap-3">
                                                             {!dayjs(profile?.admissionDate).isBefore(dayjs().add(1, "day").endOf("day")) &&
@@ -605,6 +648,12 @@ const AppointmentList = () => {
                 onCancel={() => setShowOldParaclinicalModal(false)}
                 oldParaclinical={obAppoinment?.oldParaclinical}
                 onSave={handleUpdateOldParaclinical}
+            />
+
+            <StepModal
+                isOpen={isModalStepOpen}
+                onClose={() => setIsModalStepOpen(false)}
+                examinationData={listStep}
             />
 
         </div>

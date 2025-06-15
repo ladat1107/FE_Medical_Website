@@ -84,9 +84,9 @@ const BlogDetailHeader = ({ blogDetail, isLoading }) => {
                 {/* Ảnh bên phải - chỉ hiển thị khi màn hình >= md */}
                 <div className="hidden md:block w-[230px] sticky top-10 self-start">
                     <img
-                        src="https://medpro.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbn.da13f84b.png&w=1920&q=75"
+                        src="https://res.cloudinary.com/degcwwwii/image/upload/v1749817827/20250613_1845_%E1%BB%A8ng_D%E1%BB%A5ng_Y_T%E1%BA%BF_remix_01jxmhka3pf4zvcazcf6vasp5p_l2frqn.png"
                         alt="Decor"
-                        className="w-full"
+                        className="w-full rounded-xl"
                     />
                 </div>
             </div>

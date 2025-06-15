@@ -1,7 +1,7 @@
 import { TABLE } from '@/constant/value';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { deleteUser, blockUser, deleteDepartment, blockDepartment, deleteServiceOfRoom, blockServiceOfRoom, deleteRoom, blockRoom, deleteSpecialty, blockSpecialty, deleteMedicine, blockMedicine } from "@/services/adminService";
+import { deleteUser, blockUser, deleteDepartment, blockDepartment, deleteServiceOfRoom, blockServiceOfRoom, deleteRoom, blockRoom, deleteSpecialty, blockSpecialty, deleteMedicine, blockMedicine, deleteExamination, blockExamination } from "@/services/adminService";
 import { Button, message, Modal } from "antd";
 import { primaryColorAdmin } from '@/styles//variables';
 
@@ -24,6 +24,8 @@ const DeleteModal = (props) => {
             setMessageContent("Xác nhận xóa chuyên khoa " + data.name + "?")
         } else if (props.table === TABLE.MEDICINE) {
             setMessageContent("Xác nhận xóa thuốc " + data.name + "?")
+        } else if (props.table === TABLE.EXAMINATION) {
+            setMessageContent("Xác nhận xóa lịch hẹn " + data.id + "?")
         }
     }, [props.data])
     const handleDelete = async () => {
@@ -48,6 +50,9 @@ const DeleteModal = (props) => {
         } else if (props.table === TABLE.MEDICINE) {
             let response = await deleteMedicine(data);
             notify(response);
+        } else if (props.table === TABLE.EXAMINATION) {
+            let response = await deleteExamination(data);
+            notify(response);
         }
         setIsLoadingDelete(false)
     }
@@ -71,6 +76,10 @@ const DeleteModal = (props) => {
             notify(response);
         } else if (props.table === TABLE.MEDICINE) {
             let response = await blockMedicine(data);
+            notify(response);
+        }
+        else if (props.table === TABLE.EXAMINATION) {
+            let response = await blockExamination(data);
             notify(response);
         }
         setIsLoadingBlock(false)

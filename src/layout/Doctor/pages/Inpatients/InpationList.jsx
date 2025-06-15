@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { useMutation } from "@/hooks/useMutation";
 import PatientItem from "@/layout/Receptionist/components/PatientItem/PatientItem";
 import { useNavigate } from "react-router-dom";
+import socket from "@/Socket/socket";
 
 const InpatientList = () => {
     const [status, setStatus] = useState(5);
@@ -34,6 +35,17 @@ const InpatientList = () => {
         if (dataInpatients) {
             setTotal(dataInpatients.DT.totalItems);
             setListInpatient(dataInpatients.DT.examinations);
+        }
+    }, [dataInpatients]);
+
+    useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchInpatients();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
         }
     }, [dataInpatients]);
 
@@ -112,7 +124,7 @@ const InpatientList = () => {
                                 />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                         )}

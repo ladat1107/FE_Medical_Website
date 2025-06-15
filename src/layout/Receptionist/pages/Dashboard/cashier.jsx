@@ -6,6 +6,7 @@ import PatientItem from "@/layout/Receptionist/components/PatientItem/PatientIte
 import PayModal from "../../components/PayModal/PayModal";
 import AdvanceModal from "../../components/PayModal/AdvanceModal";
 import SummaryModal from "@/layout/Doctor/pages/Inpatients/InpatientModals/InpatientSumary";
+import socket from '@/Socket/socket'
 
 const Cashier = () => {
     const today = new Date().toISOString();
@@ -128,6 +129,19 @@ const Cashier = () => {
     }, [dataExaminations]);
 
     useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+            fetchAdvanceMoney();
+            fetchInpatients();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
+    useEffect(() => {
         if (dataAdvanceMoney) {
             setTotal(dataAdvanceMoney.DT.totalItems);
             setListAdvance(dataAdvanceMoney.DT.examinations);
@@ -239,7 +253,7 @@ const Cashier = () => {
                                 </div>
                             )) : (
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                             )}
@@ -271,7 +285,7 @@ const Cashier = () => {
                                 </div>
                             )) : (
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                             )}
@@ -302,7 +316,7 @@ const Cashier = () => {
                                 </div>
                             )) : (
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                             )}

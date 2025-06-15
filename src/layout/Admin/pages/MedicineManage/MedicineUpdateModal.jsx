@@ -487,6 +487,7 @@ const MedicineUpdateModal = ({ open, onClose, data, onSubmit }) => {
                     Cập nhật thuốc <EditOutlined />
                 </div>
             }
+            centered
             onCancel={onClose}
             onOk={handleOk}
             width={window.innerWidth < 768 ? '95%' : window.innerWidth < 1024 ? '90%' : 800}

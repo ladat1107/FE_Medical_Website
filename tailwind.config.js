@@ -35,6 +35,9 @@ export default {
     "./src/components/Sidebar/**/*.{js,jsx,ts,tsx}",
     "./src/layout/User/components/ChatUser/**/*.{js,jsx,ts,tsx}",
     "./src/layout/User/pages/Booking/**/*.{js,jsx,ts,tsx}",
+    "./src/components/Print/**/*.{js,jsx,ts,tsx}",
+    "./src/layout/Admin/components/Modal/CreateAppointmentModal.jsx",
+    "./src/layout/Doctor/pages/Examination/index.jsx"
   ],
   theme: {
     extend: {

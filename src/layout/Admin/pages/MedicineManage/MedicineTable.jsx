@@ -99,6 +99,7 @@ const MedicineTable = ({ medicines, refetch, isRefetchingMedicineData, isLoading
         setTotalPages(filteredMedicines.length);
     }, [medicines, search, filters, sortConfig]);
 
+    
     const handleSort = (key) => {
         let direction = 'ascending';
         if (sortConfig.key === key && sortConfig.direction === 'ascending') {

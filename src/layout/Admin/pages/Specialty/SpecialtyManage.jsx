@@ -93,15 +93,8 @@ const Specialty = () => {
         setSearch("");
         fetchSpecialtys();
     }
-    const handleUpdate = async (item) => {
-        let response = await getSpecialtyById(item.id);
-        if (response?.EC == 0) {
-            let value = response?.DT;
-            setObUpdate(value)
-        } else {
-            message.error(response?.EM || "Không thể chọn chuyên khoa")
-            refresh();
-        }
+    const handleUpdate = (item) => {
+        setObUpdate(item)
     }
     const handleInsertUpdate = async () => {
         if (!urlImage) {

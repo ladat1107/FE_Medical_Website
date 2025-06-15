@@ -1,4 +1,4 @@
-import { Input, message, Pagination, Select, Spin, Form } from "antd";
+import { Input, message, Pagination, Select, Spin, Form, DatePicker } from "antd";
 import { useEffect, useRef, useState } from "react";
 import AddExamModal from "../../components/AddExamModal/AddExamModal";
 import { useMutation } from "@/hooks/useMutation";
@@ -7,10 +7,10 @@ import PatientItem from "../../components/PatientItem/PatientItem";
 import { TIMESLOTS, TYPE_NUMBER } from "@/constant/value";
 import { convertDateTime } from "@/utils/formatDate";
 import userService from "@/services/userService";
-import Loading from "@/components/Loading/Loading";
 import dayjs from "dayjs";
 import StepModal from "../../components/StepModal/StepModal";
 import { useGetUserByQRCode } from "@/hooks";
+import useAutoTimeSlot from "@/hooks/useAutoTimeSlot";
 
 const ReceptionistDashboard = () => {
     // Form
@@ -21,7 +21,7 @@ const ReceptionistDashboard = () => {
     const [currentNumber, setCurrentNumber] = useState({});
     const [loading, setLoading] = useState(false);
     const [loadingSteps, setLoadingSteps] = useState(false);
-    const today = dayjs();
+    const [date, setDate] = useState(dayjs())
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalStepOpen, setIsModalStepOpen] = useState(false);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
@@ -33,7 +33,7 @@ const ReceptionistDashboard = () => {
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
     const [isAppointment, setIsAppointment] = useState(1);
-    const [time, setTime] = useState(null);
+    const { time, setTime } = useAutoTimeSlot();
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState(2);
     const [listExam, setListExam] = useState([]);
@@ -213,7 +213,7 @@ const ReceptionistDashboard = () => {
         data: dataExaminations,
         loading: loadingExaminations,
         execute: fetchExaminations,
-    } = useMutation(() => getExaminations(today, today, status, '', isAppointment, currentPage, pageSize, search, time));
+    } = useMutation(() => getExaminations(date, date, status, '', isAppointment, currentPage, pageSize, search, time));
 
     // Data updates
     useEffect(() => {
@@ -257,7 +257,7 @@ const ReceptionistDashboard = () => {
 
     useEffect(() => {
         fetchExaminations();
-    }, [isAppointment, search, time, currentPage, pageSize]);
+    }, [isAppointment, search, time, currentPage, pageSize, date]);
 
     // Event handlers
     const openAddExam = (timeSlot) => {
@@ -345,6 +345,11 @@ const ReceptionistDashboard = () => {
         setIsModalStepOpen(false);
     };
 
+    const handleDateChange = (value) => {
+        if (!value) setDate(dayjs())
+        else setDate(value)
+    }
+
     const getSpecialClass = (special) => {
         switch (special) {
             case 'old':
@@ -372,7 +377,7 @@ const ReceptionistDashboard = () => {
                     <p className="text-base font-medium text-gray-500">{selectedTimeSlot.label}</p>
                     {examsInTimeSlot.length === 0 ? (
                         <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
-                            <p>Không tìm thấy bệnh nhân!</p>
+                            <p>Danh sách bệnh nhân trống!</p>
                         </div>
                     ) : (
                         examsInTimeSlot.map((item, index) => (
@@ -392,7 +397,7 @@ const ReceptionistDashboard = () => {
                             />
                         ))
                     )}
-                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" 
+                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200"
                         onClick={() => openAddExam(time.value)}>
                         <div className="flex justify-center items-center">
                             <i className="fa-solid mr-2 fa-plus"></i>
@@ -412,7 +417,7 @@ const ReceptionistDashboard = () => {
                     <p className="text-base font-medium text-gray-500">{timeSlot.label}</p>
                     {examsInTimeSlot.length === 0 ? (
                         <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
-                            <p>Không tìm thấy bệnh nhân!</p>
+                            <p>Danh sách bệnh nhân trống!</p>
                         </div>
                     ) : (
                         examsInTimeSlot.map((item, index) => (
@@ -456,7 +461,7 @@ const ReceptionistDashboard = () => {
                                 <p className="m-0 ml-2.5 text-3xl">{totalPatient}</p>
                             </div>
                             <div className="text-gray-500">
-                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {convertDateTime(new Date())}</p>
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
                             </div>
                         </div>
                         <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#007BFF] flex justify-center">
@@ -476,7 +481,7 @@ const ReceptionistDashboard = () => {
                                 <p className="m-0 ml-2.5 text-3xl">{totalAppointment}</p>
                             </div>
                             <div className="text-gray-500">
-                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {convertDateTime(new Date())}</p>
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
                             </div>
                         </div>
                         <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#3AA472] flex justify-center">
@@ -491,21 +496,21 @@ const ReceptionistDashboard = () => {
                         <div className="col-span-5 md:col-span-7 lg:col-span-5">
                             <div className="text-gray-500">
                                 <div className="m-0 ml-1.5 text-sm text-gray-500 flex items-center">
-                                    <p style={{width: '120px'}}>{type === TYPE_NUMBER.NORMAL ? "Số khám thường" : "Số khám ưu tiên"}</p>
-                                    <button 
-                                        className='flex items-center justify-center bg-[#ffffff] text-white transition-all duration-200 hover:shadow-md hover:scale-105' 
+                                    <p style={{ width: '120px' }}>{type === TYPE_NUMBER.NORMAL ? "Số khám thường" : "Số khám ưu tiên"}</p>
+                                    <button
+                                        className='flex items-center justify-center bg-[#ffffff] text-white transition-all duration-200 hover:shadow-md hover:scale-105'
                                         style={{
                                             borderRadius: '50%',
-                                            width: '25px', 
-                                            height: '25px', 
+                                            width: '25px',
+                                            height: '25px',
                                             padding: '0',
-                                            border: '1px solid #e5e7eb' 
+                                            border: '1px solid #e5e7eb'
                                         }}
                                         onClick={() => {
                                             setType(type === TYPE_NUMBER.NORMAL ? TYPE_NUMBER.PRIORITY : TYPE_NUMBER.NORMAL);
                                         }}
                                     >
-                                        <i className="fa-solid fa-arrows-rotate" style={{color: '#FF7A56'}}></i>
+                                        <i className="fa-solid fa-arrows-rotate" style={{ color: '#FF7A56' }}></i>
                                     </button>
                                 </div>
                             </div>
@@ -513,15 +518,15 @@ const ReceptionistDashboard = () => {
                                 <p className="m-0 ml-2.5 text-3xl">{type === TYPE_NUMBER.NORMAL ? currentNumber?.normalNumberCurrent : currentNumber?.priorityNumberCurrent}</p>
                             </div>
                             <div className="text-gray-500">
-                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {convertDateTime(new Date())}</p>
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
                             </div>
                         </div>
                         <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#FF7A56] flex justify-center">
                             <div
                                 className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#FFE3DD] hover:scale-105"
-                                onClick={() => handleGeneralNumber(type)}
+                                onClick={() => date.isSame(dayjs(), "day") ? handleGeneralNumber(type) : null}
                             >
-                                {loading ? <Spin tip="Loading..." />  :
+                                {loading ? <Spin tip="Loading..." /> :
                                     <i className="text-2xl fa-solid fa-user-plus"></i>
                                 }
                             </div>
@@ -572,15 +577,26 @@ const ReceptionistDashboard = () => {
                                 />
                             </Form.Item>
                         </div>
+                        <div className="w-fit lg:w-64">
+                            <DatePicker
+                                format="DD/MM/YYYY"
+                                placeholder="Chọn ngày"
+                                allowClear
+                                onChange={handleDateChange}
+                                value={date}
+                            />
+                        </div>
                     </div>
-                    <div className="w-fit">
-                        <button
-                            className="h-8 border border-gray-300 py-0 px-5 rounded-md bg-[#007BFF] text-white transition-all duration-200 hover:shadow-md hover:scale-105 w-full md:w-auto"
-                            onClick={() => openAddExam(null)}
-                        >
-                            Thêm bệnh nhân trực tiếp
-                        </button>
-                    </div>
+                    {date.isSame(dayjs(), "day") && (
+                        <div className="w-fit">
+                            <button
+                                className="h-8 border border-gray-300 py-0 px-5 rounded-md bg-[#007BFF] text-white transition-all duration-200 hover:shadow-md hover:scale-105 w-full md:w-auto"
+                                onClick={() => openAddExam(null)}
+                            >
+                                Thêm bệnh nhân trực tiếp
+                            </button>
+                        </div>
+                    )}
                 </div>
             </Form>
 
@@ -636,7 +652,7 @@ const ReceptionistDashboard = () => {
                                         />
                                     )) : (
                                         <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
-                                            <p>Không tìm thấy bệnh nhân!</p>
+                                            <p>Danh sách bệnh nhân trống!</p>
                                         </div>
                                     )
                                 )}

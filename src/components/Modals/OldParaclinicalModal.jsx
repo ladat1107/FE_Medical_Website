@@ -74,6 +74,7 @@ const OldParaclinacalModal = ({ visible, onCancel, oldParaclinical, onSave }) =>
                 title="Thêm phiếu xét nghiệm trước đây"
                 open={visible}
                 onCancel={onCancel}
+                centered
                 width={800}
                 footer={[
                     <Button key="back" onClick={onCancel}>
