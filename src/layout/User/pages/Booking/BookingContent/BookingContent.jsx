@@ -1,5 +1,4 @@
-import { useState } from "react";
-import "../Booking.scss"
+import { useEffect } from "react";
 import BookingDoctor from "./BookingDoctor";
 import BookingSpecialty from "./BookingSpecialty";
 import BookingCalendar from "./BookingCalendar";
@@ -7,69 +6,77 @@ import BookingPersonal from "./BookingPersonal";
 import BookingConfirm from "./BookingConfirm";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "@/constant/path";
-const content = {
-    specialty: "specialty",
-    doctor: "doctor",
-    schedule: "schedule",
-    information: "information",
-    confirm: "confirm",
-}
-const BookingContent = (props) => {
+import { useDispatch, useSelector } from "react-redux";
+import { setSpecialty, setDoctor, setSchedule, setProfile, setCurrentContent } from "@/redux/bookingSlice";
+import { BOOKING_CONTENT } from "@/constant/value";
+
+
+const BookingContent = () => {
     let navigate = useNavigate();
-    let [currentContent, setCurrentContent] = useState(content.specialty);
-    let specialty = props.specialty;
-    let doctor = props.doctor;
-    let schedule = props.schedule;
-    let profile = props.profile;
+    let dispatch = useDispatch();
+    let { specialty, doctor, schedule, profile, currentContent } = useSelector(state => state.booking);
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentContent]);
+
+    useEffect(() => {
+        if (doctor) {
+            dispatch(setSpecialty(doctor?.staffSpecialtyData || null));
+        }
+    }, [doctor])
+
     let handleStepSpecialty = (specialty) => {
-        props.setSpecialty(specialty);
-        setCurrentContent(content.doctor);
+        dispatch(setSpecialty(specialty));
+        dispatch(setCurrentContent(BOOKING_CONTENT.DOCTOR));
     }
+
     let handleStepDoctor = (value) => {
-        props.setDoctor(value);
-        setCurrentContent(content.schedule);
+        dispatch(setDoctor(value));
+        dispatch(setCurrentContent(BOOKING_CONTENT.SCHEDULE));
     }
+
     let handleStepSchedule = (value) => {
-        props.setSchedule(value);
-        setCurrentContent(content.information);
+        dispatch(setSchedule(value));
+        dispatch(setCurrentContent(BOOKING_CONTENT.INFORMATION));
     }
+
     let handleStepInformation = (value) => {
-        props.setProfile(value);
-        setCurrentContent(content.confirm);
+        dispatch(setProfile(value));
+        dispatch(setCurrentContent(BOOKING_CONTENT.CONFIRM));
     }
+
     let handleStepConfirm = async () => {
     }
+
     return (
         <div>
-            <div className="booking-content">
-                {currentContent === content.specialty && <BookingSpecialty
+            <div className="bg-white rounded-lg w-full shadow-md">
+                {currentContent === BOOKING_CONTENT.SPECIALTY && <BookingSpecialty
                     next={handleStepSpecialty}
                     back={() => { navigate(PATHS.HOME.HOMEPAGE) }} />}
-                {currentContent === content.doctor && <BookingDoctor
+                {currentContent === BOOKING_CONTENT.DOCTOR && <BookingDoctor
                     specialtyId={specialty?.id}
                     next={handleStepDoctor}
-                    back={() => { setCurrentContent(content.specialty), props.setSpecialty(null) }} />}
-                {currentContent === content.schedule && <BookingCalendar
+                    back={() => { dispatch(setCurrentContent(BOOKING_CONTENT.SPECIALTY)), dispatch(setSpecialty(null)) }} />}
+                {currentContent === BOOKING_CONTENT.SCHEDULE && <BookingCalendar
                     doctor={doctor}
                     next={handleStepSchedule}
-                    back={() => { setCurrentContent(content.doctor), props.setDoctor(null) }} />}
-                {currentContent === content.information && <BookingPersonal
+                    back={() => { dispatch(setCurrentContent(BOOKING_CONTENT.DOCTOR)), dispatch(setDoctor(null)) }} />}
+                {currentContent === BOOKING_CONTENT.INFORMATION && <BookingPersonal
                     schedule={schedule}
                     profile={profile}
                     next={handleStepInformation}
-                    back={() => { setCurrentContent(content.schedule), props.setSchedule(null) }}
+                    back={() => { dispatch(setCurrentContent(BOOKING_CONTENT.SCHEDULE)), dispatch(setSchedule(null)) }}
                 />}
-                {currentContent === content.confirm && <BookingConfirm
+                {currentContent === BOOKING_CONTENT.CONFIRM && <BookingConfirm
                     profile={profile}
                     doctor={doctor}
                     schedule={schedule}
                     next={handleStepConfirm}
-                    back={() => { setCurrentContent(content.information) }}
+                    back={() => { dispatch(setCurrentContent(BOOKING_CONTENT.INFORMATION)) }}
                 />}
-
             </div>
         </div>
-
     );
 }
 

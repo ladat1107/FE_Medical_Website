@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import PatientItem from "../../components/PatientItem/PatientItem";
 import ParacModal from "./ParacModal/ParacModal";
 import dayjs from "dayjs";
+import socket from '@/Socket/socket'
 
 
 const ParaclinicalList = () => {
@@ -76,6 +77,18 @@ const ParaclinicalList = () => {
             
         }
     }, [dataExaminations]);
+
+        useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
     // #endregion
 
 
@@ -101,14 +114,14 @@ const ParaclinicalList = () => {
                     <div className="col-6">
                         <p className="search-title">Tìm kiếm bệnh nhân</p>
                         <input type="text" className="search-box" 
-                                placeholder="Nhập tên bệnh nhân để tìm kiếm..." 
+                                placeholder="Nhập thông tin bệnh nhân để tìm kiếm..." 
                                 value={search}
                                 onChange={handleSearch}/>
                     </div>
                 </div>
                 <div className="appointment-container mt-3 row">
                     <div className="header">
-                        <p className="title">Danh sách cận lâm sàn</p>
+                        <p className="title">Danh sách cận lâm sàng</p>
                     </div>
                     <div className="schedule-content text-center">
                         {loadingExaminations ? (
@@ -129,16 +142,17 @@ const ParaclinicalList = () => {
                                         visit_status={item.name}
                                         onClickItem={()=>handleParac(item.id)}
                                         sort={false}
+                                        isEmergency={item.examinationResultParaclincalData?.medicalTreatmentTier === 3 ? true : false}
                                     />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                         )}
                     </div>
                     <div className='row'>
-                        {!loadingExaminations !== 1 && listExam.length > 0 && (
+                        {!loadingExaminations !== 1 && listExam?.length > 0 && (
                             <Pagination
                                 align="center"
                                 current={currentPage}
@@ -149,7 +163,7 @@ const ParaclinicalList = () => {
                         )}
                     </div>
                 </div>
-                {listExam.length > 0 && examId &&
+                {listExam?.length > 0 && examId &&
                     <ParacModal
                         isOpen={isModalOpen}
                         onClose={closePay}

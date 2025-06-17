@@ -1,91 +1,113 @@
 import React from "react";
-import classNames from "classnames/bind";
-import styles from "./blogList.module.scss";
-import SubBlog from "@/components/Sub-blog";
-import { LINK, TAGS } from "@/constant/value";
-import { primaryColorHome } from "@/style/variables";
-import { formatDate } from "@/utils/formatDate";
 import { useNavigate } from "react-router-dom";
+import { LINK, TAGS } from "@/constant/value";
 import { PATHS } from "@/constant/path";
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+import { formatDate } from "@/utils/formatDate";
+import HandbookCardHorizontal from "@/components/HandbookItem/HandbookCard/HandbookCardHorizontal";
+import { CalendarPlus2 } from "lucide-react";
+import { useMobile } from "@/hooks/useMobile";
 
-const HeadBlogList = (props) => {
-  let listHandbook = props?.list || [];
-  let navigate = useNavigate();
+const HeadBlogList = ({ list = [], id }) => {
+  const navigate = useNavigate();
+  const isMobile = useMobile();
   return (
-    <div className={cx("head-blog-list")}>
-      <ul className={cx("nav-cate")}>
-        <li>CẨM NANG Y TẾ</li>
-        <li className={cx({ active: props.id === 2 })} onClick={() => navigate(`${PATHS.HOME.HANDBOOK_LIST}/${TAGS[2].value}`)}>{TAGS[2].label}</li>
-        <li className={cx({ active: props.id === 4 })} onClick={() => navigate(`${PATHS.HOME.HANDBOOK_LIST}/${TAGS[4].value}`)}>{TAGS[4].label}</li>
-        <li className={cx({ active: props.id === 5 })} onClick={() => navigate(`${PATHS.HOME.HANDBOOK_LIST}/${TAGS[5].value}`)}>{TAGS[5].label}</li>
+    <div className="w-full py-10">
+      {/* Navigation Tabs */}
+      <ul className="flex flex-wrap gap-4 mb-4 px-2 md:px-4 lg:w-[700px] items-center justify-start md:justify-between text-sm md:text-base font-medium">
+        <li className="text-secondaryText-tw font-bold text-lg md:text-xl">CẨM NANG Y TẾ</li>
+        {[2, 4, 5].map((key) => (
+          <li
+            key={key}
+            onClick={() => navigate(`${PATHS.HOME.HANDBOOK_LIST}/${TAGS[key].value}`)}
+            className={`cursor-pointer text-gray-500 hover:text-primary-tw transition-all ${id === key ? "text-primary-tw font-semibold" : ""
+              }`}
+          >
+            {TAGS[key].label}
+          </li>
+        ))}
       </ul>
 
-      <div className={cx("blog-list-body")}>
-        <div className={cx("body-left")}>
-          <div className={cx("blog-banner")}>
-            <div className={cx("img")}>
+      {/* Blog List Body */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left Column */}
+        <div className="w-full lg:w-[60%]">
+          {/* Main Banner Blog */}
+          <div className="mb-6">
+            <div className="rounded-xl overflow-hidden">
               <img
-                src={listHandbook[0]?.image || LINK.IMAGE_HANDBOOK}
+                src={list[0]?.image || LINK.IMAGE_HANDBOOK}
                 alt="Ảnh bài viết"
+                className="w-full object-cover"
               />
             </div>
-            <h4 className={cx("blog-banner-title")}>
-              {listHandbook[0]?.title || "Bài viết mới nhất"}
+            <h4 className="mt-6 text-2xl md:text-3xl font-bold">
+              {list[0]?.title || "Bài viết mới nhất"}
             </h4>
-            <p>
-              {" "}
-              {listHandbook[0].shortDescription || ""
-              }{" "}
-            </p>
-            <span>
-              {" "}
-              <svg
-                stroke="currentColor"
-                fill="currentColor"
-                stroke-width="0"
-                viewBox="0 0 24 24"
-                height="16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path fill="none" d="M0 0h24v24H0V0z"></path>
-                <path d="M7 11h2v2H7v-2zm14-5v14c0 1.1-.9 2-2 2H5a2 2 0 01-2-2l.01-14c0-1.1.88-2 1.99-2h1V2h2v2h8V2h2v2h1c1.1 0 2 .9 2 2zM5 8h14V6H5v2zm14 12V10H5v10h14zm-4-7h2v-2h-2v2zm-4 0h2v-2h-2v2z"></path>
-              </svg>{" "}
-              {formatDate(listHandbook[0]?.updatedAt || new Date())} - {listHandbook[0]?.handbookStaffData?.position || ""} {listHandbook[0]?.handbookStaffData?.staffUserData?.lastName + " " + listHandbook[0]?.handbookStaffData?.staffUserData?.firstName} {" "}
+            <div className="border-l-[5px] border-yellow-500 bg-yellow-50 py-2 px-4 rounded-tr-lg rounded-br-lg my-2">
+              <p className="text-gray-800 mt-2 line-clamp-3 text-base leading-relaxed">
+                {list[0]?.shortDescription || ""}
+              </p>
+            </div>
+            <span className="flex items-center gap-2 text-gray-700 font-semibold mt-2">
+              <CalendarPlus2 size={16} />
+              {formatDate(list[0]?.updatedAt || new Date())} -{" "}
+              {list[0]?.handbookStaffData?.position}{" "}
+              {list[0]?.handbookStaffData?.staffUserData?.lastName}{" "}
+              {list[0]?.handbookStaffData?.staffUserData?.firstName}
             </span>
-
-            <div className={cx("btn-next")} onClick={() => navigate(PATHS.HOME.HANDBOOK_DETAIL + "/" + listHandbook[0].id)}>Xem tiếp →</div>
+            <div
+              onClick={() =>
+                navigate(PATHS.HOME.HANDBOOK_DETAIL + "/" + list[0]?.id)
+              }
+              className="text-primary-tw text-lg font-semibold cursor-pointer mt-2"
+            >
+              Xem tiếp →
+            </div>
           </div>
 
-          <div className={cx("sub-blog")}>
-            {listHandbook.slice(1, 3).map((item, index) => (
-              <div className={cx("sub-blog-item")} key={index}>
+          {/* Sub Blogs */}
+          <div className={`${isMobile ? "hidden" : "flex flex-col sm:flex-row"} gap-4`}>
+            {list.slice(1, 3).map((item, idx) => (
+              <div
+                key={idx}
+                className="group w-full sm:w-1/2 p-3 border-1 border-transparent hover:border-primary-tw rounded-lg transition-all"
+              >
                 <img
                   src={item?.image || LINK.IMAGE_HANDBOOK}
                   alt="Ảnh bài viết"
+                  className="w-full h-[200px] lg:h-[150px] object-cover rounded-lg"
                 />
-                <div className={cx("content")}>
-                  <h4>{item?.title || " Đặt lịch khám, đưa đón tiện lợi Medpro và Toàn Thắng"} </h4>
-                  <p>
-                    {" "}
-                    {item?.shortDescription}{"..."}
+                <div className="mt-2">
+                  <h4 className="text-base md:text-lg font-semibold mt-2 text-secondaryText-tw group-hover:text-primary-tw transition-all">
+                    {item?.title || "Đặt lịch khám, đưa đón tiện lợi Medpro và Toàn Thắng"}
+                  </h4>
+                  <p className="text-sm text-gray-700 font-medium mt-1 h-[90px] overflow-hidden">
+                    {item?.shortDescription}...
                   </p>
-                  <div className={cx("btn-next")} onClick={() => navigate(PATHS.HOME.HANDBOOK_DETAIL + "/" + item.id)}>Xem tiếp →</div>
+                  <div
+                    onClick={() =>
+                      navigate(PATHS.HOME.HANDBOOK_DETAIL + "/" + item.id)
+                    }
+                    className="text-sky-400 text-sm font-semibold cursor-pointer mt-2"
+                  >
+                    Xem tiếp →
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <div className={cx("body-right")}>
-          {listHandbook.map((item, index) =>
-            <SubBlog key={index} data={item} tag={TAGS[props.id].label} />
-          )}
 
+        {/* Right Column */}
+        <div className={`${isMobile ? "hidden" : "block"} w-full lg:w-[40%] `}>
+          <div className="overflow-y-auto overflow-x-hidden scrollbar-none h-[1000px] px-3">
+            {list.map((item, idx) => (
+              <HandbookCardHorizontal key={idx} item={item} />
+            ))}
+          </div>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

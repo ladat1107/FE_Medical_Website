@@ -1,24 +1,22 @@
-@import "../../../../style/variables.scss";
-
 .handbook-container {
 
     .header-handbook {
         border-radius: 10px;
-        box-shadow: $box-shadow-content-admin;
+        box-shadow: var(--box-shadow-content-admin);
         background: white;
         padding: 20px 30px;
 
         .text {
             font-size: 2em;
             font-weight: 600;
-            color: $primary-color-admin;
+            color: var(--primary-color-admin);
         }
 
         .button {
             border-radius: 5px;
             padding: 5px 15px;
             border: none;
-            background-color: $primary-color-admin;
+            background-color: var(--primary-color-admin);
             color: white;
             cursor: pointer;
             font-weight: 600;
@@ -31,11 +29,11 @@
 
     .filter {
         border-radius: 10px;
-        box-shadow: $box-shadow-content-admin;
+        box-shadow: var(--box-shadow-content-admin);
         background: white;
         padding: 5px;
         height: fit-content;
-        color: $primary-color-admin;
+        color: var(--primary-color-admin);
         font-weight: 600;
 
         .list-tag {
@@ -80,9 +78,9 @@
             }
 
             .active {
-                border: 2px solid #e7e7e7;
+                border: 2px solid var(--primary-color-admin);
                 background: white;
-                color: black;
+                color: var(--primary-color-admin);
             }
         }
     }

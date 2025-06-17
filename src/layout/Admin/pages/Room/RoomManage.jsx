@@ -1,28 +1,28 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SearchOutlined } from "@ant-design/icons";
-import "./Room.scss";
-import { primaryColorAdmin } from "@/style/variables";
-import { faBed, faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { SquareMenu } from "lucide-react";
 import InsertRoom from "./InsertRoom";
 import { useEffect, useState } from "react";
 import { useMutation } from "@/hooks/useMutation";
 import { getAllRoom, getNameDepartment, getRoomById, getServiceSearch, getSpecialtySelect } from "@/services/adminService";
-import { Checkbox, Input, Popover } from "antd";
+import { message, Button, Tooltip } from "antd";
 import DropdownPaginate from "../../components/Dropdown/DropdownPaginate";
 import PaginateCustom from "../../components/Paginate/PaginateCustom";
-import { TABLE } from "@/constant/value";
+import { TABLE, TYPE_ROOM } from "@/constant/value";
 import useDebounce from "@/hooks/useDebounce";
-import DropdownDepartment from "./DropdownDepartment";
 import useQuery from "@/hooks/useQuery";
 import Status from "../../components/Status";
 import DropdownAction from "../../components/Dropdown/DropdownAction";
+import SkeletonRoom from "./SkeletonRoom";
+import RoomFilter from "./RoomFilter";
+import RoomDetail from "./RoomDetail";
+
 const Room = () => {
     let [showInsert, setShowInsert] = useState(false);
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    let [rowsPerPage, setRowPaper] = useState(10);
     let [totalPages, setTotalPage] = useState(0);
     let [listRoom, setListRoom] = useState([]);
-    let [checkAll, setCheckAll] = useState(false);
     let [search, setSearch] = useState("");
     let [obUpdate, setObUpdate] = useState({});
     let searchDebounce = "";
@@ -30,245 +30,270 @@ const Room = () => {
     let { data: departmentData } = useQuery(() => getNameDepartment())
     let [specialty, setSpecailty] = useState([]);
     let { data: specialtyData } = useQuery(() => getSpecialtySelect())
-    let [services, setServices] = useState([]);
+    let [typeRoom, setTypeRoom] = useState([]);
+    let [paraclinical, setParaclinical] = useState([]);
     let { data: serviceData } = useQuery(() => getServiceSearch())
-    let [searchDepartment, setSearchDepartment] = useState(0);
+    let [filter, setFilter] = useState({
+        departmentId: null,
+        typeRoom: null,
+        status: null
+    });
+
+    // State quản lý modal chi tiết phòng
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [selectedRoomDetail, setSelectedRoomDetail] = useState(null);
+
     useEffect(() => {
         if (departmentData && departmentData?.DT?.length > 0) {
             setDepartments(departmentData.DT);
         }
     }, [departmentData])
-    let {
-        data: dataRoom,
-        loading: listRoomLoading,
-        error: listRoomError,
-        execute: fetchRooms,
-    } = useMutation((query) => getAllRoom(currentPage, rowsPerPage.id, searchDebounce, searchDepartment))
+
+    let { data: dataRoom, loading: loadingRoom, execute: fetchRooms } = useMutation(() => getAllRoom({ page: currentPage, limit: rowsPerPage, search: searchDebounce, filter }))
     useEffect(() => {
-        if (dataRoom && dataRoom.DT && dataRoom.DT.rows && dataRoom.DT) {
-            let _listRoom = [...dataRoom.DT.rows];
-            for (let i = 0; i < _listRoom.length; i++) {
-                let bedFree = 0;
-                let bedBusy = 0;
-                _listRoom[i].checked = false;
-                _listRoom[i].bedQuantity = _listRoom[i].bedRoomData.length;
-                for (let j = 0; j < _listRoom[i].bedQuantity; j++) {
-                    if (_listRoom[i].bedRoomData[j].status === 1) {
-                        bedBusy++;
-                    } else {
-                        bedFree++;
-                    }
+        if (dataRoom?.EC === 0 && typeRoom?.length > 0) {
+            let _listRoom = dataRoom.DT.rows.map(item => {
+                let arrayService = item?.serviceData?.map(service => service.id)
+                let _typeRoom = typeRoom.find(type => arrayService.includes(type.value)) || {}
+                return {
+                    ...item,
+                    typeRoom: _typeRoom,
                 }
-                _listRoom[i].bedFree = bedFree;
-                _listRoom[i].bedBusy = bedBusy;
-            }
+            })
             setListRoom(_listRoom);
-            setTotalPage(dataRoom.DT.count / rowsPerPage.value);
+            setTotalPage(dataRoom.DT.count / rowsPerPage);
         }
-    }, [dataRoom])
+    }, [dataRoom, typeRoom])
+
     useEffect(() => {
         fetchRooms();
-    }, [currentPage, useDebounce(search, 500), rowsPerPage, searchDepartment]);
+    }, [currentPage, useDebounce(search, 500), rowsPerPage, filter]);
+
     useEffect(() => {
         if (specialtyData && specialtyData?.DT?.length > 0) {
             setSpecailty(specialtyData.DT);
         }
     }, [specialtyData])
+
     useEffect(() => {
-        if (serviceData && serviceData?.DT?.length > 0) {
-            setServices(serviceData.DT);
+        if (serviceData?.EC === 0 && serviceData?.DT?.length > 0) {
+            let typeRoom = [];
+            let paraclinical = [];
+            serviceData.DT.forEach(service => {
+                if (service?.isLaboratory === 1) {
+                    typeRoom.push({ value: service.id, label: service.name })
+                } else {
+                    paraclinical.push({ value: service.id, label: service.name })
+                }
+            })
+            setTypeRoom(typeRoom);
+            setParaclinical(paraclinical);
         }
     }, [serviceData])
 
-    let handleChange = (item) => {
-        let _listRoom = [...listRoom];
-        _listRoom = _listRoom.map(obj =>
-            obj.id === item.id ? { ...obj, checked: !item.checked } : obj
-        );
-        setCheckAll(false);
-        setListRoom(_listRoom);
-    };
-    let handleChangeSelectedAll = () => {
-        let _listRoom = [...listRoom];
-        setCheckAll(!checkAll);
-        _listRoom = _listRoom.map(obj =>
-            checkAll === true ? { ...obj, checked: false } : { ...obj, checked: true }
-        );
-        setListRoom(_listRoom);
-    }
-    let handleChangePaginate = (item) => {
+    const handleChangePaginate = (item) => {
         setRowPaper(item);
         setCurrentPage(1);
     }
     searchDebounce = useDebounce(search, 500);
-    let handleChangeSearch = (event) => {
+    const handleChangeSearch = (event) => {
         setSearch(event.target.value);
         setCurrentPage(1)
     }
-    let refresh = () => {
-        setCheckAll(false)
+
+    const refresh = () => {
         handleShow(false)
         fetchRooms();
     }
-    let handleShow = (value) => {
+    const handleShow = (value) => {
         setObUpdate(null)
     }
-    let handleUpdate = async (item) => {
+
+    const handleUpdate = async (item) => {
         setShowInsert(false)
         let response = await getRoomById(item.id);
-        if (response?.data?.EC == 0) {
-            let value = response?.data?.DT;
+        if (response?.EC == 0) {
+            let value = response?.DT;
             setObUpdate(value)
             setShowInsert(true)
         } else {
-            message.error(response?.data?.EM || "Không thể chọn phòng ban")
+            message.error(response?.EM)
             refresh();
         }
     }
-    let handleShowInsert = (value) => {
+
+    // Xử lý khi nhấn nút xem chi tiết
+    const handleViewDetail = async (room) => {
+        try {
+            // Lấy thông tin chi tiết phòng từ API
+            const response = await getRoomById(room.id);
+            if (response?.EC === 0) {
+                setSelectedRoomDetail({ ...response.DT, typeRoom: room.typeRoom, department: room.roomDepartmentData.name });
+                setIsDetailModalVisible(true);
+            } else {
+                message.error(response?.EM || "Không thể tải thông tin phòng");
+            }
+        } catch (error) {
+            console.error("Lỗi khi lấy thông tin chi tiết phòng:", error);
+            message.error("Đã xảy ra lỗi khi tải thông tin chi tiết phòng");
+        }
+    };
+
+    const handleCloseDetailModal = () => {
+        setIsDetailModalVisible(false);
+    };
+
+    const handleShowInsert = (value) => {
         setObUpdate(null)
         setShowInsert(value)
     }
-    let handleChangeDepartment = (value) => {
-        setSearchDepartment(value);
+    const handleChangeDepartment = (value) => {
+        setFilter({ ...filter, departmentId: value });
         setCurrentPage(1);
-        setSearch("");
     }
+    const handleChangeTypeRoom = (value) => {
+        setFilter({ ...filter, typeRoom: value });
+        setCurrentPage(1);
+    }
+    const handleChangeStatus = (value) => {
+        setFilter({ ...filter, status: value });
+        setCurrentPage(1);
+    }
+
     return (
-        <div className="room-content">
-            <div className="container">
-                <div className="room-of-room-content-header d-flex align-items-center justify-content-between py-3">
-                    <div className="text">QUẢN LÝ PHÒNG</div>
-                    <div>
+        <div className="p-4 bg-bgAdmin min-h-screen">
+            <div className="mx-auto">
+                <div className="flex items-center justify-between py-3">
+                    <div className="flex items-center gap-2">
+                        <SquareMenu className="text-secondaryText-tw" />
+                        <span className="text-secondaryText-tw text-[18px] uppercase">Quản lý phòng</span>
+                    </div>
+                    <div className="flex space-x-3">
                         {!showInsert &&
-                            <button className=' py-1 px-2 btn-add-room' onClick={() => { setObUpdate(null), setShowInsert(true) }}>
-                                <FontAwesomeIcon
-                                    className='me-1 icon' icon={faPlus} style={{ color: "#0A8FDC", }} /> Thêm mới</button>
+                            <button className="py-1 px-2 rounded-lg bg-primary-tw text-white hover:bg-primary-tw-light transition-colors"
+                                onClick={() => { setObUpdate(null), setShowInsert(true) }}>
+                                <FontAwesomeIcon className="mr-1" icon={faPlus} /> Thêm mới</button>
                         }
-                        <button className='py-1 px-2 btn-refresh-room ms-3' onClick={() => refresh()}>
+                        <Button className="py-1 px-2"
+                            onClick={() => refresh()}>
                             <FontAwesomeIcon
-                                className='me-1 icon' icon={faRotateRight} style={{ color: "#04a9f3", }} /> Tải lại</button>
+                                className="mr-1" icon={faRotateRight} /> Tải lại
+                        </Button>
                     </div>
                 </div>
-                <div className={`p-1 animated-div ${showInsert ? 'show' : ''}`}>
-                    {showInsert && specialty?.length > 0 && services?.length > 0 && <InsertRoom
+                <div className={`transition-all duration-500 ease-in-out overflow-hidden ${showInsert ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                    {showInsert && specialty?.length > 0 && <InsertRoom
                         specialty={specialty}
-                        services={services}
+                        typeRoom={typeRoom}
+                        paraclinical={paraclinical}
                         obUpdate={obUpdate}
                         departments={departments}
                         handleShowInsert={handleShowInsert}
                         refresh={refresh}
                     />}
                 </div>
-                <div className="table-room bg-white ">
-                    <div>
-                        <Input placeholder="Tìm kiếm" prefix={<SearchOutlined />} className="ms-4 my-3 w-25"
-                            value={search}
-                            onChange={(event) => { handleChangeSearch(event) }} />
-                    </div>
-                    <div className="px-4">
-                        <table className="w-100">
-                            <thead className="header">
-                                <tr>
-                                    <th scope="col" className="rounded-top-left p-2">
-                                        <div>
-                                            <Checkbox
-                                                checked={checkAll}
-                                                onChange={() => { handleChangeSelectedAll() }}
-                                                size="small"
-                                            />
-                                        </div>
-                                    </th>
-                                    <th scope="col" className=" px-1">Tên phòng</th>
-                                    <th scope="col" className=" px-1"><div>Khoa  <DropdownDepartment
-                                        departments={departments}
-                                        change={handleChangeDepartment} />
-                                    </div></th>
-                                    <th scope="col" className=" px-1 text-center">Giường trống</th>
-                                    <th scope="col" className="text-center ps-5">Trạng thái</th>
-                                    <th scope="col" className="rounded-top-right px-1"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="table-body ">
-                                {+listRoom.length > 0 && +totalPages != 0 ?
-                                    <>
-                                        {
-                                            listRoom.map((item, index) => {
-                                                return (
-                                                    <Popover
-                                                        key={index}
-                                                        placement="topLeft"
-                                                        content={
-                                                            item?.serviceData.map((service, index) => (
-                                                                <span key={index}>
-                                                                    {service.name}
-                                                                    <br />
-                                                                </span>
-                                                            ))}
-                                                        title="Dịch vụ"
-                                                    >
-                                                        <tr>
-                                                            <td className="p-2">
-                                                                <div>
-                                                                    <Checkbox
-                                                                        checked={item.checked}
-                                                                        onChange={() => { handleChange(item, index) }}
-                                                                        size="small"
-                                                                    /></div>
-                                                            </td>
-                                                            <td className="text-start px-1 py-2 text-uppercase">
-                                                                <div> {item?.name || "Khác"}</div>
-                                                            </td>
-                                                            <td className="text-start px-1 py-2">
-                                                                <div className="fw-normal">{item?.roomDepartmentData?.name || "_"}</div>
-                                                            </td>
-                                                            <td className="text-center px-1 py-2">
-                                                                {item.bedQuantity > 0 ?
-                                                                    <div className="fw-normal"><b style={{ color: primaryColorAdmin }}>{item?.bedBusy || 0}</b> / {item?.bedQuantity || 0}</div>
-                                                                    :
-                                                                    <div>
-                                                                        -
-                                                                    </div>}
-                                                            </td>
-                                                            <td className="text-center ps-5 py-2">
-                                                                <Status data={item?.status} />
-                                                            </td>
-                                                            <td className="px-1 py-2 d-flex justify-content-end">
-                                                                <div className='iconDetail'>
-                                                                    <DropdownAction
-                                                                        data={item}
-                                                                        action={handleUpdate}
-                                                                        refresh={refresh}
-                                                                        table={TABLE.ROOM}
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </Popover>
-                                                )
-
-                                            })
-                                        }
-                                    </> :
-                                    <tr>
-                                        <td colSpan="7" className="text-center">
-                                            <span className="text-gray-500">Không có dữ liệu</span>
-                                        </td>
+                <div className="bg-white rounded-bg-admin shadow-table-admin">
+                    <RoomFilter
+                        search={search}
+                        handleChangeSearch={handleChangeSearch}
+                        filter={filter}
+                        departments={departments}
+                        typeRoom={typeRoom}
+                        handleChangeDepartment={handleChangeDepartment}
+                        handleChangeTypeRoom={handleChangeTypeRoom}
+                        handleChangeStatus={handleChangeStatus}
+                    />
+                    <div className="p-4">
+                        <div className="w-full overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="bg-bgTableHead text-textHeadTable">
+                                        <th className="p-2 text-center rounded-tl-lg">#</th>
+                                        <th className="p-2">Tên phòng</th>
+                                        <th className="p-2">Khoa</th>
+                                        {filter.typeRoom === TYPE_ROOM.CLINIC && <th className="p-2">Chuyên khoa</th>}
+                                        <th className="p-2">Loại phòng</th>
+                                        <th className="p-2 text-center">Giường trống</th>
+                                        <th className="p-2 text-center">Trạng thái</th>
+                                        <th className="p-2 rounded-tr-lg"></th>
                                     </tr>
-                                }
+                                </thead>
+                                <tbody>
+                                    {
+                                        loadingRoom ? <SkeletonRoom /> :
+                                            +listRoom.length > 0 && +totalPages != 0 ?
+                                                <>
+                                                    {
+                                                        listRoom.map((item, index) => {
+                                                            return (
+                                                                <tr key={index} className="border-b border-gray-200 hover:bg-hoverTable transition-colors">
+                                                                    <td className="p-2 text-center">
+                                                                        {item.id}
+                                                                    </td>
+                                                                    <td className="p-2 uppercase cursor-pointer" onClick={() => handleViewDetail(item)}>
+                                                                        <Tooltip title="Xem chi tiết phòng">
+                                                                            <div>{item?.name || "Khác"}</div>
+                                                                        </Tooltip>
+                                                                    </td>
+                                                                    <td className="p-2">
+                                                                        <div className="font-normal">{item?.roomDepartmentData?.name || "_"}</div>
+                                                                    </td>
+                                                                    {filter.typeRoom === TYPE_ROOM.CLINIC &&
+                                                                        <td className="p-2">
+                                                                            <div className="font-normal">{item?.specialtyData?.name || "_"}</div>
+                                                                        </td>
+                                                                    }
+                                                                    <td className="p-2">
+                                                                        <div className="font-normal">{item?.typeRoom?.label || "_"}</div>
+                                                                    </td>
+                                                                    <td className="p-2 text-center">
+                                                                        {item.capacity > 0 ?
+                                                                            <div className="font-normal"><b className="text-primary-tw">{Number(item?.capacity) - Number(item?.examinationRoomData?.length) || 0}</b> / {item?.capacity || 0}</div>
+                                                                            :
+                                                                            <div></div>
+                                                                        }
+                                                                    </td>
+                                                                    <td className="p-2 text-center">
+                                                                        <Status data={item?.status} />
+                                                                    </td>
+                                                                    <td className="p-2 flex justify-end items-center space-x-2">
+                                                                        <DropdownAction
+                                                                            data={item}
+                                                                            action={handleUpdate}
+                                                                            refresh={refresh}
+                                                                            table={TABLE.ROOM}
+                                                                        />
+                                                                    </td>
+                                                                </tr>
+                                                            )
 
-                            </tbody>
-                        </table>
-                        <div className='footer-table d-flex justify-content-end mx-2 mt-3'>
-                            <div className='select-page'>
-                                <DropdownPaginate page={rowsPerPage}
-                                    setPage={handleChangePaginate} />
+                                                        })
+                                                    }
+                                                </> :
+                                                <tr>
+                                                    <td colSpan="7" className="text-center p-4">
+                                                        <span className="text-gray-500">Không có dữ liệu</span>
+                                                    </td>
+                                                </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="flex justify-end items-center mt-4">
+                            <div className="mr-4">
+                                <DropdownPaginate page={rowsPerPage} setPage={handleChangePaginate} />
                             </div>
-                            <PaginateCustom totalPageCount={totalPages}
-                                setPage={setCurrentPage} />
+                            <PaginateCustom totalPageCount={totalPages} setPage={setCurrentPage} />
                         </div>
                     </div>
                 </div>
+
+                {/* Modal xem chi tiết phòng */}
+                <RoomDetail
+                    visible={isDetailModalVisible}
+                    onClose={handleCloseDetailModal}
+                    roomData={selectedRoomDetail}
+                />
             </div>
         </div>
     );

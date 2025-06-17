@@ -1,100 +1,147 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "../DepartmentDetail.scss";
-import { faCalendarMinus, faLocationDot, faMagnifyingGlassLocation, faPhone } from "@fortawesome/free-solid-svg-icons";
-import { Breadcrumb, Rate } from "antd";
-import { primaryColorHome, seccondaryColorHome } from "@/style/variables";
+
+//import "../DepartmentDetail.scss";
+import { MapPin, Phone, Calendar } from "lucide-react"
+import { Breadcrumb, Rate, Skeleton } from "antd";
 import { Link } from "react-router-dom";
 import { PATHS } from "@/constant/path";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
-import SliderComponent from "../../Home/HomeComponent/Slider";
 import GoogleMap from "./MapComponent";
-const listAdvertisement1 = [
-    "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn-pkh.longvan.net%2Fprod-partner%2F42a394bd-0354-4c1c-b83b-f6cc331d3263-m3.png&w=1920&q=75",
-    "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn-pkh.longvan.net%2Fprod-partner%2F42a394bd-0354-4c1c-b83b-f6cc331d3263-m3.png&w=1920&q=75",
-    "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn-pkh.longvan.net%2Fprod-partner%2F42a394bd-0354-4c1c-b83b-f6cc331d3263-m3.png&w=1920&q=75",
-    "https://medpro.vn/_next/image?url=https%3A%2F%2Fcdn-pkh.longvan.net%2Fprod-partner%2F42a394bd-0354-4c1c-b83b-f6cc331d3263-m3.png&w=1920&q=75",
-]
-
+import ParseHtml from "@/components/ParseHtml";
+import BannerSwiper from "./BannerSwiper";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearBooking } from "@/redux/bookingSlice";
 const DepartmentDetailHeader = (props) => {
-    let { departmentDetail } = props;
+    let { departmentDetail, departmentLoading } = props;
+    const randomRating = [3, 4, 5][Math.floor(Math.random() * 3)];
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const breadcrumbItems = [
-        {
-            title: <Link to={PATHS.HOME.HOMEPAGE}>Trang chủ</Link>,
-        },
-        {
-            title: <Link to={PATHS.HOME.DEPARTMENT_LIST} >Khoa</Link>,
-        },
-        {
-            title: (<div>Khoa {departmentDetail.name}</div>), // Mục cuối không dùng Link
-            className: "breadcrumb-last", // Gắn class tùy chỉnh cho item cuối
-        },
+        { title: <Link className="!text-secondaryText-tw no-underline hover:!bg-transparent" to={PATHS.HOME.HOMEPAGE}>Trang chủ</Link>, },
+        { title: <Link className="!text-secondaryText-tw no-underline hover:!bg-transparent" to={PATHS.HOME.DEPARTMENT_LIST} >Khoa</Link>, },
+        { title: (<div className="text-primary-tw ">Khoa {departmentDetail.name}</div>) },
     ];
+    const handleBooking = () => {
+        dispatch(clearBooking());
+        navigate(PATHS.HOME.BOOKING);
+    }
     return (
         <>
-            <Breadcrumb items={breadcrumbItems} className="custom-breadcrumb" />
-            <div className="department-detail-user-header row">
-                <div className="col-3">
-                    <div className="hospital-info">
-                        <div className="img-star">
-                            <img src={departmentDetail?.image || ""} alt="" />
-                            <div >
-                                <span>(4) </span> <Rate disabled allowHalf defaultValue={4} />
+            <Breadcrumb items={breadcrumbItems} className="font-bold" />
+
+            <div className="flex flex-col md:flex-row gap-6 w-full mt-4 ">
+                {/* Left Column */}
+                <div className="w-full md:w-1/3 lg:w-1/4">
+                    <div className="bg-white rounded-2xl p-2 shadow-md flex flex-col">
+                        {departmentLoading ? (
+                            <Skeleton.Avatar shape="circle" active style={{ width: "150px", height: "150px", margin: "5px auto" }} />
+                        ) : (
+                            <div className="flex flex-col items-center w-full ">
+                                <img
+                                    src={departmentDetail?.image || ""}
+                                    alt="Department"
+                                    className="w-[150px] md:w-[70%] rounded-full mb-4"
+                                />
+                                <div>
+                                    <span className="text-[#FADB14] font-bold">({randomRating}) </span>
+                                    <Rate disabled allowHalf value={randomRating} />
+                                </div>
+                            </div>
+                        )}
+
+                        {departmentLoading ? (
+                            <Skeleton active paragraph={{ rows: 4 }} />
+                        ) : (
+                            <div className="px-3 mt-3">
+                                <div className="flex items-start mb-2">
+                                    <MapPin className="text-[#f0bd46] mr-2 mt-1 flex-shrink-0" />
+                                    <span className="text-gray-700 ">
+                                        Cơ sở 215 Hồng Bàng, Phường 11, Quận 5, TP.HCM - {departmentDetail?.address}
+                                    </span>
+                                </div>
+                                <div className="flex items-center ">
+                                    <Phone className="text-[#f0bd46] mr-2 flex-shrink-0" />
+                                    <span className="text-gray-700">0353366459</span>
+                                </div>
+                                <button onClick={handleBooking} className="w-full text-center text-white bg-primary-tw rounded-full py-2 text-base font-bold cursor-pointer mt-2 hover:bg-primary-tw/80 transition-all duration-300">
+                                    Đặt khám ngay
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {!departmentLoading && (
+                        <div className="hidden md:flex mt-5 flex-col items-center">
+                            <img
+                                src={
+                                    departmentDetail?.deanDepartmentData?.staffUserData?.avatar ||
+                                    "https://medpro.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbn.da13f84b.png&w=1920&q=75"
+                                }
+                                alt="Department Head"
+                                className="rounded-2xl mb-2 w-full"
+                            />
+                            <div>
+                                <span className="text-gray-600 font-bold">Trưởng khoa</span>
+                                <span className="text-orange-500 font-semibold">
+                                    {" "}
+                                    - {departmentDetail?.deanDepartmentData?.position}.{" "}
+                                    {departmentDetail?.deanDepartmentData?.staffUserData?.lastName +
+                                        " " +
+                                        departmentDetail?.deanDepartmentData?.staffUserData?.firstName}
+                                </span>
                             </div>
                         </div>
-                        <hr />
-                        <div className="text-location px-3">
-                            <div>
-                                <FontAwesomeIcon className="icon" icon={faLocationDot} />
-                                <span> Cơ sở 215 Hồng Bàng, Phường 11, Quận 5, TP.HCM - {departmentDetail?.address}</span>
-                            </div>
-                            {/* <div>
-                                <FontAwesomeIcon className="icon" icon={faClock} />
-                                <span>Thứ 2 - Thứ 7 (6:30 - 19:00)</span>
-                            </div> */}
-                            <div>
-                                <FontAwesomeIcon className="icon" icon={faPhone} />
-                                <span>0353366459</span>
-                            </div>
-                            <div className="btn-booking">Đặt khám ngay</div>
+                    )}
+
+                    {!departmentLoading && (
+                        <div className="w-full h-[400px] mt-5 rounded-3xl shadow-md overflow-hidden">
+                            <GoogleMap />
                         </div>
-                    </div>
-                    <div className="image-ri">
-                        <img src={departmentDetail?.deanDepartmentData?.staffUserData?.avatar || "https://medpro.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fbn.da13f84b.png&w=1920&q=75"} />
-                        <div> <span className="article-date">Trưởng khoa</span>
-                            <span className="article-author"> - {departmentDetail?.deanDepartmentData?.position}. {departmentDetail?.deanDepartmentData?.staffUserData?.lastName + " " + departmentDetail?.deanDepartmentData?.staffUserData?.firstName}</span></div>
-                    </div>
-                    <div className="map-deparment">
-                        <GoogleMap />
-                    </div>
+                    )}
                 </div>
 
-                <div className="department-detail-user-content col-9">
-                    <div className="slide-department">
-                        <SliderComponent
-                            type="advertisement"
-                            numberShow={1}
-                            autoplayProps={true}
-                            dot={false}
-                            listData={listAdvertisement1}
-                        />
-                    </div>
-                    <div className="content-handbook ">
-                        <h1 className="article-title">
-                            {departmentDetail?.name}
-                        </h1>
-                        <div className="article-meta">
-                            <FontAwesomeIcon className="me-3" icon={faCalendarMinus} />
-                            <span className="article-date">Trưởng khoa</span>
-                            <span className="article-author"> - {departmentDetail?.deanDepartmentData?.position}. {departmentDetail?.deanDepartmentData?.staffUserData?.lastName + " " + departmentDetail?.deanDepartmentData?.staffUserData?.firstName}</span>
-                        </div>
-                        <div className="article-intro">
-                            {departmentDetail?.shortDescription}
-                        </div>
-                    </div>
-                    <div className="article-content mt-4">
-                        <div className="markdown" dangerouslySetInnerHTML={{ __html: departmentDetail?.departmentDescriptionData?.htmlContent || "" }}></div>
+                {/* Right Column */}
+                <div className="w-full md:w-2/3 lg:w-3/4 flex flex-col items-center">
+                    <div className="w-full rounded-2xl p-0">
+                        <BannerSwiper loading={departmentLoading} />
                     </div>
 
+                    <div className="w-full bg-white shadow-md p-4 rounded-2xl mt-3">
+                        {departmentLoading ? (
+                            <Skeleton active style={{ width: "100%", height: "300px" }} className="my-3" />
+                        ) : (
+                            <>
+                                <h1 className="text-2xl font-bold text-secondaryText-tw mb-2 uppercase">{departmentDetail?.name}</h1>
+                                <div className="text-sm text-orange-500 mb-2 flex items-center">
+                                    <Calendar size={18} className="mr-2" />
+                                    <span >Trưởng khoa</span>
+                                    <span className="font-semibold">
+                                        {" "}
+                                        - {departmentDetail?.deanDepartmentData?.position}.{" "}
+                                        {departmentDetail?.deanDepartmentData?.staffUserData?.lastName +
+                                            " " +
+                                            departmentDetail?.deanDepartmentData?.staffUserData?.firstName}
+                                    </span>
+                                </div>
+                                <div className="flex items-start gap-2 ">
+                                    {/* Gạch đứng màu cam */}
+                                    <div className="w-[2px] h-full bg-orange-500 rounded-sm" />
+
+                                    {/* Nội dung đoạn text */}
+                                    <div className="text-base font-medium text-gray-600 text-justify">
+                                        {departmentDetail?.shortDescription}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="w-full bg-white shadow-md p-4 rounded-2xl mt-4 mb-12 max-h-[750px] overflow-y-auto">
+                        {departmentLoading ? (
+                            <Skeleton active style={{ width: "100%", height: "300px" }} className="my-3" />
+                        ) : (
+                            <ParseHtml htmlString={departmentDetail?.htmlDescription || ""} />
+                        )}
+                    </div>
                 </div>
             </div>
         </>

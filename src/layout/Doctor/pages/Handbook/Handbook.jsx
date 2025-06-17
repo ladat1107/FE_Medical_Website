@@ -1,5 +1,5 @@
 import './Handbook.scss'
-import { Input, Pagination, Select } from "antd";
+import { Input, Pagination, Select, Skeleton } from "antd";
 import { SearchOutlined } from "@mui/icons-material";
 import { act, useEffect, useState } from "react";
 import { STATUS_HOSPITAL, TAGS } from "@/constant/value";
@@ -9,7 +9,7 @@ import HandbookItem from "@/components/HandbookItem";
 import { getAllHandbooks } from '@/services/doctorService';
 import CreateHandbook from './CreateHandbook/CreateHandbook';
 import { useSelector } from 'react-redux';
-import { set } from 'lodash';
+import HandbookItemSkeleton from '@/components/HandbookItem/HandbookItemSkeleton';
 const statusArray = Object.values(STATUS_HOSPITAL);
 statusArray.unshift({ value: "", label: "Tất cả" });
 const Handbook = () => {
@@ -29,7 +29,8 @@ const Handbook = () => {
         data: dataHandbook,
         loading: listHandbookLoading,
         execute: fetchHandbooks,
-    } = useMutation((query) => getAllHandbooks(currentPage, rowsPerPage, searchDebounce,filter.join(','), status.value))
+    } = useMutation((query) => getAllHandbooks(currentPage, rowsPerPage, searchDebounce, filter.join(','), status.value))
+
     useEffect(() => {
         if (dataHandbook && dataHandbook.EC === 0) {
             let handbook = dataHandbook.DT.handBooks;
@@ -94,62 +95,69 @@ const Handbook = () => {
             <div className="handbook-container">
                 <div className='header-handbook'>
                     <div className="d-flex justify-content-between align-items-center">
-                        <div className='text'>Cẩm nang</div>
-                        <div>
-                            {action === 1 ?
-                                <button className='button' onClick={() => { setAction(2), refresh() }}><i className="fa-solid fa-plus"></i>Thêm mới</button> :
-                                <button className='button' onClick={() => { setAction(1), refresh() }}> <i className="fa-solid fa-arrow-left"></i>Hủy bỏ</button>
-                            }
-                        </div>
+                        {!listHandbookLoading && <div className='text'>Cẩm nang</div>}
+                        {listHandbookLoading ? <Skeleton.Button style={{ width: '100%' }} active={true} /> :
+                            <div>
+                                {action === 1 ?
+                                    <button className='button' onClick={() => { setAction(2), refresh() }}><i className="fa-solid fa-plus"></i>Thêm mới</button> :
+                                    <button className='button' onClick={() => { setAction(1), refresh() }}> <i className="fa-solid fa-arrow-left"></i>Hủy bỏ</button>
+                                }
+                            </div>}
                     </div>
-                    <div className='my-3'> Cẩm nang sức khỏe cung cấp những thông tin hữu ích về các bệnh lý thường gặp, quy trình khám chữa bệnh, hướng dẫn chăm sóc sức khỏe hằng ngày, và những lưu ý quan trọng trong việc phòng ngừa bệnh, giúp người dùng tự tin và chủ động hơn trong việc bảo vệ sức khỏe bản thân và gia đình.</div>
+                    {listHandbookLoading ? <Skeleton style={{ width: '100%' }} active={true} /> :
+                        <div className='my-3'> Cẩm nang sức khỏe cung cấp những thông tin hữu ích về các bệnh lý thường gặp, quy trình khám chữa bệnh, hướng dẫn chăm sóc sức khỏe hằng ngày, và những lưu ý quan trọng trong việc phòng ngừa bệnh, giúp người dùng tự tin và chủ động hơn trong việc bảo vệ sức khỏe bản thân và gia đình.</div>
+                    }
                 </div>
                 <div className="row d-flex flex-lg-row-reverse justify-content-between align-items-start mt-4">
                     <div className="ps-3 pb-3 col-12 col-lg-3">
-                        <div className="filter p-3">
-                            {action === 1 && <>
+                        {listHandbookLoading ? <Skeleton style={{ width: '100%' }} active={true} /> :
+                            <div className="filter p-3">
+                                {action === 1 && <>
+                                    <div>
+                                        <div className=""> Trạng thái </div>
+                                        <Select
+                                            className="w-100 mt-3"
+                                            placeholder="Chọn trạng thái"
+                                            labelInValue
+                                            options={statusArray}
+                                            value={status}
+                                            onChange={(selected) => setStatus({ value: selected.value, label: selected.label })}
+                                        />
+                                        <Input placeholder="Tìm kiếm cẩm nang" prefix={<SearchOutlined />} className="mt-3"
+                                            value={search}
+                                            onChange={(event) => { handleChangeSearch(event) }} />
+                                    </div>
+                                    <hr />
+                                </>}
                                 <div>
-                                    <div className=""> Trạng thái </div>
-                                    <Select
-                                        className="w-100 mt-3"
-                                        placeholder="Chọn trạng thái"
-                                        labelInValue
-                                        options={statusArray}
-                                        value={status}
-                                        onChange={(selected) => setStatus({ value: selected.value, label: selected.label })}
-                                    />
-                                    <Input placeholder="Tìm kiếm cẩm nang" prefix={<SearchOutlined />} className="mt-3"
-                                        value={search}
-                                        onChange={(event) => { handleChangeSearch(event) }} />
-                                </div>
-                                <hr />
-                            </>}
-                            <div>
-                                <div>Tag</div>
-                                <div>
-                                    <div className="list-tag tag-box mt-3">
-                                        {allTags.map((tag, index) => (
-                                            <div
-                                                key={index}
-                                                className={`tag-item ${tag.checked ? 'active' : ''}`}
-                                                onClick={() => { handleTagClick(tag) }}>
-                                                <p>{tag?.label}</p>
-                                            </div>
-                                        ))}
+                                    <div>Tag</div>
+                                    <div>
+                                        <div className="list-tag tag-box mt-3">
+                                            {allTags.map((tag, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`tag-item ${tag.checked ? 'active' : ''}`}
+                                                    onClick={() => { handleTagClick(tag) }}>
+                                                    <p>{tag?.label}</p>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </div>}
                     </div>
                     {action === 1 &&
                         <div className="col-12 col-lg-9">
                             <div className="row">
-                                {listHandbook.length > 0 && listHandbook.map((item, index) => (
-                                    <HandbookItem
-                                        key={index}
-                                        data={item}
-                                        index={index}
-                                        handleUpdate={(id) => { setIdUpdate(id) }} />))}
+                                {
+                                    listHandbookLoading ? (<HandbookItemSkeleton />) :
+                                        listHandbook.length > 0 ? listHandbook.map((item, index) => (
+                                            <HandbookItem
+                                                key={index}
+                                                data={item}
+                                                index={index}
+                                                handleUpdate={(id) => { setIdUpdate(id) }} />))
+                                            : <div className="text-center w-100 mt-5">Không có dữ liệu</div>}
                             </div>
                         </div>}
                     {action === 2 && (
@@ -158,6 +166,7 @@ const Handbook = () => {
                                 handbookId={idUpdate}
                                 allTags={allTags}
                                 setAllTags={(tags) => setAllTags(tags)}
+                                setAction={() => setAction(1)}
                                 refresh={refresh}
                             // key={idUpdate ? idUpdate + " " + Date.now() : "modal-closed"}
                             />

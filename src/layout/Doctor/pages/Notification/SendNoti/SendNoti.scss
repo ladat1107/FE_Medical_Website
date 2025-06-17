@@ -1,0 +1,64 @@
+.send-noti-cont{
+    border-top: 1px solid #dddddd;
+    padding: 1.5% 0;
+    
+
+    .send-noti-title{
+        border: none;
+        font-size: 1.7em;
+        width: 100%;
+        height: 1.5em;
+        overflow: hidden;
+        resize: none;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .icon-container {
+        display: flex;
+        align-items: center; /* Căn giữa theo chiều dọc */
+        justify-content: center; /* Căn giữa theo chiều ngang (nếu cần) */
+        height: 100%; /* Đảm bảo nó chiếm toàn bộ chiều cao */
+    }
+    
+    .add-button{
+        border-radius: 5px;
+        padding: 1px 15px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0.5px solid rgb(207, 207, 207);
+
+        i {
+            margin-right: 0px;
+        }
+
+        &:hover {
+            box-shadow: 2px 2px 4px #e6eaeb, -2px -2px 4px #e6eaeb;
+        }
+    }
+
+    .attach-file{
+        border-radius: 5px;
+        padding: 5px 5px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0.5px solid rgb(207, 207, 207);
+
+        .attach-file-title{
+            font-weight: 500;
+        }
+
+        .attach-file-capacity{
+            font-size: 0.9em;
+            color: gray;
+        }
+    }
+}

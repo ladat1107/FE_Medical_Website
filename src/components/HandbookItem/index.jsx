@@ -4,7 +4,7 @@ import { formatDate } from "@/utils/formatDate";
 const HandbookItem = (props) => {
     let handbook = props?.data;
     return (
-        <div className=" col-12 col-md-6 col-lg-4 ps-3 pb-3" key={props?.index}>
+        <div className="col-12 col-md-6 col-lg-4 ps-3 pb-3" key={props?.index}>
             <div className="handbook-item-cart w-100">
                 <div className="handbook-image" style={{ backgroundImage: `url(${handbook?.image || 'https://ant-cra.cremawork.com/assets/images/extra-pages/blog/blog-img.png'})` }}>
                     <DropdownHandbook 

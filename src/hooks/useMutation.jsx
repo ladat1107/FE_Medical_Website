@@ -10,9 +10,9 @@ export const useMutation = (promise) => {
     try {
       const res = await promise(payload);
 
-      if (res.data) {
-        setData(res.data);
-        onSuccess?.(res.data); // sent data to outside
+      if (res) {
+        setData(res);
+        onSuccess?.(res); // sent data to outside
       }
     } catch (error) {
       setError(error);

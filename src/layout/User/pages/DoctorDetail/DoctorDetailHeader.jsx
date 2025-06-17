@@ -1,86 +1,117 @@
 import React from "react";
-import { Breadcrumb } from "antd";
+import { Breadcrumb, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import classNames from "classnames/bind";
-import styles from "./doctorDetail.module.scss";
 import { LINK } from "@/constant/value";
 import { formatCurrency } from "@/utils/formatCurrency";
 import { PATHS } from "@/constant/path";
-import { primaryColorHome, seccondaryColorHome } from "@/style/variables";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import userService from "@/services/userService";
+import { useDispatch, useSelector } from "react-redux";
+import { BOOKING_CONTENT } from "@/constant/value";
+import { clearBooking, setCurrentContent, setDoctor } from "@/redux/bookingSlice";
 // Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
 const DoctorDetailHeader = (props) => {
   let { data } = props;
+  const { isLoggedIn } = useSelector((state) => state.authen);
   let navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const handleBookingDoctor = async (doctorId) => {
+    try {
+      if (!isLoggedIn) {
+        message.info("Vui lòng đăng nhập để đặt lịch khám")
+        navigate(PATHS.HOME.LOGIN)
+        return;
+      }
+      let response = await userService.getDoctorBookingById({ id: doctorId })
+      if (response?.EC === 0) {
+        dispatch(clearBooking())
+        dispatch(setDoctor(response?.DT))
+        dispatch(setCurrentContent(BOOKING_CONTENT.SCHEDULE))
+        navigate(PATHS.HOME.BOOKING)
+      } else {
+        message.warning(response?.EM)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
-    <div className={cx('doctor-header')} >
-      <Breadcrumb style={{ marginBottom: "30px", fontSize: "14px", color: "#555", fontWeight: "700" }}>
+    <div className={'mb-12'} >
+      <Breadcrumb className="mb-4 text-sm !text-secondaryText-tw font-bold hover:!bg-transparent" >
         <Breadcrumb.Item>
-          <Link to={PATHS.HOME.HOMEPAGE} style={{ color: seccondaryColorHome, textDecoration: "none" }}>
+          <Link to={PATHS.HOME.HOMEPAGE} className="!text-secondaryText-tw no-underline hover:!bg-transparent">
             Trang chủ
           </Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <Link to={PATHS.HOME.DOCTOR_LIST} style={{ color: seccondaryColorHome, textDecoration: "none" }}>
+          <Link to={PATHS.HOME.DOCTOR_LIST} className="!text-secondaryText-tw no-underline hover:!bg-transparent">
             Bác sĩ
           </Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
-          <span style={{
-            fontWeight: "bold",
-            color: primaryColorHome,
-          }}> {data.lastName} {data.firstName}</span>
-
+          <span className="text-primary-tw font-bold"> {data?.lastName} {data?.firstName}</span>
         </Breadcrumb.Item>
       </Breadcrumb>
 
 
-      <div className={cx("wrapper")}>
-        <div className={cx("doctor-header-top")}>
-          <div className={cx('doctor-avt')} >
-            <img src={data?.avatar || LINK.AVATAR_NULL} alt="bác sĩ" />
+      <div className="relative bg-white rounded-2xl">
+        {/* Doctor Header Top */}
+        <div className="flex flex-col sm:flex-row p-2">
+          {/* Doctor Avatar */}
+          <div className="w-full md:w-48 h-48 md:mr-10 rounded-lg overflow-hidden mb-4 md:mb-0">
+            <img src={data?.avatar || LINK.AVATAR_NULL} alt="bác sĩ" className="w-full h-full object-contain md:object-cover" />
           </div>
-          <div className={cx('doctor-info')} >
-            <h4 className={cx('doctor-info-title')} >
-              {data?.staffUserData?.position || "BS"}.  {data.lastName} {data.firstName}
+
+          {/* Doctor Info */}
+          <div className="w-full flex flex-col justify-around items-center md:items-start p-2">
+            <h4 className="text-xl md:text-2xl font-bold mb-4">
+              {data?.staffUserData?.position || "BS"}. {data?.lastName} {data?.firstName}
             </h4>
-            <div className={cx('doctor-info-content')} >
-              <div className={cx('style-info')} >
-                <label htmlFor="">Chuyên Khoa</label>
+
+            <div>
+              <div className="flex flex-wrap sm:items-start mb-1 leading-7">
+                <label className="min-w-[125px] font-bold">Chuyên Khoa</label>
+                <span>{data?.staffUserData?.staffDepartmentData?.name}</span>
+              </div>
+
+              <div className="flex flex-wrap sm:items-start mb-1 leading-7">
+                <label className="min-w-[125px] font-bold">Chuyên Trị</label>
                 <span>{data?.staffUserData?.staffSpecialtyData?.name}</span>
               </div>
-              <div className={cx('style-info')} >
-                <label htmlFor="">Chuyên Trị</label>
-                <span>{data?.staffUserData?.staffSpecialtyData?.name}</span>
-              </div>
-              <div className={cx('style-info')} >
-                <label htmlFor="">Giá Khám</label>
+
+              <div className="flex flex-wrap sm:items-start mb-1 leading-7">
+                <label className="min-w-[125px] font-bold">Giá Khám</label>
                 <span>{formatCurrency(data?.staffUserData?.price || 0)}</span>
               </div>
-              <div className={cx('style-info')} >
-                <label htmlFor="">Lịch Khám</label>
+
+              <div className="flex flex-wrap sm:items-start mb-1 leading-7">
+                <label className="min-w-[125px] font-bold">Lịch Khám</label>
                 <span>Hẹn Khám</span>
               </div>
-
             </div>
           </div>
         </div>
-        <div className={cx("doctor-header-bottom")}>
-          <div className={cx('address')} >
-            <div className={cx('icon')} >
-              <svg stroke="currentColor" fill="none" strokeWidth="0" viewBox="0 0 24 24" className="styles_linear-location__OUB8h" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </div>
-            <div className='text' >
-              Bác sĩ chuyên khoa <br />
-              Tư vấn online tại website
+
+        {/* Doctor Header Bottom */}
+        <div className="bg-blue-50 p-2 w-full flex justify-between items-center rounded-b-2xl">
+          <div className="flex gap-2.5 items-center mb-4 sm:mb-0">
+            <div className="text-start sm:text-left text-secondaryText-tw ms-2">
+              <div className="flex items-start gap-[6px]">
+                <div className="sm:text-base text-sm"><b> <FontAwesomeIcon icon={faLocationDot} size="lg" bounce style={{ color: "#2c7cba", }} /> Bác sĩ chuyên khoa</b> <br /> Tư vấn online tại website</div></div>
             </div>
           </div>
 
-          <div className={cx('booking-btn')} onClick={() => { navigate(PATHS.HOME.BOOKING) }} >
+          <button
+            className="bg-gradient-primary flex items-center px-6 sm:px-9 py-2 rounded-full text-white font-bold whitespace-nowrap cursor-pointer"
+            onClick={() => handleBookingDoctor(data?.id)}
+          >
             Đặt lịch
-          </div>
+          </button>
         </div>
       </div>
+
     </div>
   );
 };

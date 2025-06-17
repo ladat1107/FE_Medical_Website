@@ -8,7 +8,7 @@ const AdminFooter = () => {
                 textAlign: 'center',
             }}
         >
-            Ant Design ©{new Date().getFullYear()} Created by Ant UED
+            Bệnh viện Hoa Sen
         </Footer>
     );
 

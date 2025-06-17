@@ -1,0 +1,109 @@
+/* Reset CSS */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.custom-confirm-modal .ant-modal-content {
+  padding: 15px !important;
+}
+
+p {
+  margin: 0 !important;
+}
+
+html,
+body {
+  height: 100%;
+  font-size: 100%;
+  line-height: 1.5;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+
+// Global Scrollbar Styles
+* {
+  scrollbar-width: thin; // Firefox
+  scrollbar-color: #d6d6d6 #f4f4f4; // Màu thanh cuộn và nền track
+
+  &::-webkit-scrollbar {
+    width: 8px; // Độ rộng của thanh cuộn
+    height: 8px; // Độ cao của thanh cuộn ngang
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f4f4f4; // Nền của track scrollbar (rất nhạt)
+    border-radius: 10px; // Bo tròn track
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #d6d6d6; // Màu xám nhạt cho thanh cuộn
+    border-radius: 10px; // Bo tròn thanh cuộn
+    border: 2px solid #f4f4f4; // Khoảng cách giữa thumb và track
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #bdbdbd; // Màu đậm hơn khi hover
+  }
+}
+
+.ant-modal-wrap {
+  overflow: hidden !important;
+
+  &.ant-modal-wrap-open {
+    overflow: hidden !important;
+  }
+}
+
+// Ngăn body scroll khi modal mở
+body.ant-scrolling-effect {
+  overflow: hidden !important;
+}

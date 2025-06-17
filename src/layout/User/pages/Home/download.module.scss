@@ -1,0 +1,115 @@
+//dowload
+
+.dowload {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  .center {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .circle,
+    .cell-phone {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .circle {
+      max-width: 470px;
+      max-height: 470px;
+    }
+
+    .cell-phone {
+      max-width: 630px;
+      max-height: 630px;
+    }
+
+    .item-center {
+      position: absolute;
+      width: 330px;
+      display: flex;
+      justify-content: space-between;
+
+      gap: 15px;
+
+      .text-title {
+        margin-bottom: 10px;
+      }
+
+      &.left {
+        text-align: right;
+
+        .text {
+          margin-left: auto;
+        }
+
+        .icon {
+          width: 32%;
+
+          img {
+            width: 100%;
+          }
+        }
+      }
+
+      &.right {
+        text-align: left;
+
+        .text {
+          margin-right: auto;
+        }
+
+        .icon {
+          width: 32%;
+
+          img {
+            width: 100%;
+          }
+        }
+      }
+
+      &.reverse {
+        flex-direction: row-reverse;
+        /* Đổi vị trí: icon bên phải */
+      }
+    }
+
+    .item1 {
+      top: 20%;
+      left: 5%;
+    }
+
+    .item2 {
+      top: 60%;
+      left: -2%;
+      transform: translateY(-50%);
+    }
+
+    .item3 {
+      bottom: 5%;
+      left: 5%;
+    }
+
+    .item4 {
+      top: 20%;
+      right: 5%;
+    }
+
+    .item5 {
+      top: 60%;
+      right: -2%;
+      transform: translateY(-50%);
+    }
+
+    .item6 {
+      bottom: 5%;
+      right: 5%;
+    }
+  }
+}

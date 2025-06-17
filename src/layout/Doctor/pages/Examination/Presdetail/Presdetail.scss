@@ -1,56 +1,83 @@
 .presdetail-container {
-    display: flex;
-    flex-direction: column;
-    padding: 8px 20px;
+    padding: 16px;
     background-color: white;
     border: 1px solid #E0E0E0;
-    box-shadow: 2px 2px 4px #e6eaeb;
     border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     font-family: 'Be Vietnam Pro', sans-serif;
     font-size: 14px;
-
-    .center-content{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        
+    margin-bottom: 16px;
+    
+    .medicine-row {
+      display: grid;
+      grid-template-columns: 30% 20% 20% 20%;
+      gap: 16px;
+      align-items: center;
+      position: relative;
+      
+      &:first-child {
+        margin-bottom: 12px;
+      }
     }
-
-    .row {
-        display: flex;
-        align-items: flex-start
+    
+    .medicine-info {
+      display: grid;
+      grid-template-columns: 33% 33% 33%;
+      gap: 8px;
     }
-
-    p {
-        margin: 0;
-        display: flex;
-        color: black;
-        padding: 0;
+    
+    .title {
+      font-weight: 600;
+      color: #333;
+      margin: 0;
     }
-
+    
     .suptext {
-        color: gray;
-        font-weight: 500;
-        margin-top: 5px;
+      color: #666;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      height: 36px;
     }
-
-    .input {
-        width: 100%;
-        padding: 5px;
-        box-sizing: border-box;
+    
+    input, .select-box2 {
+      width: 100%;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      
+      &:focus {
+        border-color: #66afe9;
+        outline: none;
+      }
     }
-}
-
-.red {
-    color: #F44343;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: 16px;
-    margin-top: 35%;
-    cursor: pointer;
-
-    .hover {
-        color: black;
+    
+    .delete-btn {
+        position: absolute;
+        right: 0;
+        color: #F44343;
+        cursor: pointer;
+        
+        &:hover {
+          color: #dc3c3c;
+        }
     }
-}
+    
+    @media (max-width: 768px) {
+      .medicine-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .medicine-info {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      
+      .delete-btn {
+        position: static;
+        margin-top: 12px;
+        text-align: right;
+      }
+    }
+  }

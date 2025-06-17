@@ -2,11 +2,12 @@
 import { Modal, Form, Select, message, Button } from 'antd';
 
 import { formatDate } from "@/utils/formatDate";
-import { primaryColorAdmin } from '@/style/variables';
 import { ROLE } from '@/constant/role';
 import { useEffect, useState } from 'react';
 import { createSchedule } from '@/services/adminService';
 import "./Modal.scss";
+import useSendNotification from '@/hooks/useSendNotification';
+import { FRONTEND_URL } from '@/constant/environment';
 
 const ScheduleModal = (props) => {
     let date = formatDate(props?.data?.date);
@@ -16,6 +17,8 @@ const ScheduleModal = (props) => {
     let [listDoctor, setListDoctor] = useState([]);
     let [listNurse, setListNurse] = useState([]);
     let [errorText, setErrorText] = useState('');
+    let { handleSendNoti } = useSendNotification();
+
     useEffect(() => {
         let _listDoctor = [];
         let _listNurse = [];
@@ -67,14 +70,27 @@ const ScheduleModal = (props) => {
                 });
             });
             let response = await createSchedule(data);
-            if (response.data.EC === 0) {
-                message.success(response.data.EM)
+            if (response.EC === 0) {
+                message.success(response.EM)
                 handleClose();
                 props.refresh();
-            } else if (response.data.EC === 2) {
-                setErrorText(response.data.EM);
+
+                handleSendNoti(
+                    `📆 Thông báo lịch trực`,
+                    `<p>
+                        <span style="color: rgb(234, 195, 148); font-weight: bold;">✨ Lịch trực ✨</span> 
+                        Đã có thông báo về lịch trực mới! Các bác sĩ xem thông tin và thực hiện tại  
+                        👉 <a href="${FRONTEND_URL}/doctorSchedule" rel="noopener noreferrer" target="_blank" style="color: #007bff; font-weight: bold;">Xem lịch trực</a>
+                    </p>`,
+                    [],
+                    false,
+                    response.DT.map((item) => item?.staffScheduleData?.staffUserData?.id) // Chỉ lấy id của người nhận thông báo
+                )
+
+            } else if (response.EC === 2) {
+                setErrorText(response.EM);
             } else {
-                message.error(response.data.EM)
+                message.error(response.EM)
             }
         }).catch((info) => {
             message.info('Vui lòng chọn bác sĩ và điều dưỡng');
@@ -89,7 +105,7 @@ const ScheduleModal = (props) => {
     return (
         <Modal
             name="scheduleModal"
-            title={<span style={{ color: primaryColorAdmin, fontSize: "1em" }}>Thêm lịch trực</span>}
+            title={<span>Thêm lịch trực</span>}
             open={props.open}
             onCancel={() => handleClose()}
             footer={[
@@ -101,8 +117,10 @@ const ScheduleModal = (props) => {
                 </Button>,
             ]}
             maskClosable={false}
+            centered
         >
             <Form
+                className='px-3'
                 form={form}
                 labelCol={{
                     span: 24,

@@ -1,5 +1,3 @@
-
-
 import PropTypes from 'prop-types';
 import './HistoryModal.scss';
 import HistoryItem from '../HistoryItem/HistoryItem';
@@ -9,18 +7,18 @@ import { useMutation } from '@/hooks/useMutation';
 import { getMedicalHistories } from '@/services/doctorService';
 import { convertDateTime } from '@/utils/formatDate';
 import { convertGender } from '@/utils/convertGender';
+import dayjs from 'dayjs';
+import { apiService } from '@/services/apiService';
 
-const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
+const HistoryModal = ({ isModalOpen, handleCancel, userId = '', onCopyPrescription }) => {
 
     const [historyData, setHistoryData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
-
+    const [address, setAddress] = useState("");
     useEffect(() => {
-        if (userId) { 
-            fetchExaminationData();
-        }
+        fetchExaminationData();
     }, [userId]);
-    
+
     let {
         data: dataHistory,
         loading: loadingHistory,
@@ -29,7 +27,7 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
     } = useMutation((query) => {
         return getMedicalHistories(+userId);
     });
-    
+
     useEffect(() => {
         if (dataHistory && dataHistory.DT) {
             setHistoryData(dataHistory.DT[0]);
@@ -37,8 +35,30 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
         }
     }, [dataHistory, loadingHistory, errorHistory]);
 
-    if(!isModalOpen) return null;
+    useEffect(() => {
+        if (historyData?.address) {
+            getAddress(historyData?.address);
+        }
+    }, [historyData]);
 
+    const getAddress = async (address) => {
+        let _addressArray = address?.split('%') || [];
+        if (_addressArray.length > 1) {
+            let response = await apiService.getFullAddress(_addressArray[1]);
+            if (response.error === 0) {
+                setAddress((_addressArray[0] || "") + ", " + (response?.data?.full_name || ""));
+            }
+        }
+    }
+
+    const handleCopyPrescription = (prescriptionData) => {
+        if (onCopyPrescription) {
+            onCopyPrescription(prescriptionData);
+            message.success('Đơn thuốc đã được sao chép thành công!');
+            handleCancel(); // Close the modal after copying
+        }
+    };
+    if (!isModalOpen) return null;
     return (
         <div className='history-container'>
             <div className="history-content">
@@ -56,10 +76,10 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
                     <div className="loading text-center">
                         <Spin />
                     </div>
-                    ) : (
-                        <>
+                ) : (
+                    <>
                         <div className="patient-history row">
-                            <p style={{fontWeight: '600', fontSize: '17px'}}>Thông tin bệnh nhân</p>
+                            <p style={{ fontWeight: '600', fontSize: '17px' }}>Thông tin bệnh nhân</p>
                             <div className="col-12 row mt-1">
                                 <div className="col-2">
                                     Họ và tên:
@@ -73,7 +93,7 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
                                 <div className="col-2">
                                     {convertDateTime(historyData?.dob)}
                                 </div>
-                                <div className="col-1"/>
+                                <div className="col-1" />
                                 <div className="col-1">
                                     Giới tính:
                                 </div>
@@ -94,7 +114,7 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
                                 <div className="col-2">
                                     {historyData?.cid}
                                 </div>
-                                <div className="col-1"/>
+                                <div className="col-1" />
                                 <div className="col-1">
                                     Email:
                                 </div>
@@ -107,24 +127,24 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
                                     Dân tộc:
                                 </div>
                                 <div className="col-2">
-                                    {historyData.folkData?.name}
+                                    {historyData?.folkData?.name}
                                 </div>
                                 <div className="col-2">
                                     Địa chỉ:
                                 </div>
                                 <div className="col-6">
-                                    {historyData?.address}
+                                    {address ? address : historyData?.address}
                                 </div>
                             </div>
                         </div>
                         <div className="patient-history row">
-                            <p style={{fontWeight: '600', fontSize: '17px'}}>Thông tin thẻ bảo hiểm y tế</p>
+                            <p style={{ fontWeight: '600', fontSize: '17px' }}>Thông tin thẻ bảo hiểm y tế</p>
                             <div className="col-12 row mt-1">
                                 <div className="col-2">
                                     Mã bảo hiểm y tế:
-                                </div>  
+                                </div>
                                 <div className="col-2">
-                                    {historyData?.userInsuranceData?.insuranceCode}
+                                    <b>{historyData?.userInsuranceData?.insuranceCode}</b>
                                 </div>
                                 <div className="col-2">
                                     Nơi đăng ký KCB ban đầu:
@@ -134,26 +154,31 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
                                 </div>
                             </div>
                             <div className="col-12 row mt-2">
-                            <div className="col-2">
-                                    Giá trị sử dụng: 
-                                </div>  
                                 <div className="col-2">
-                                    {historyData?.userInsuranceData?.dateOfIssue && historyData?.userInsuranceData?.exp
-                                        ? `${historyData.userInsuranceData.dateOfIssue} - ${historyData.userInsuranceData.exp}` : ''}
+                                    Giá trị sử dụng:
+                                </div>
+                                <div className="col-2">
+                                    {(historyData?.userInsuranceData?.dateOfIssue && historyData?.userInsuranceData?.exp)
+                                        ? `${dayjs(dayjs(historyData.userInsuranceData.dateOfIssue).format("YYYY-MM-DD")).format("DD/MM/YYYY")} - ${dayjs(dayjs(historyData.userInsuranceData.exp).format("YYYY-MM-DD")).format("DD/MM/YYYY")}` : ''}
                                 </div>
                                 <div className="col-2">
                                     Thời hạn đủ 5 năm liên tục:
                                 </div>
                                 <div className="col-6">
-                                    {historyData?.userInsuranceData?.continuousFiveYearPeriod}
+                                    {historyData?.userInsuranceData?.continuousFiveYearPeriod ? dayjs(dayjs(historyData?.userInsuranceData?.continuousFiveYearPeriod).format("YYYY-MM-DD")).format("DD/MM/YYYY") : ""}
                                 </div>
                             </div>
                         </div>
                         <div className="patient-history row">
-                            <p style={{fontWeight: '600', fontSize: '17px'}}>Hồ sơ bệnh án</p>
+                            <p style={{ fontWeight: '600', fontSize: '17px' }}>Hồ sơ bệnh án</p>
                             <div className="col-12 mt-3 row">
-                                {historyData.userExaminationData && historyData.userExaminationData.map((item, index) => (
-                                    <HistoryItem key={index} id={index} data={item}/>
+                                {historyData?.userExaminationData && historyData?.userExaminationData.map((item, index) => (
+                                    <HistoryItem
+                                        key={index}
+                                        id={index}
+                                        data={item}
+                                        onCopyPrescription={onCopyPrescription ? handleCopyPrescription : null}
+                                    />
                                 ))}
                             </div>
                         </div>
@@ -167,7 +192,8 @@ const HistoryModal = ({isModalOpen, handleCancel, userId}) => {
 HistoryModal.propTypes = {
     isModalOpen: PropTypes.bool.isRequired,
     handleCancel: PropTypes.func.isRequired,
-    userId: PropTypes.string.isRequired,
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    onCopyPrescription: PropTypes.func
 };
 
 export default HistoryModal;

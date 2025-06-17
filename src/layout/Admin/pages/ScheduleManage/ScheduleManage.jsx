@@ -9,7 +9,7 @@ import { formatDate1 } from "@/utils/formatDate";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import ArrangeSchedule from "./ArrangeSchedule";
-import { primaryColorAdmin } from "@/style/variables";
+import { primaryColorAdmin } from "@/styles//variables";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -19,17 +19,17 @@ const ScheduleManage = () => {
     let [currentWeek, setCurrentWeek] = useState(dayjs());
     let [schedules, setSchedules] = useState([]);
     let [departments, setDepartments] = useState([]);
-    let daysOfWeek = Array(7).fill(0).map((_, i) => currentWeek.startOf("week").add(i + 1, "day"));
+    let daysOfWeek = Array(7).fill(0).map((_, i) => currentWeek.startOf("week").add(i, "day"));
     let fecthSchedule = async (startDate) => {
         let res = await getSchedule({ startDate });
-        if (res.data.EC === 0) {
-            setSchedules(res.data.DT);
+        if (res.EC === 0) {
+            setSchedules(res.DT);
         }
     }
     let fecthDepartment = async () => {
         let res = await getDepartmentDuty();
-        if (res.data.EC === 0) {
-            setDepartments(res.data.DT);
+        if (res.EC === 0) {
+            setDepartments(res.DT);
         }
     }
     useEffect(() => {

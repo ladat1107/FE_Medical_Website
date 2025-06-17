@@ -1,12 +1,14 @@
+
 import { createSlice } from '@reduxjs/toolkit';
-import { remove } from 'lodash';
 
 const initialState = {
     isLoggedIn: false,
     token: "",
     user: null,
     rememberLogin: [],
+    isLogout: false,
 };
+
 export const authenSlice = createSlice({
     name: 'authen',
     initialState,
@@ -21,8 +23,12 @@ export const authenSlice = createSlice({
         },
         logout: (state) => {
             state.isLoggedIn = false;
+            state.isLogout = true;
             state.token = "";
             state.user = null;
+        },
+        setIsLogout: (state, action) => {
+            state.isLogout = action.payload;
         },
         addRememberLogin: (state, action) => {
             if (!Array.isArray(state.rememberLogin)) {
@@ -50,7 +56,7 @@ export const authenSlice = createSlice({
 });
 
 // Export các action để sử dụng trong component
-export const { login, logout, setToken, addRememberLogin, removeRememberAccount } = authenSlice.actions;
+export const { login, logout, setToken, setIsLogout, addRememberLogin, removeRememberAccount } = authenSlice.actions;
 
 // Export reducer để sử dụng trong store
 export default authenSlice.reducer;

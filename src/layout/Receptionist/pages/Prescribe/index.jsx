@@ -5,6 +5,7 @@ import { getPrescriptions } from "@/services/doctorService";
 import { useMutation } from "@/hooks/useMutation";
 import PresModal from "./PresModal/PresModal";
 import dayjs from "dayjs";
+import socket from '@/Socket/socket'
 
 
 const Prescribe = () => {
@@ -18,12 +19,14 @@ const Prescribe = () => {
 
     const [patientData, setPatientData] = useState({});
     const [examId, setExamId] = useState(null);
+    const [examinationId, setExaminationId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleParac = (id) => {
         const selectedPatient = listExam.find(item => item.id === id);
 
         if (selectedPatient) {
+            setExaminationId(id)
             setExamId(selectedPatient.prescriptionExamData[0].id);
             setPatientData(selectedPatient);
             setIsModalOpen(true);
@@ -70,11 +73,22 @@ const Prescribe = () => {
         if (dataExaminations) {
             setTotal(dataExaminations.DT.totalItems);
             setListExam(dataExaminations.DT.examinations);
-            
+
         }
     }, [dataExaminations]);
-    // #endregion
 
+    useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+        }
+
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
+    // #endregion
     return (
         <>
             <div className="appointment-content">
@@ -89,17 +103,17 @@ const Prescribe = () => {
                     {status == 2 && (
                         <div className="col-2">
                             <p className="search-title">Ngày</p>
-                            <DatePicker className="date-picker" 
-                                value={currentDate} allowClear={false}  
-                                onChange={(date) => setCurrentDate(date)}/>
+                            <DatePicker className="date-picker"
+                                value={currentDate} allowClear={false}
+                                onChange={(date) => setCurrentDate(date)} />
                         </div>
                     )}
                     <div className="col-6">
                         <p className="search-title">Tìm kiếm cận lâm sàn</p>
-                        <input type="text" className="search-box" 
-                                placeholder="Nhập tên bệnh nhân để tìm kiếm..." 
-                                value={search}
-                                onChange={handleSearch}/>
+                        <input type="text" className="search-box"
+                            placeholder="Nhập thông tin bệnh nhân để tìm kiếm..."
+                            value={search}
+                            onChange={handleSearch} />
                     </div>
                 </div>
                 <div className="appointment-container mt-3 row">
@@ -111,26 +125,26 @@ const Prescribe = () => {
                             <div className="loading">
                                 <Spin />
                             </div>
-                        ) : ( listExam && listExam.length > 0 ? listExam.map((item, index) => (
-                                <PatientItem
-                                        key={item.id}
-                                        index={index + 1}
-                                        id={item.id}
-                                        name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
-                                        symptom={"Lấy thuốc"}
-                                        special={item.special}
-                                        room={'Phòng lấy thuốc'}
-                                        doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
-                                        downItem={downItem}
-                                        visit_status={item.name}
-                                        onClickItem={()=>handleParac(item.id)}
-                                        sort={false}
-                                    />
-                            )):(
-                                <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
-                                </div>
-                            )
+                        ) : (listExam && listExam.length > 0 ? listExam.map((item, index) => (
+                            <PatientItem
+                                key={item.id}
+                                index={index + 1}
+                                id={item.id}
+                                name={`${item?.userExaminationData?.lastName} ${item?.userExaminationData?.firstName}`}
+                                symptom={"Lấy thuốc"}
+                                special={item.special}
+                                room={'Phòng lấy thuốc'}
+                                doctor={`${item?.examinationStaffData?.staffUserData?.lastName} ${item?.examinationStaffData?.staffUserData?.firstName}`}
+                                downItem={downItem}
+                                visit_status={item.name}
+                                onClickItem={() => handleParac(item.id)}
+                                sort={false}
+                            />
+                        )) : (
+                            <div className="no-patient d-flex justify-content-center mt-2">
+                                <p>Danh sách bệnh nhân trống!</p>
+                            </div>
+                        )
                         )}
                     </div>
                     <div className='row'>
@@ -152,6 +166,7 @@ const Prescribe = () => {
                         onSusscess={onSusscess}
                         patientData={patientData}
                         presId={examId}
+                        examinationId={examinationId}
                     />
                 }
             </div>

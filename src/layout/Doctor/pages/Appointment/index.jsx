@@ -1,18 +1,21 @@
-import { getExaminations } from "@/services/doctorService";
+import { getExaminations, getScheduleByStaffIdFromToday } from "@/services/doctorService";
 import React, { useEffect, useState } from 'react'
 import "./Appointment.scss";
 import { useMutation } from "@/hooks/useMutation";
 import { useNavigate } from "react-router-dom";
 import { DatePicker, Pagination, Select, Spin } from "antd";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PatientItem from "@/layout/Receptionist/components/PatientItem/PatientItem";
 import dayjs from "dayjs";
+import { setSchedule } from "@/redux/scheduleSlice";
+import socket from '@/Socket/socket'
 
 const Appointment = () => {
     const navigate = useNavigate();
     let { user } = useSelector((state) => state.authen);
 
     const [currentDate, setCurrentDate] = useState(dayjs());
+    const [toDate, setToDate] = useState(dayjs());
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
@@ -20,11 +23,28 @@ const Appointment = () => {
     const [search, setSearch] = useState('');
     const [listExam, setListExam] = useState([]);
     const [status, setStatus] = useState(5);
+    const dispatch = useDispatch();
     const isAppointment = 0;
 
+    const {
+        data: dataSchedules,
+        loading: loadingSchedules,
+        error: errorSchedules,
+        execute: fetchSchedules,
+    } = useMutation(() => getScheduleByStaffIdFromToday())
+
+    useEffect(() => {
+        fetchSchedules();
+    }, [user.staff]);
+
+    useEffect(() => {
+        if (dataSchedules?.DT.length > 0) {
+            dispatch(setSchedule(dataSchedules.DT));
+        }
+    }, [dataSchedules]);
 
     const handleClickRow = (examinationId) => {
-        navigate(`/doctorExamination/${examinationId}`);
+        navigate(`/examination/${examinationId}`);
     }
 
     const handlePageChange = (page, pageSize) => {
@@ -50,7 +70,7 @@ const Appointment = () => {
         loading: loadingExaminations,
         error: errorExaminations,
         execute: fetchExaminations,
-    } = useMutation(() => getExaminations(currentDate, status, user.staff, isAppointment, currentPage, pageSize, search, time))
+    } = useMutation(() => getExaminations(currentDate, toDate, +status, user.staff, isAppointment, currentPage, pageSize, search, time))
 
     useEffect(() => {
         fetchExaminations();
@@ -63,8 +83,18 @@ const Appointment = () => {
         }
     }, [dataExaminations]);
 
-    // #endregion
+    useEffect(() => {
+        const handleStaffLoad = () => {
+            fetchExaminations();
+        }
 
+        socket.on("staffLoad", handleStaffLoad)
+        return () => {
+            socket.off("staffLoad", handleStaffLoad)
+        }
+    }, [dataExaminations]);
+
+    // #endregion
 
     return (
         <>
@@ -79,17 +109,25 @@ const Appointment = () => {
                         </Select>
                     </div>
                     {status == 7 && (
-                        <div className="col-2">
-                            <p className="search-title">Ngày</p>
-                            <DatePicker className="date-picker" 
-                                value={currentDate} allowClear={false}  
-                                onChange={(date) => setCurrentDate(date)}/>
-                        </div>
+                        <>
+                            <div className="col-2">
+                                <p className="search-title">Từ ngày</p>
+                                <DatePicker className="date-picker" 
+                                    value={currentDate} allowClear={false}  
+                                    onChange={(date) => setCurrentDate(date)}/>
+                            </div>
+                            <div className="col-2" >
+                                <p className="search-title">Đến ngày</p>
+                                <DatePicker className="date-picker" 
+                                    value={toDate} allowClear={false}  
+                                    onChange={(toDate) => setToDate(toDate)}/>
+                            </div>
+                        </>
                     )}
                     <div className="col-6">
                         <p className="search-title">Tìm kiếm đơn khám</p>
                         <input type="text" className="search-box" 
-                                placeholder="Nhập tên bệnh nhân để tìm kiếm..." 
+                                placeholder="Nhập thông tin bệnh nhân để tìm kiếm..." 
                                 value={search}
                                 onChange={handleSearch}/>
                     </div>
@@ -105,22 +143,22 @@ const Appointment = () => {
                             </div>
                         ) : ( listExam && listExam.length > 0 ? listExam.map((item, index) => (
                                 <PatientItem
-                                        key={item.id}
-                                        index={index + 1}
-                                        id={item.id}
-                                        name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
-                                        symptom={'Triệu chứng: ' + item.symptom}
-                                        special={item.special}
-                                        room={item.roomName}
-                                        doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
-                                        downItem={downItem}
-                                        visit_status={item.visit_status}
-                                        onClickItem={()=>handleClickRow(item.id)}
-                                        sort={false}
-                                    />
+                                    key={item.id}
+                                    index={index + 1}
+                                    id={item.id}
+                                    name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
+                                    symptom={'Triệu chứng: ' + item.symptom}
+                                    special={item.special}
+                                    room={item.roomName}
+                                    doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
+                                    downItem={downItem}
+                                    visit_status={item.visit_status}
+                                    onClickItem={()=>handleClickRow(item.id)}
+                                    sort={false}
+                                />
                             )):(
                                 <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                                    <p>Danh sách bệnh nhân trống!</p>
                                 </div>
                             )
                         )}

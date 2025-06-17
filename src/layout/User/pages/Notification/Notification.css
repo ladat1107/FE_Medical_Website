@@ -1,0 +1,137 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+
+    to {
+        max-height: 1000px;
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        max-height: 1000px;
+        opacity: 1;
+    }
+
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.5s ease-out;
+}
+
+.notification-pagination .ant-pagination-item-active {
+    border-color: #00B5F1;
+}
+
+.notification-pagination .ant-pagination-item-active a {
+    color: #00B5F1;
+}
+
+.notification-pagination .ant-pagination-item:hover {
+    border-color: #00B5F1;
+}
+
+.notification-pagination .ant-pagination-item:hover a {
+    color: #00B5F1;
+}
+
+.notification-pagination .ant-select-selector {
+    border-radius: 8px !important;
+}
+
+.notification-pagination .ant-select-focused .ant-select-selector {
+    border-color: #00B5F1 !important;
+    box-shadow: 0 0 0 2px rgba(0, 181, 241, 0.2) !important;
+}
+
+.notification-tabs .ant-tabs-nav::before {
+    border-bottom: none !important;
+}
+
+.notification-tabs .ant-tabs-tab {
+    padding: 12px 16px;
+    transition: all 0.3s;
+}
+
+.notification-tabs .ant-tabs-tab:hover {
+    color: #00B5F1;
+}
+
+.notification-tabs .ant-tabs-tab-active {
+    background-color: rgba(0, 181, 241, 0.1);
+    border-radius: 8px 8px 0 0;
+}
+
+.notification-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #00B5F1 !important;
+}
+
+.notification-tabs .ant-tabs-ink-bar {
+    background-color: #00B5F1;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+}
+
+.notification-html-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.notification-html-content a {
+    color: #00B5F1;
+    text-decoration: none;
+}
+
+.notification-html-content a:hover {
+    text-decoration: underline;
+}
+
+.notification-html-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.notification-html-content table td,
+.notification-html-content table th {
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+}
+
+.notification-html-content table th {
+    background-color: #f8fafc;
+}

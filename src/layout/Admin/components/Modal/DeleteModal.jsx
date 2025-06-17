@@ -1,14 +1,16 @@
 import { TABLE } from '@/constant/value';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { deleteUser, blockUser, deleteDepartment, blockDepartment, deleteServiceOfRoom, blockServiceOfRoom, deleteRoom, blockRoom, deleteSpecialty, blockSpecialty } from "@/services/adminService";
+import { deleteUser, blockUser, deleteDepartment, blockDepartment, deleteServiceOfRoom, blockServiceOfRoom, deleteRoom, blockRoom, deleteSpecialty, blockSpecialty, deleteMedicine, blockMedicine, deleteExamination, blockExamination } from "@/services/adminService";
 import { Button, message, Modal } from "antd";
+import { primaryColorAdmin } from '@/styles//variables';
+
 const DeleteModal = (props) => {
     let [messageContent, setMessageContent] = useState("")
+    let [isLoadingBlock, setIsLoadingBlock] = useState(false)
+    let [isLoadingDelete, setIsLoadingDelete] = useState(false)
     let data = props.data;
-    const handleClose = () => {
-        props.isShow(false)
-    }
+    const handleClose = () => { props.isShow(false) }
     useEffect(() => {
         if (props.table === TABLE.USER) {
             setMessageContent("Xác nhận xóa người dùng " + data.lastName + " " + data.firstName + "?")
@@ -20,92 +22,78 @@ const DeleteModal = (props) => {
             setMessageContent("Xác nhận xóa phòng " + data.name + "?")
         } else if (props.table === TABLE.SPECIALTY) {
             setMessageContent("Xác nhận xóa chuyên khoa " + data.name + "?")
+        } else if (props.table === TABLE.MEDICINE) {
+            setMessageContent("Xác nhận xóa thuốc " + data.name + "?")
+        } else if (props.table === TABLE.EXAMINATION) {
+            setMessageContent("Xác nhận xóa lịch hẹn " + data.id + "?")
         }
     }, [props.data])
-    let handleDelete = async () => {
+    const handleDelete = async () => {
+        setIsLoadingDelete(true)
         if (props.table === TABLE.USER) {
             let response = await deleteUser(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         }
         else if (props.table === TABLE.DEPARTMENT) {
             let response = await deleteDepartment(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         }
         else if (props.table === TABLE.SERVICE) {
             let response = await deleteServiceOfRoom(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         } else if (props.table === TABLE.ROOM) {
             let response = await deleteRoom(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         } else if (props.table === TABLE.SPECIALTY) {
             let response = await deleteSpecialty(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
+        } else if (props.table === TABLE.MEDICINE) {
+            let response = await deleteMedicine(data);
+            notify(response);
+        } else if (props.table === TABLE.EXAMINATION) {
+            let response = await deleteExamination(data);
+            notify(response);
         }
+        setIsLoadingDelete(false)
     }
-    let handleLock = async () => {
+    const handleLock = async () => {
+        setIsLoadingBlock(true)
         if (props.table === TABLE.USER) {
             let response = await blockUser(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         }
         else if (props.table === TABLE.DEPARTMENT) {
             let response = await blockDepartment(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
-
+            notify(response);
         } else if (props.table === TABLE.SERVICE) {
             let response = await blockServiceOfRoom(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         } else if (props.table === TABLE.ROOM) {
             let response = await blockRoom(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
         } else if (props.table === TABLE.SPECIALTY) {
             let response = await blockSpecialty(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
-            } else {
-                message.error(response.data.EM);
-            }
+            notify(response);
+        } else if (props.table === TABLE.MEDICINE) {
+            let response = await blockMedicine(data);
+            notify(response);
         }
+        else if (props.table === TABLE.EXAMINATION) {
+            let response = await blockExamination(data);
+            notify(response);
+        }
+        setIsLoadingBlock(false)
     }
-    let susscess = (text) => {
-        message.success(text);
-        props.isShow(false)
-        props.refresh()
+    const notify = (response) => {
+        setIsLoadingBlock(false)
+        setIsLoadingDelete(false)
+        if (response?.EC === 0) {
+            message.success(response?.EM || "Thành công");
+            props.isShow(false)
+            props.refresh()
+        } else {
+            message.error(response?.EM || "Thất bại");
+        }
     }
     return (
         <>
@@ -115,19 +103,20 @@ const DeleteModal = (props) => {
                 onCancel={handleClose}
                 maskClosable={false} // Ngăn đóng modal khi bấm bên ngoài
                 footer={[
-                    <Button key="cancel" onClick={() => handleClose()}>
+                    <Button disabled={isLoadingBlock || isLoadingDelete} key="cancel" onClick={() => handleClose()}>
                         Hủy
                     </Button>,
-                    <Button key="submit" style={{ background: "#F1B14D", color: "#ffffff", border: "none" }} onClick={() => handleLock()}>
+                    <Button disabled={isLoadingBlock || isLoadingDelete} loading={isLoadingBlock} key="submit" style={{ background: primaryColorAdmin, color: "#ffffff", border: "none" }} onClick={() => handleLock()}>
                         Khóa
                     </Button>,
-                    <Button key="submit" style={{ background: "#f5222d", color: "#ffffff", border: "none" }} onClick={() => handleDelete()}>
+                    <Button disabled={isLoadingBlock || isLoadingDelete} loading={isLoadingDelete} key="submit" style={{ background: "#f5222d", color: "#ffffff", border: "none" }} onClick={() => handleDelete()}>
                         Xóa
                     </Button>,
                 ]}
             >
-                <p> {messageContent}</p>
-
+                <div className='px-3 pt-3'>
+                    <p> {messageContent}</p>
+                </div>
             </Modal>
         </>
     );

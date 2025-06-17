@@ -1,33 +1,41 @@
-import React, { useState } from 'react';
-import { Dropdown, Menu, Space } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Dropdown, Space } from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 const DropdownPaginate = (props) => {
-    const [selectedLabel, setSelectedLabel] = useState(props?.page?.value || 10);
-    let handleChange = (item) => {
-        props.setPage(item);  // Trả về key
-        setSelectedLabel(item.value); // Cập nhật label
+    const [selectedLabel, setSelectedLabel] = useState(10);
+
+    useEffect(() => {
+        if (props.page) {
+            setSelectedLabel(props.page);
+        }
+    }, [props.page]);
+
+    let handleChange = (value) => {
+        props.setPage(value);  // Trả về key
+        setSelectedLabel(value); // Cập nhật label
     };
+
     let items = [
         {
             label: "10",
             key: '1',
-            onClick: () => { handleChange({ id: 1, value: 10 }) }
+            onClick: () => { handleChange(10) }
         },
         {
             label: "25",
             key: '2',
-            onClick: () => { handleChange({ id: 2, value: 25 }) }
+            onClick: () => { handleChange(25) }
         },
         {
             label: "50",
             key: '3',
-            onClick: () => { handleChange({ id: 3, value: 50 }) }
+            onClick: () => { handleChange(50) }
         },
         {
             label: "100",
             key: '4',
-            onClick: () => { handleChange({ id: 4, value: 100 }) }
+            onClick: () => { handleChange(100) }
         }
     ]
 

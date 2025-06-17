@@ -1,26 +1,24 @@
-@import "../../../../../style/variables.scss";
-
 .patient-manage {
     display: flex;
     justify-content: center; // Căn giữa theo chiều ngang
     align-items: center; // Căn giữa theo chiều dọc
     height: 100%;
 
-    background: $background-color;
+    background: var(--background-color);
 
     .container {
         padding: 0 3%;
         margin: 0;
-        background: $background-color;
+        background: var(--background-color);
 
         .first {
             .text {
                 font-size: 1.2rem;
-                color: $secondary-color-admin;
+                color: var(--secondary-color-admin);
             }
 
             .btn-add-user {
-                background: $background-color;
+                background: var(--background-color);
                 border: 1px solid #0A8FDC;
                 border-radius: 8px;
                 color: #0A8FDC;
@@ -40,13 +38,14 @@
 
         .table-responsive {
             border-radius: 10px;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
+            scrollbar-width: none;
 
             .header {
                 width: 100%;
                 height: 50px;
-                background: $background-table-head-admin;
-                color: $text-head-color-admin;
+                background: var(--background-table-head-admin);
+                color: var(--text-head-color-admin);
 
                 .rounded-top-left {
                     border-top-left-radius: 5px;
@@ -89,7 +88,7 @@
                         flex-direction: column;
 
                         .fw-semibold {
-                            color: $secondary-color-admin;
+                            color: var(--secondary-color-admin);
                         }
 
                         .fw-normal {

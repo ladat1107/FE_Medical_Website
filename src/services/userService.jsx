@@ -1,6 +1,16 @@
 import axiosInstance from "@/utils/axiosInstance";
 
 const userService = {
+
+  getTicket(query = "") {
+    return axiosInstance.get(`api/getCurrentNumber${query}`);
+  },
+  generateNumber(data) {
+    return axiosInstance.put(`api/generateNumber`, data);
+  },
+  generateNumberCurrent(data) {
+    return axiosInstance.put(`api/generateNumberCurrent`, data);
+  },
   getDepartment(query = "") {
     return axiosInstance.get(`api/getDepartmenHome${query}`);
   },
@@ -16,6 +26,9 @@ const userService = {
   getDoctorDetail(query = "") {
     return axiosInstance.get(`api/getUserById`, { params: query })
   },
+  getDoctorBookingById(query = "") {
+    return axiosInstance.get(`api/getDoctorBookingById`, { params: query })
+  },
   getHandbook(query = "") {
     return axiosInstance.get(`api/getHandBookHome`, { params: query })
   },
@@ -24,6 +37,9 @@ const userService = {
   },
   getScheduleApoinment(query = "") {
     return axiosInstance.get(`api/getScheduleApoinment`, { params: query })
+  },
+  updateOldParaclinical(data) {
+    return axiosInstance.put(`api/updateOldParaclinical`, data)
   },
   getFolk() {
     return axiosInstance.get(`api/getFolk`);
@@ -45,9 +61,27 @@ const userService = {
       params: { id: data.id },
     });
   },
-  checkOutAppointment(query = "") {
-    return axiosInstance.get(`/api/paymentAppoinmentMomo`, { params: query });
+  sendMessage(data) {
+    return axiosInstance.post(`/api/messageSystem`, data);
   },
+  getConversation(query = "") {
+    return axiosInstance.get(`/api/getConversation`, { params: query });
+  },
+  createMessage(data) {
+    return axiosInstance.post(`/api/createMessage`, data);
+  },
+  getNumberMessageUnread(query = "") {
+    return axiosInstance.get(`/api/getNumberMessageUnread`, { params: query });
+  },
+  getUserByQRCode(query = "") {
+    return axiosInstance.get(`/api/getUserByQrCode`, { params: query });
+  },
+  createInsuarance(data) {
+    return axiosInstance.post(`/api/createInsuarance`, data);
+  },
+  updateInsuarance(data) {
+    return axiosInstance.put(`/api/updateInsuarance`, data);
+  }
 };
 
 export default userService

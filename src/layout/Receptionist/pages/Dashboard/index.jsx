@@ -1,16 +1,28 @@
-import { message, Pagination, Select, Spin } from "antd";
-import "./Dashboard.scss"
-import { useEffect, useState } from "react";
+import { Input, message, Pagination, Select, Spin, Form, DatePicker } from "antd";
+import { useEffect, useRef, useState } from "react";
 import AddExamModal from "../../components/AddExamModal/AddExamModal";
 import { useMutation } from "@/hooks/useMutation";
-import { getAllDisease, getExaminations, getSpecialties } from "@/services/doctorService";
+import { getAllDisease, getExaminations, getPatienSteps, getSpecialties } from "@/services/doctorService";
 import PatientItem from "../../components/PatientItem/PatientItem";
-import { TIMESLOTS } from "@/constant/value";
-import { convertDateTime } from "@/utils/formatDate";
+import { TIMESLOTS, TYPE_NUMBER } from "@/constant/value";
+import userService from "@/services/userService";
+import dayjs from "dayjs";
+import StepModal from "../../components/StepModal/StepModal";
+import { useGetUserByQRCode } from "@/hooks";
+import useAutoTimeSlot from "@/hooks/useAutoTimeSlot";
 
 const ReceptionistDashboard = () => {
-    const today = new Date().toISOString();
+    // Form
+    const [form] = Form.useForm();
+
+    // States
+    const [type, setType] = useState(TYPE_NUMBER.NORMAL);
+    const [currentNumber, setCurrentNumber] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [loadingSteps, setLoadingSteps] = useState(false);
+    const [date, setDate] = useState(dayjs())
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalStepOpen, setIsModalStepOpen] = useState(false);
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [patientData, setPatientData] = useState({});
@@ -20,10 +32,11 @@ const ReceptionistDashboard = () => {
     const [pageSize, setPageSize] = useState(50);
     const [total, setTotal] = useState(0);
     const [isAppointment, setIsAppointment] = useState(1);
-    const [time, setTime] = useState(null);
+    const { time, setTime } = useAutoTimeSlot();
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState(2);
     const [listExam, setListExam] = useState([]);
+    const [listStep, setListStep] = useState({});
 
     const [totalPatient, setTotalPatient] = useState(0);
     const [totalAppointment, setTotalAppointment] = useState(0);
@@ -31,12 +44,183 @@ const ReceptionistDashboard = () => {
     const [comorbiditiesOptions, setComorbiditiesOptions] = useState([]);
     const [specialtyOptions, setSpecialtyOptions] = useState([]);
 
+    // QR Code scanning
+    const [scannedQR, setScannedQR] = useState("");
+    const { data: dataUserByQRCode, refetch: refetchUserByQRCode } = useGetUserByQRCode({ qrCode: scannedQR });
+    const [dataQRCode, setDataQRCode] = useState(null);
+    // QR Code scanning refs
+    const hiddeninputref = useRef(null);
+    const lastScanTimeRef = useRef(0);
+    const scanningInProgressRef = useRef(false);
+    const qrTimeoutRef = useRef(null);
+    const previousActiveElementRef = useRef(null);
+    const keystrokeSequenceRef = useRef([]);
+
+    // QR Code scanning setup
+    useEffect(() => {
+        fetchComorbidities();
+        fetchSpecialties();
+        fetchTicketData();
+        // This function handles all keystrokes to detect QR scanner patterns
+        const handleKeyDown = (e) => {
+            const now = Date.now();
+            const timeSinceLastKey = now - lastScanTimeRef.current;
+            lastScanTimeRef.current = now;
+
+            // Only process if it's a printable character
+            if (e.key.length === 1) {
+                // Store keystroke info (time difference and key)
+                keystrokeSequenceRef.current.push({
+                    timeDiff: timeSinceLastKey,
+                    key: e.key
+                });
+
+                // Keep buffer at reasonable size
+                if (keystrokeSequenceRef.current.length > 10) {
+                    keystrokeSequenceRef.current.shift();
+                }
+
+                // Check if we have enough keystrokes to analyze
+                if (keystrokeSequenceRef.current.length >= 3) {
+                    // Check the last few keystrokes to see if they match QR scanner pattern
+                    // (multiple consecutive fast keystrokes under 25ms)
+                    const recentStrokes = keystrokeSequenceRef.current.slice(-3);
+                    const fastStrokes = recentStrokes.filter(stroke => stroke.timeDiff < 25);
+                    const isLikelyQRScanner = fastStrokes.length >= 2;
+
+                    // Check if we're in an input field
+                    const activeElement = document.activeElement;
+                    const isInputElement = activeElement.tagName === 'INPUT' ||
+                        activeElement.tagName === 'TEXTAREA';
+                    const isOurHiddenInput = activeElement === hiddeninputref.current;
+
+                    // Start QR scan mode if scanner detected AND:
+                    // 1. We're not in an input field, OR
+                    // 2. We're already in scanning mode, OR
+                    // 3. We're in our hidden input
+                    if (isLikelyQRScanner && (!isInputElement || scanningInProgressRef.current || isOurHiddenInput)) {
+                        if (!scanningInProgressRef.current) {
+                            // Start of a new scan
+                            scanningInProgressRef.current = true;
+
+                            // Store current focus for later restoration
+                            previousActiveElementRef.current = activeElement;
+
+                            // Focus our hidden input
+                            if (!isOurHiddenInput) {
+                                hiddeninputref.current.focus();
+                            }
+
+                            // Recreate the start of the QR code from our keystroke buffer
+                            const qrPrefix = keystrokeSequenceRef.current
+                                .slice(-3)  // Take the last 3 keystrokes
+                                .map(stroke => stroke.key)  // Extract just the keys
+                                .join('');   // Join them into a string
+
+                            // Set the hidden input value to include the start of the QR code
+                            hiddeninputref.current.value = qrPrefix;
+
+                            // Prevent this keystroke from being processed elsewhere
+                            e.preventDefault();
+                        }
+                    }
+                }
+
+                // Reset scan timeout if we're in scanning mode
+                if (scanningInProgressRef.current) {
+                    if (qrTimeoutRef.current) clearTimeout(qrTimeoutRef.current);
+                    qrTimeoutRef.current = setTimeout(() => {
+                        // QR scan completed
+                        if (hiddeninputref.current.value) {
+                            setScannedQR(hiddeninputref.current.value);
+                            hiddeninputref.current.value = "";
+                        }
+
+                        // Clean up state
+                        scanningInProgressRef.current = false;
+                        keystrokeSequenceRef.current = [];
+
+                        // Restore focus
+                        if (previousActiveElementRef.current && previousActiveElementRef.current !== hiddeninputref.current) {
+                            try {
+                                previousActiveElementRef.current.focus();
+                            } catch (err) {
+                                console.log("Error returning focus:", err);
+                            }
+                        }
+                    }, 100);
+                }
+            }
+        };
+
+        // Listen for all keydown events to catch QR scanner input
+        document.addEventListener("keydown", handleKeyDown, true);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown, true);
+            if (qrTimeoutRef.current) {
+                clearTimeout(qrTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    // Process QR code when it's scanned
+    useEffect(() => {
+        if (scannedQR) {
+            setIsModalOpen(false);
+            setDataQRCode(null);
+            refetchUserByQRCode();
+
+            // Reset QR code after processing
+            const timeout = setTimeout(() => {
+                setScannedQR("");
+            }, 1000);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [scannedQR, refetchUserByQRCode]);
+
+    // Process user data from QR code
+    useEffect(() => {
+        if (dataUserByQRCode) {
+            if (dataUserByQRCode?.EC === 0 || dataUserByQRCode?.EC === 1) {
+                setDataQRCode(dataUserByQRCode);
+                setIsModalOpen(true);
+            } else {
+                message.error(dataUserByQRCode?.EM);
+            }
+        }
+    }, [dataUserByQRCode]);
+
+    // Data fetching
     const {
         data: dataComorbidities,
-        loading: comorbiditiesLoading,
-        error: comorbiditiesError,
         execute: fetchComorbidities,
     } = useMutation(() => getAllDisease());
+
+    const {
+        data: ticketData,
+        execute: fetchTicketData,
+    } = useMutation((query) => userService.getTicket());
+
+    const {
+        data: dataSpecialties,
+        execute: fetchSpecialties,
+    } = useMutation(() => getSpecialties());
+
+    const {
+        data: dataExaminations,
+        loading: loadingExaminations,
+        execute: fetchExaminations,
+    } = useMutation(() => getExaminations(date, date, status, '', isAppointment, currentPage, pageSize, search, time));
+
+    // Data updates
+    useEffect(() => {
+        if (ticketData?.EC === 0) {
+            setCurrentNumber(ticketData.DT[0]);
+            setLoading(false);
+        }
+    }, [ticketData, type]);
 
     useEffect(() => {
         if (dataComorbidities?.DT) {
@@ -47,13 +231,6 @@ const ReceptionistDashboard = () => {
             setComorbiditiesOptions(options);
         }
     }, [dataComorbidities]);
-
-    const {
-        data: dataSpecialties,
-        loading: specialtiesLoading,
-        error: specialtiesError,
-        execute: fetchSpecialties,
-    } = useMutation(() => getSpecialties());
 
     useEffect(() => {
         if (dataSpecialties?.DT) {
@@ -69,31 +246,6 @@ const ReceptionistDashboard = () => {
     }, [dataSpecialties]);
 
     useEffect(() => {
-        fetchComorbidities();
-        fetchSpecialties();  
-    }, []);
-
-    const openAddExam = (timeSlot) => {
-        setIsEditMode(false);
-        setIsModalOpen(true);
-        setSelectedTimeSlot(timeSlot);
-    };
-    const closeAddExam = () => setIsModalOpen(false);
-
-
-    // #region Fetch data 
-    const {
-        data: dataExaminations,
-        loading: loadingExaminations,
-        error: errorExaminations,
-        execute: fetchExaminations,
-    } = useMutation(() => getExaminations(today, status, '', isAppointment, currentPage, pageSize, search, time))
-
-    useEffect(() => {
-        fetchExaminations();
-    }, [isAppointment, search, time, currentPage, pageSize]);
-
-    useEffect(() => {
         if (dataExaminations) {
             setTotal(dataExaminations.DT.totalItems);
             setListExam(dataExaminations.DT.examinations);
@@ -102,9 +254,31 @@ const ReceptionistDashboard = () => {
         }
     }, [dataExaminations]);
 
-    // #endregion
-    
-    // #region Handle events
+    useEffect(() => {
+        fetchExaminations();
+    }, [isAppointment, search, time, currentPage, pageSize, date]);
+
+    // Event handlers
+    const openAddExam = (timeSlot) => {
+        setIsEditMode(false);
+        setIsModalOpen(true);
+        setSelectedTimeSlot(timeSlot);
+    };
+
+    const closeAddExam = () => {
+        setIsModalOpen(false);
+        setDataQRCode(null);
+    }
+
+    const handleGeneralNumber = async (type) => {
+        setLoading(true);
+        let response = await userService.generateNumberCurrent({ type });
+        if (response?.EC !== 0) {
+            message.error(response?.EM);
+        }
+        fetchTicketData();
+    };
+
     const handlePageChange = (page, pageSize) => {
         setCurrentPage(page);
         setPageSize(pageSize);
@@ -112,56 +286,97 @@ const ReceptionistDashboard = () => {
 
     const handleAddExamSuscess = () => {
         fetchExaminations();
-    }
+    };
 
-    const handelSelectChange = (value) => {
-        setStatus(value === 'appointment' ? 2 : 4 );
+    const handleSelectChange = (value) => {
+        setStatus(value === 'appointment' ? 2 : 4);
         setIsAppointment(value === 'appointment' ? 1 : 0);
-    }
-    
+        setTime(null);
+    };
+
     const handleTimeChange = (value) => {
         setTime(value);
-    }
+    };
 
     const handleSearch = (e) => {
         setSearch(e.target.value);
-    }
+    };
 
     const downItem = () => {
         fetchExaminations();
-    }
+    };
 
     const handleClickItem = (id) => {
         const selectedPatient = listExam.find(item => item.id === id);
         if (selectedPatient) {
-
             setExamId(id);
+            setSelectedTimeSlot(null);
             setIsEditMode(true);
             setPatientData(selectedPatient);
-            console.log("selectedPatient", selectedPatient);
-            
             setIsModalOpen(true);
         } else {
-            // Xử lý trường hợp không tìm thấy bệnh nhân
             message.error('Không tìm thấy thông tin bệnh nhân');
         }
+    };
+
+    const handleClickStep = async (id) => {
+        const selectedPatient = listExam.find(item => item.id === id);
+        if (selectedPatient) {
+            try {
+                setLoadingSteps(true);
+                const response = await getPatienSteps(selectedPatient.id);
+                if (response.EC === 0) {
+                    setListStep(response);
+                    setIsModalStepOpen(true);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                message.error('Lấy dữ liệu bước khám thất bại');
+            } finally {
+                setLoadingSteps(false);
+            }
+        } else {
+            message.error('Không tìm thấy thông tin bệnh nhân');
+        }
+    };
+
+    const handleCloseModal = () => {
+        setIsModalStepOpen(false);
+    };
+
+    const handleDateChange = (value) => {
+        if (!value) setDate(dayjs())
+        else setDate(value)
     }
 
-    // #endregion
+    const getSpecialClass = (special) => {
+        switch (special) {
+            case 'old':
+                return 'bg-[#ffe3dc] text-[#FF7752] border border-[#FF7752]';
+            case 'children':
+                return 'bg-[#DDFCED] text-[#3AA472] border border-[#3AA472]';
+            case 'disabled':
+                return 'bg-[#DFEFFF] text-[#007BFF] border border-[#007BFF]';
+            case 'pregnant':
+                return 'bg-[#FFD5D8] text-[#ff4851] border border-[#ff4851]';
+            default:
+                return '';
+        }
+    };
 
-    // #region Render
+    // Render functions
     const renderExaminationByTimeSlot = () => {
         // Nếu có chọn time cụ thể, chỉ render time đó
         if (time) {
             const selectedTimeSlot = TIMESLOTS.find(slot => slot.value === time);
             const examsInTimeSlot = listExam.filter(exam => exam.time === time);
-            
+
             return (
-                <div key={time} className="dashboard-content mt-4">
-                    <p className="time">{selectedTimeSlot.label}</p>
+                <div key={time} className="mt-4">
+                    <p className="text-base font-medium text-gray-500">{selectedTimeSlot.label}</p>
                     {examsInTimeSlot.length === 0 ? (
-                        <div className="no-patient d-flex justify-content-center mt-2">
-                            <p>Không tìm thấy bệnh nhân!</p>
+                        <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
+                            <p>Danh sách bệnh nhân trống!</p>
                         </div>
                     ) : (
                         examsInTimeSlot.map((item, index) => (
@@ -173,34 +388,35 @@ const ReceptionistDashboard = () => {
                                 symptom={'Triệu chứng: ' + item.symptom}
                                 special={item.special}
                                 room={item.roomName}
-                                doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
+                                doctor={`${item?.examinationStaffData?.staffUserData?.lastName} ${item?.examinationStaffData?.staffUserData?.firstName}`}
                                 downItem={downItem}
                                 visit_status={item.visit_status}
-                                onClickItem={()=>handleClickItem(item.id)}
+                                onClickItem={() => handleClickItem(item.id)}
                                 sort={true}
                             />
                         ))
                     )}
-                    <div className="add-patient justify-content-center mt-2 row" onClick={() => openAddExam(time.value)}>
-                        <div className="d-flex justify-content-center">
-                            <i className="fa-solid me-2 fa-plus"></i>
-                            <p>Thêm bệnh nhân</p>
+                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200"
+                        onClick={() => openAddExam(time.value)}>
+                        <div className="flex justify-center items-center">
+                            <i className="fa-solid mr-2 fa-plus"></i>
+                            <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
                         </div>
                     </div>
                 </div>
             );
         }
-        
+
         // Nếu không chọn time, render toàn bộ như cũ
         return TIMESLOTS.map((timeSlot) => {
             const examsInTimeSlot = listExam.filter(exam => exam.time === timeSlot.value);
 
             return (
-                <div key={timeSlot.value} className="dashboard-content mt-4">
-                    <p className="time">{timeSlot.label}</p>
+                <div key={timeSlot.value} className="mt-4">
+                    <p className="text-base font-medium text-gray-500">{timeSlot.label}</p>
                     {examsInTimeSlot.length === 0 ? (
-                        <div className="no-patient d-flex justify-content-center mt-2">
-                            <p>Không tìm thấy bệnh nhân!</p>
+                        <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
+                            <p>Danh sách bệnh nhân trống!</p>
                         </div>
                     ) : (
                         examsInTimeSlot.map((item, index) => (
@@ -212,18 +428,18 @@ const ReceptionistDashboard = () => {
                                 symptom={'Triệu chứng: ' + item.symptom}
                                 special={item.special}
                                 room={item.roomName}
-                                doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
+                                doctor={`${item?.examinationStaffData?.staffUserData?.lastName} ${item?.examinationStaffData?.staffUserData?.firstName}`}
                                 downItem={downItem}
                                 visit_status={item.visit_status}
-                                onClickItem={()=>handleClickItem(item.id)}
+                                onClickItem={() => handleClickItem(item.id)}
                                 sort={true}
                             />
                         ))
                     )}
-                    <div className="add-patient justify-content-center mt-2 row" onClick={() => openAddExam(timeSlot.value)}>
-                        <div className="d-flex justify-content-center">
-                            <i className="fa-solid me-2 fa-plus"></i>
-                            <p>Thêm bệnh nhân</p>
+                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" onClick={() => openAddExam(timeSlot.value)}>
+                        <div className="flex justify-center items-center">
+                            <i className="fa-solid mr-2 fa-plus"></i>
+                            <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
                         </div>
                     </div>
                 </div>
@@ -231,166 +447,252 @@ const ReceptionistDashboard = () => {
         });
     };
 
-    // #endregion
-
-    // #region Return
     return (
-        <div className="dashboard-container">
-            <div className="dashboard-header ms-1 row gap2">
-                {/* <div className="col-3 statistical-item">
-                    <div className="row">
-                        <div className="col-7">
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Số thứ tự</p>
+        <div className="p-2.5 min-h-screen font-['Be_Vietnam_Pro',_sans-serif]">
+            <div className="mx-1 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="p-2.5 bg-white h-[105px] rounded-[10px] border-2 border-[#e6eaeb] transition duration-200 ease-in-out hover:shadow-md">
+                    <div className="grid grid-cols-7 md:grid-cols-7">
+                        <div className="col-span-5 md:col-span-7 lg:col-span-5">
+                            <div className="text-gray-500">
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Số bệnh nhân</p>
                             </div>
-                            <div className="col-12 ms-2 inline">
-                                <p className="number inline orange number-text">87</p>
-                                <p className="subtext inline">/100</p> 
+                            <div className="ms-2 text-[#007BFF] text-3xl font-semibold">
+                                <p className="m-0 ml-2.5 text-3xl">{totalPatient}</p>
                             </div>
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Ngày {convertDateTime(new Date())}</p>
-                            </div>
-                        </div>
-                        <div className="col-4 orange d-flex justify-content-center">
-                            <div className="icon blur-orange">
-                                <i className="fa-solid fa-user-group"></i>
+                            <div className="text-gray-500">
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
                             </div>
                         </div>
-                    </div>
-                </div> */}
-                <div className="col-3 statistical-item">
-                    <div className="row">
-                        <div className="col-7">
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Số bệnh nhân</p>
-                            </div>
-                            <div className="col-12 ms-2 blue number-text">
-                                <p className="number">{totalPatient}</p>
-                            </div>
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Ngày {convertDateTime(new Date())}</p>
-                            </div>
-                        </div>
-                        <div className="col-4 blue d-flex justify-content-center">
-                            <div className="icon blur-blue">
-                                <i className="fa-solid fa-head-side-mask"></i>
+                        <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#007BFF] flex justify-center">
+                            <div className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#dfefff] hover:scale-105">
+                                <i className="text-2xl fa-solid fa-head-side-mask"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="col-3 statistical-item">
-                    <div className="row">
-                        <div className="col-7">
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Số lịch hẹn</p>
+                <div className="p-2.5 bg-white h-[105px] rounded-[10px] border-2 border-[#e6eaeb] transition duration-200 ease-in-out hover:shadow-md">
+                    <div className="grid grid-cols-7 md:grid-cols-7">
+                        <div className="col-span-5 md:col-span-7 lg:col-span-5">
+                            <div className="text-gray-500">
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Số lịch hẹn</p>
                             </div>
-                            <div className="col-12 ms-2 green number-text">
-                                <p className="number">{totalAppointment}</p>
+                            <div className="ms-2 text-[#3AA472] text-3xl font-semibold">
+                                <p className="m-0 ml-2.5 text-3xl">{totalAppointment}</p>
                             </div>
-                            <div className="col-12 blur-text">
-                                <p className="subtext">Ngày {convertDateTime(new Date())}</p>
+                            <div className="text-gray-500">
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
                             </div>
                         </div>
-                        <div className="col-4 green d-flex justify-content-center">
-                            <div className="icon blur-green">
-                                <i className="fa-solid fa-bookmark"></i>
+                        <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#3AA472] flex justify-center">
+                            <div className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#ddfced] hover:scale-105">
+                                <i className="text-2xl fa-solid fa-bookmark"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="dashboard-action mt-4 row">
-                <div className="col-7 row">
-                    <div className="col-3">
-                        <div className="action-item">
-                            <Select className="select-box" defaultValue="appointment" onChange={handelSelectChange}>
-                                <Select.Option value="appointment">Hẹn khám</Select.Option>
-                                <Select.Option value="getnumber">Đang chờ khám</Select.Option>
-                            </Select>
-                        </div>
-                    </div>
-                    <div className="col-4"  style={{paddingRight: "0"}}>
-                        <div className="action-item">
-                            <Select className="select-box" allowClear
-                                    placeholder="Chọn khung giờ" 
-                                    onChange={handleTimeChange}
-                                    value={time} options={TIMESLOTS}/>
-                        </div>
-                    </div>
-                    <div className="col-4">
-                        <div className="action-item">
-                            <input type="text" className="search-box" 
-                                    placeholder="Tìm kiếm bệnh nhân..." 
-                                    onChange={handleSearch}/>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-5 d-flex justify-content-end" style={{padding: '0'}}>
-                    <button className="find-button" onClick={() => openAddExam(null)} >Thêm bệnh nhân trực tiếp</button>
-                </div>
-            </div>
-            <div className="dashboard-content mt-4">
-                {loadingExaminations ? (
-                    <div className="loading">
-                        <Spin />
-                    </div>
-                ) : (
-                    <>
-                        {isAppointment === 1 && (
-                            renderExaminationByTimeSlot()
-                        )}
-                        { isAppointment === 0 && (
-                            listExam && listExam.length > 0 ? listExam.map((item, index) => (
-                                <PatientItem
-                                        key={item.id}
-                                        index={index + 1}
-                                        id={item.id}
-                                        name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
-                                        symptom={item.symptom}
-                                        special={'Triệu chứng: ' + item.special}
-                                        room={item.roomName}
-                                        doctor={`${item.examinationStaffData.staffUserData.lastName} ${item.examinationStaffData.staffUserData.firstName}`}
-                                        downItem={downItem}
-                                        visit_status={item.visit_status}
-                                        onClickItem={()=>handleClickItem(item.id)}
-                                        sort={true}
-                                    />
-                            )):(
-                                <div className="no-patient d-flex justify-content-center mt-2">
-                                    <p>Không tìm thấy bệnh nhân!</p>
+                <div className="p-2.5 bg-white h-[105px] rounded-[10px] border-2 border-[#e6eaeb] transition duration-200 ease-in-out hover:shadow-md">
+                    <div className="grid grid-cols-7 md:grid-cols-7">
+                        <div className="col-span-5 md:col-span-7 lg:col-span-5">
+                            <div className="text-gray-500">
+                                <div className="m-0 ml-1.5 text-sm text-gray-500 flex items-center">
+                                    <p style={{ width: '120px' }}>{type === TYPE_NUMBER.NORMAL ? "Số khám thường" : "Số khám ưu tiên"}</p>
+                                    <button
+                                        className='flex items-center justify-center bg-[#ffffff] text-white transition-all duration-200 hover:shadow-md hover:scale-105'
+                                        style={{
+                                            borderRadius: '50%',
+                                            width: '25px',
+                                            height: '25px',
+                                            padding: '0',
+                                            border: '1px solid #e5e7eb'
+                                        }}
+                                        onClick={() => {
+                                            setType(type === TYPE_NUMBER.NORMAL ? TYPE_NUMBER.PRIORITY : TYPE_NUMBER.NORMAL);
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-arrows-rotate" style={{ color: '#FF7A56' }}></i>
+                                    </button>
                                 </div>
-                            )
+                            </div>
+                            <div className="ms-2 text-[#FF7A56] text-3xl font-semibold">
+                                <p className="m-0 ml-2.5 text-3xl">{type === TYPE_NUMBER.NORMAL ? currentNumber?.normalNumberCurrent : currentNumber?.priorityNumberCurrent}</p>
+                            </div>
+                            <div className="text-gray-500">
+                                <p className="m-0 ml-1.5 text-sm text-gray-500">Ngày {date.format("DD/MM/YYYY")}</p>
+                            </div>
+                        </div>
+                        <div className="col-span-2 md:col-span-7 lg:col-span-2 text-[#FF7A56] flex justify-center">
+                            <div
+                                className="p-2.5 rounded-full w-[75px] h-[75px] flex justify-center items-center cursor-pointer transition-all duration-200 bg-[#FFE3DD] hover:scale-105"
+                                onClick={() => date.isSame(dayjs(), "day") ? handleGeneralNumber(type) : null}
+                            >
+                                {loading ? <Spin tip="Loading..." /> :
+                                    <i className="text-2xl fa-solid fa-user-plus"></i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <Form
+                form={form}
+                className="mt-4"
+                layout="horizontal"
+            >
+                <div className="flex flex-wrap gap-2 justify-between">
+                    <div className="flex flex-wrap gap-2">
+                        <div className="w-fit lg:w-40">
+                            <Form.Item className="m-0">
+                                <Select
+                                    className="w-full"
+                                    defaultValue="appointment"
+                                    onChange={handleSelectChange}
+                                >
+                                    <Select.Option value="appointment">Hẹn khám</Select.Option>
+                                    <Select.Option value="getnumber">Đang chờ khám</Select.Option>
+                                </Select>
+                            </Form.Item>
+                        </div>
+                        {isAppointment === 1 && (
+                            <div className="w-fit lg:w-48">
+                                <Form.Item className="m-0">
+                                    <Select
+                                        className="w-full"
+                                        allowClear
+                                        placeholder="Chọn khung giờ"
+                                        onChange={handleTimeChange}
+                                        value={time}
+                                        options={TIMESLOTS}
+                                    />
+                                </Form.Item>
+                            </div>
                         )}
-                    </>
+                        <div className="w-fit lg:w-64">
+                            <Form.Item className="m-0">
+                                <Input
+                                    className="w-full"
+                                    placeholder="Tìm kiếm bệnh nhân..."
+                                    onChange={handleSearch}
+                                />
+                            </Form.Item>
+                        </div>
+                        <div className="w-fit lg:w-64">
+                            <DatePicker
+                                format="DD/MM/YYYY"
+                                placeholder="Chọn ngày"
+                                allowClear
+                                onChange={handleDateChange}
+                                value={date}
+                            />
+                        </div>
+                    </div>
+                    {date.isSame(dayjs(), "day") && (
+                        <div className="w-fit">
+                            <button
+                                className="h-8 border border-gray-300 py-0 px-5 rounded-md bg-[#007BFF] text-white transition-all duration-200 hover:shadow-md hover:scale-105 w-full md:w-auto"
+                                onClick={() => openAddExam(null)}
+                            >
+                                Thêm bệnh nhân trực tiếp
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </Form>
+
+            <input
+                ref={hiddeninputref}
+                type="text"
+                className="opacity-0 h-0 w-0 absolute pointer-events-none"
+                autoComplete="off"
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        // Enter key often signals the end of QR code data
+                        setScannedQR(e.target.value);
+                        e.target.value = "";
+                        scanningInProgressRef.current = false;
+                        keystrokeSequenceRef.current = [];
+                    }
+                }}
+            />
+
+            <div className="relative">
+                {loadingSteps && (
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-10">
+                        <Spin size="large" />
+                    </div>
                 )}
+                <div className={`${loadingSteps ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className="mt-4">
+                        {loadingExaminations ? (
+                            <div className="flex justify-center items-center h-[20vh]">
+                                <Spin />
+                            </div>
+                        ) : (
+                            <>
+                                {isAppointment === 1 && (
+                                    renderExaminationByTimeSlot()
+                                )}
+                                {isAppointment === 0 && (
+                                    listExam && listExam.length > 0 ? listExam.map((item, index) => (
+                                        <PatientItem
+                                            key={item.id}
+                                            index={index + 1}
+                                            id={item.id}
+                                            name={`${item.userExaminationData.lastName} ${item.userExaminationData.firstName}`}
+                                            symptom={item.symptom}
+                                            special={item.special}
+                                            room={item.roomName}
+                                            doctor={'Đang ở đâu'}
+                                            downItem={downItem}
+                                            visit_status={item.visit_status}
+                                            onClickItem={() => handleClickStep(item.id)}
+                                            sort={true}
+                                            status={+item.status}
+                                        />
+                                    )) : (
+                                        <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 flex justify-center mt-2">
+                                            <p>Danh sách bệnh nhân trống!</p>
+                                        </div>
+                                    )
+                                )}
+                            </>
+                        )}
+                    </div>
+                    <div className="mt-4 flex justify-center">
+                        {!loadingExaminations && isAppointment !== 1 && listExam.length > 0 && (
+                            <Pagination
+                                current={currentPage}
+                                pageSize={pageSize}
+                                total={total}
+                                onChange={handlePageChange}
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
-            <div className='row mt-4'>
-                {!loadingExaminations && isAppointment !== 1 && listExam.length > 0 && (
-                    <Pagination
-                        align="center"
-                        current={currentPage}
-                        pageSize={pageSize}
-                        total={total}
-                        onChange={handlePageChange}
-                    />
-                )}
-            </div>
-            { isModalOpen && (
-                <AddExamModal 
-                    isOpen={isModalOpen} 
-                    onClose={closeAddExam} 
+
+            {isModalOpen && (
+                <AddExamModal
+                    dataQRCode={dataQRCode}
+                    isOpen={isModalOpen}
+                    onClose={closeAddExam}
                     timeSlot={selectedTimeSlot}
                     handleAddExamSuscess={handleAddExamSuscess}
                     isEditMode={isEditMode}
-                    patientData={patientData} 
+                    patientData={patientData}
                     examId={examId}
                     comorbiditiesOptions={comorbiditiesOptions}
                     specialtyOptions={specialtyOptions}
-                    key={patientData? patientData.id + " " + Date.now() : "modal-closed"}
-                    />
+                //key={patientData ? patientData.id + " " + Date.now() : "modal-closed"}
+                />
             )}
+            <StepModal
+                isOpen={isModalStepOpen}
+                onClose={handleCloseModal}
+                examinationData={listStep}
+            />
         </div>
     );
-}
+};
 
 export default ReceptionistDashboard;

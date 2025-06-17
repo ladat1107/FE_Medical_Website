@@ -1,6 +1,7 @@
 
 
-export const BASE_URL = import.meta.env.VITE_BASE_URL
+export const BACKEND_URL = import.meta.env.VITE_SERVER_URL
+export const FRONTEND_URL = import.meta.env.VITE_REACT_URL
 export const ENV = import.meta.env.ENV
 export const _PORT = import.meta.env.PORT
 export const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME

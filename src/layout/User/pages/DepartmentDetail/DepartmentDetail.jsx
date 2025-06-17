@@ -1,5 +1,4 @@
 import Container from "@/components/Container";
-import "./DepartmentDetail.scss";
 import DepartmentRelated from "./section/DepartmentRelated";
 import DepartmentDetailHeader from "./section/DepartmentDetailHeader";
 import userService from "@/services/userService";
@@ -13,6 +12,7 @@ const DepartmentDetail = () => {
     let [listStaff, setListStaff] = useState([]);
     const {
         data: departmentData,
+        loading: departmentLoading,
         execute: getDepartmentDetail,
     } = useMutation(() => userService.getDepartmentId({ id }));
     const department = departmentData?.DT || {};
@@ -22,26 +22,24 @@ const DepartmentDetail = () => {
         }
     }, [location]);
     useEffect(() => {
+        window.scrollTo(0, 0);
         if (departmentData) {
-            setListStaff(departmentData.DT.staffDepartmentData);
+            let _listStaff = (departmentData?.DT?.staffDepartmentData || []).map((item) => {
+                return { ...item, staffDepartmentData: { name: departmentData?.DT?.name } };
+            });
+
+            setListStaff(_listStaff);
         }
     }, [departmentData]);
-    // let fetchDepartmentList = async () => {
-    //     let response = await userService.getDepartment({ tags: departmentData.DT.tags, limit: 20 });
-    //     if (response.data.EC === 0) {
-    //         setListDepartment(response.data.DT);
-    //     }
-    // }
+
     return (
-        <div className={'bg'} >
-            {department && listStaff &&
-                <Container>
-                    <div className="department-detail-user">
-                        <DepartmentDetailHeader departmentDetail={department} />
-                        <DepartmentRelated listStaff={listStaff} />
-                    </div>
-                </Container>
-            }
+        <div className="bg-bgHomePage py-10" >
+            <Container>
+                <div className="department-detail-user">
+                    <DepartmentDetailHeader departmentLoading={departmentLoading} departmentDetail={department} />
+                    {listStaff && <DepartmentRelated listStaff={listStaff} />}
+                </div>
+            </Container>
 
         </div>
     )

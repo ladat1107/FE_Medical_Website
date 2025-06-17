@@ -1,0 +1,252 @@
+.get-number-bg2 {
+    height: 100vh;
+    width: 99vw;
+    background-image: url("https://medpro.vn/_next/static/media/BannerDefaul.4f7c4739.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(206, 198, 198, 0.5); // Làm mờ nền
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .content {
+        transition: 0.3s;
+        width: 99%;
+    }
+
+    .disabled {
+        pointer-events: none; // Chặn thao tác
+        opacity: 0.5; // Làm mờ nội dung
+    }
+
+    .get-number-title {
+        margin: 80px auto;
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .big-num {
+        font-size: 200px;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .small-num {
+        font-size: 50px;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .btn-group {
+        z-index: 2;
+        display: flex;
+        transform: translateY(-50px);
+        text-align: center;
+        width: 100%;
+
+        .group {
+            width: 100%;
+            display: flex;
+        }
+
+        .get-number-btn {
+            // background: linear-gradient(36deg, #00b5f1, #00e0ff);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 30px 70px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+
+        .normal {
+            background: linear-gradient(36deg, #00b5f1, #00e0ff);
+
+            &:hover {
+                background-color: darken(#00b5f1, 10%);
+                transform: scale(1.1);
+            }
+        }
+
+        .priority {
+            background: linear-gradient(to right, #ffb45f, #ffc584, #FFD18A);
+
+
+
+            &:hover {
+                background-color: darken(#FFA500, 10%);
+                transform: scale(1.1);
+            }
+        }
+    }
+
+    .bg-hospital {
+        width: 40%;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1;
+    }
+
+    /* Thêm styles này vào file Numerical.scss */
+
+    .flip-card-container {
+        width: 100%;
+        max-width: 350px;
+        min-width: 250px;
+        height: auto;
+        aspect-ratio: 2 / 1;
+        perspective: 1000px;
+        margin: 0 auto 20px;
+        padding: 0 15px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .flip-card {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .flip-card-front,
+    .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .flip-card-back {
+        transform: rotateY(180deg);
+    }
+
+    .card-content {
+        padding: 15px;
+    }
+
+    .number-label {
+        font-size: clamp(16px, 4vw, 18px);
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .big-num {
+        font-size: clamp(60px, 8vw, 80px);
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .small-num {
+        font-size: clamp(18px, 4vw, 24px);
+        font-weight: 500;
+        line-height: 1;
+        margin-bottom: 5px;
+    }
+
+    /* Styles mới cho button lật */
+    .flip-button-container {
+        width: 100%;
+        max-width: 200px;
+        height: 45px;
+        perspective: 1000px;
+        margin-top: 20px;
+    }
+
+    .flip-button {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        cursor: pointer;
+    }
+
+    .flip-button.flipped {
+        transform: rotateX(180deg);
+    }
+
+    .flip-button-front,
+    .flip-button-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 5px;
+        font-size: clamp(14px, 3vw, 16px);
+        font-weight: 500;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .flip-button-front {
+        background-color: #08A476;
+    }
+
+    .flip-button-back {
+        background-color: #0073F3;
+        transform: rotateX(180deg);
+    }
+
+    /* Media queries cho các thiết bị khác nhau */
+    @media (max-width: 576px) {
+        .flip-card-container {
+            min-width: 200px;
+            max-width: 280px;
+        }
+
+        .flip-button-container {
+            max-width: 180px;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .flip-card-container {
+            min-width: 180px;
+        }
+
+        .flip-button-container {
+            max-width: 160px;
+        }
+    }
+}

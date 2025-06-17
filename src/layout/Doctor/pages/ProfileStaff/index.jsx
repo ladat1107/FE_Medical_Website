@@ -1,4 +1,4 @@
-import Profile from "../../../Admin/components/Profile/Profile";
+import Profile from "../../../../components/Profile/Profile";
 
 const ProfileStaff = () => {
     return (

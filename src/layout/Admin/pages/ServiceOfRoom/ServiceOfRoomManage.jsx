@@ -13,24 +13,26 @@ import { STATUS, TABLE } from "@/constant/value";
 import { formatCurrency } from "@/utils/formatCurrency";
 import Status from "../../components/Status";
 import DropdownAction from "../../components/Dropdown/DropdownAction";
+import SkeletonService from "./SkeletonService";
+
 const { TextArea } = Input;
 const ServiceOfRoom = () => {
     let [form] = Form.useForm();
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    let [rowsPerPage, setRowPaper] = useState(10);
     let [totalPages, setTotalPage] = useState(0);
     let [listServiceType, setListServiceType] = useState([]);
     let [checkAll, setCheckAll] = useState(false);
     let [search, setSearch] = useState("");
     let [obUpdate, setObUpdate] = useState(null);
+    let [isLoadingAction, setIsLoadingAction] = useState(false);
     let searchDebounce = "";
     let {
         data: dataServiceType,
-        loading: listServiceTypeLoading,
-        error: listServiceTypeError,
+        loading: loadingServiceType,
         execute: fetchServiceTypes,
     } = useMutation((query) =>
-        getServiceOfRoom(currentPage, rowsPerPage.id, searchDebounce)
+        getServiceOfRoom(currentPage, rowsPerPage, searchDebounce)
     )
     useEffect(() => {
         if (dataServiceType && dataServiceType.DT && dataServiceType.DT.rows && dataServiceType.DT) {
@@ -39,7 +41,7 @@ const ServiceOfRoom = () => {
                 _listServiceType[i].checked = false;
             }
             setListServiceType(_listServiceType);
-            setTotalPage(dataServiceType.DT.count / rowsPerPage.value);
+            setTotalPage(dataServiceType.DT.count / rowsPerPage);
         }
     }, [dataServiceType])
 
@@ -57,7 +59,7 @@ const ServiceOfRoom = () => {
             })
         }
     }, [obUpdate]);
-    let handleChange = (item) => {
+    const handleChange = (item) => {
         let _listService = [...listServiceType];
         _listService = _listService.map(obj =>
             obj.id === item.id ? { ...obj, checked: !item.checked } : obj
@@ -65,7 +67,7 @@ const ServiceOfRoom = () => {
         setCheckAll(false);
         setListServiceType(_listService);
     };
-    let handleChangeSelectedAll = () => {
+    const handleChangeSelectedAll = () => {
         let _listService = [...listServiceType];
         setCheckAll(!checkAll);
         _listService = _listService.map(obj =>
@@ -73,50 +75,55 @@ const ServiceOfRoom = () => {
         );
         setListServiceType(_listService);
     }
-    let handleChangePaginate = (item) => {
+    const handleChangePaginate = (item) => {
         setRowPaper(item);
         setCurrentPage(1);
     }
     searchDebounce = useDebounce(search, 500);
-    let handleChangeSearch = (event) => {
+    const handleChangeSearch = (event) => {
         setSearch(event.target.value);
         setCurrentPage(1)
     }
-    let refresh = () => {
+    const refresh = () => {
         setCheckAll(false);
         fetchServiceTypes();
+        setCurrentPage(1);
+        setSearch("");
+        form.resetFields();
         setObUpdate(null);
     }
-    let handleUpdate = async (item) => {
+    const handleUpdate = async (item) => {
         let response = await getServiceById(item.id);
-        if (response?.data?.EC == 0) {
-            let value = response?.data?.DT;
+        if (response?.EC == 0) {
+            let value = response?.DT;
             setObUpdate(value)
         } else {
-            message.error(response?.data?.EM || "Không thể chọn dịch vụ")
+            message.error(response?.EM || "Không thể chọn dịch vụ")
             refresh();
         }
     }
-    let handleInsertUpdate = async () => {
+    const handleInsertUpdate = async () => {
         form.validateFields().then(async (values) => {
+            setIsLoadingAction(true);
             let response = null;
             if (obUpdate) {
                 response = await updateServiceOfRoom({ ...values, price: values.price + "", id: obUpdate.id })
             } else {
                 response = await createServiceOfRoom({ ...values, price: values.price + "" })
             }
-            if (response?.data?.EC === 0) {
-                message.success(response?.data?.EM || "Thành công");
+            if (response?.EC === 0) {
+                message.success(response?.EM || "Thành công");
                 form.resetFields();
                 setObUpdate(null);
                 refresh();
             } else {
-                message.error(response?.data?.EM)
+                message.error(response?.EM)
             }
         }).catch((error) => {
             console.log("error", error)
-        });
-
+        }).finally(() => {
+            setIsLoadingAction(false);
+        })
     }
     return (
         < div className="service-of-room-content" >
@@ -137,17 +144,11 @@ const ServiceOfRoom = () => {
                             <Form
                                 layout={'horizontal'}
                                 form={form}
-                                labelCol={{
-                                    span: 24,
-                                }}
-                                wrapperCol={{
-                                    span: 24,
-                                }}
-                                initialValues={{
-                                }}
-                                style={{
-                                    maxWidth: "100%",
-                                }}
+                                labelCol={{ span: 24, }}
+                                wrapperCol={{ span: 24, }}
+                                initialValues={{}}
+                                style={{ maxWidth: "100%", }}
+                                autoComplete="off"
                             >
                                 <Row >
                                     <Col span={24}>
@@ -213,7 +214,7 @@ const ServiceOfRoom = () => {
                                     }
                                     <Col xs={24} style={{ display: 'flex', justifyContent: 'flex-end' }} >
                                         <Form.Item>
-                                            <Button type="primary" htmlType="submit"
+                                            <Button loading={isLoadingAction} type="primary" htmlType="submit"
                                                 style={{ background: "#04a9f3" }}
                                                 onClick={() => { handleInsertUpdate() }}>{obUpdate ? "Cập nhật" : "Thêm"}</Button>
                                         </Form.Item>
@@ -233,15 +234,7 @@ const ServiceOfRoom = () => {
                                 <table className="w-100">
                                     <thead className="header">
                                         <tr>
-                                            <th scope="col" className="rounded-top-left p-2">
-                                                <div>
-                                                    <Checkbox
-                                                        checked={checkAll}
-                                                        onChange={() => { handleChangeSelectedAll() }}
-                                                        size="small"
-                                                    />
-                                                </div>
-                                            </th>
+                                            <th scope="col" className=" text-center px-1">#</th>
                                             <th scope="col" className="px-1 name">Tên dịch vụ</th>
                                             <th scope="col" className=" text-end pe-5">Giá</th>
                                             <th scope="col" className=" px-1 ps-3">Mô tả</th>
@@ -250,59 +243,54 @@ const ServiceOfRoom = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="table-body ">
-                                        {+listServiceType.length > 0 && +totalPages != 0 ?
-                                            <>
-                                                {
-                                                    listServiceType.map((item, index) => {
-                                                        return (
-                                                            <tr key={item.id}>
-                                                                <td className="p-2">
-                                                                    <div>
-                                                                        <Checkbox
-                                                                            checked={item.checked}
-                                                                            onChange={() => { handleChange(item, index) }}
-                                                                            size="small"
-                                                                        /></div>
-                                                                </td>
-                                                                <td title={item.name} className="px-1 py-3 text-uppercase " >
-                                                                    <div className="name "> {item?.name || "Khác"}</div>
-                                                                </td>
-                                                                <td className="text-end pe-5 py-3 price">
-                                                                    {item?.price === 0 ?
-                                                                        <div ><span className="free">Miễn phí</span></div>
-                                                                        :
-                                                                        <div className="">{formatCurrency(item?.price) || "_"}</div>}
+                                        {
+                                            loadingServiceType ? <SkeletonService /> :
+                                                +listServiceType.length > 0 && +totalPages != 0 ?
+                                                    <>
+                                                        {
+                                                            listServiceType.map((item) => {
+                                                                return (
+                                                                    <tr key={item.id}>
+                                                                        <td className="text-center px-1 py-3">{item?.id || "_"}</td>
+                                                                        <td title={item.name} className="px-1 py-3 text-uppercase " >
+                                                                            <div className="name "> {item?.name || "Khác"}</div>
+                                                                        </td>
+                                                                        <td className="text-end pe-5 py-3 price">
+                                                                            {item?.price === 0 ?
+                                                                                <div ><span className="free">Miễn phí</span></div>
+                                                                                :
+                                                                                <div className="">{formatCurrency(item?.price) || "_"}</div>}
 
-                                                                </td>
-                                                                <td title={item.description} className="text-start px-1 py-3 description">
-                                                                    <div>
-                                                                        {item?.description || "Chưa có mô tả"}
-                                                                    </div>
-                                                                </td>
-                                                                <td className="text-center px-1 py-3">
-                                                                    <Status data={item?.status} />
-                                                                </td>
-                                                                <td className="px-1 py-3 d-flex justify-content-end">
-                                                                    <div className='iconDetail'>
-                                                                        <DropdownAction
-                                                                            data={item}
-                                                                            action={handleUpdate}
-                                                                            refresh={refresh}
-                                                                            table={TABLE.SERVICE}
-                                                                        />
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )
+                                                                        </td>
+                                                                        <td title={item.description} className="text-start px-1 py-3 description">
+                                                                            <div>
+                                                                                {item?.description || "Chưa có mô tả"}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="text-center px-1 py-3">
+                                                                            <Status data={item?.status} />
+                                                                        </td>
+                                                                        <td className="px-1 py-3 d-flex justify-content-end">
+                                                                            <div className='iconDetail'>
+                                                                                <DropdownAction
+                                                                                    data={item}
+                                                                                    action={handleUpdate}
+                                                                                    refresh={refresh}
+                                                                                    table={TABLE.SERVICE}
+                                                                                />
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                )
 
-                                                    })
-                                                }
-                                            </> :
-                                            <tr>
-                                                <td colSpan="7" className="text-center">
-                                                    <span className="text-gray-500">Không có dữ liệu</span>
-                                                </td>
-                                            </tr>
+                                                            })
+                                                        }
+                                                    </> :
+                                                    <tr>
+                                                        <td colSpan="7" className="text-center">
+                                                            <span className="text-gray-500">Không có dữ liệu</span>
+                                                        </td>
+                                                    </tr>
                                         }
 
                                     </tbody>

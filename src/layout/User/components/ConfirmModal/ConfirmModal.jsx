@@ -1,7 +1,7 @@
 import { message, Modal } from "antd";
 import "./ConfirmModal.scss";
 import { useEffect, useState } from "react";
-import { STATUS_BE, TABLE, TIMESLOTS } from "@/constant/value";
+import { TABLE, TIMESLOTS } from "@/constant/value";
 import userService from "@/services/userService";
 import { formatDate } from "@/utils/formatDate";
 
@@ -13,7 +13,7 @@ const ConfirmModal = (props) => {
     }
     useEffect(() => {
         if (props.table === TABLE.EXAMINATION) {
-            if (data?.paymentId && data?.paymentDoctorStatus === +STATUS_BE.ACTIVE) {
+            if (data?.paymentId) {
                 setMessageContent(
                     "Lưu ý: <strong>Bạn đã thanh toán cho lịch hẹn này, xóa lịch hẹn sẽ được hoàn lại 80% số tiền đã thanh toán.</strong> <br />" +
                     "Xác nhận xóa lịch hẹn lúc " + TIMESLOTS[data?.time - 1]?.label +
@@ -28,17 +28,16 @@ const ConfirmModal = (props) => {
     let handleDelete = async () => {
         if (props.table === TABLE.EXAMINATION) {
             let response = await userService.cancelAppoinment(data);
-            if (response && response.data && response.data.EC === 0) {
-                susscess(response?.data?.EM || "Thành công")
+            if (response.EC === 0) {
+                susscess(response?.EM)
             } else {
-                message.error(response.data.EM);
+                message.error(response.EM);
             }
         }
 
     }
     let susscess = (text) => {
         message.success(text);
-        props.isShow(false)
         props.refresh()
     }
     return (
@@ -51,7 +50,7 @@ const ConfirmModal = (props) => {
             cancelText="Đóng"
             maskClosable={false}
         >
-            <div dangerouslySetInnerHTML={{ __html: messageContent }} />
+            <div className="p-3" dangerouslySetInnerHTML={{ __html: messageContent }} />
         </Modal>
     )
 }

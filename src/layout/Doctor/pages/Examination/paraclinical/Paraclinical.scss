@@ -103,18 +103,27 @@
     }
     
     .add-button{
-        font-family: 'Be Vietnam Pro', sans-serif;
-        font-size: 14px;
-        background-color: #438EF3;
+        background: #007BFF;
         color: white;
-        font-weight: bold;
         border: none;
-        border-radius: 5px;
+        border-radius: 10px;
         padding: 5px 15px;
+        box-shadow: 2px 2px 4px #e6eaeb;
+        min-width: 80px;
         cursor: pointer;
 
+        &:hover {
+            box-shadow: 4px 4px 8px #e6eaeb, -4px -4px 8px #e6eaeb;
+        }
+    }
+
+    .disable-button{
+        background-color: #ccc;
+        cursor: not-allowed; 
+        color: gray;
+
         &:hover{
-            background-color: #1060ca;
+            background-color: #ccc;
         }
     }
 

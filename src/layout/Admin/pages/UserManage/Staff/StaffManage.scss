@@ -1,21 +1,19 @@
-@import "../../../../../style/variables.scss";
-
 .staff-manage {
     .container {
         padding: 0 3%;
-        background: $background-color;
+        background: var(--background-color);
 
         .first {
             .text {
                 font-size: 1.2rem;
-                color: $secondary-color-admin;
+                color: var(--secondary-color-admin);
             }
 
             .btn-add-user {
-                background: $background-color;
-                border: 1px solid $primary-color-admin;
+                background: var(--background-color);
+                border: 1px solid var(--primary-color-admin);
                 border-radius: 8px;
-                color: $primary-color-admin;
+                color: var(--primary-color-admin);
                 font-weight: 500;
                 cursor: pointer;
 
@@ -32,15 +30,16 @@
 
 
         .table-responsive {
-            border-radius: $boder-content-admin;
+            border-radius: 10px;
             width: 100%;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
+            scrollbar-width: none;
 
             .header {
                 width: 100%;
                 height: 50px;
-                background: $background-table-head-admin;
-                color: $text-head-color-admin;
+                background: var(--background-table-head-admin);
+                color: var(--text-head-color-admin);
 
                 .rounded-top-left {
                     border-top-left-radius: 5px;
@@ -61,6 +60,10 @@
 
                 tr {
                     border-bottom: 1px solid #e3dede !important;
+
+                    td {
+                        min-height: 80px;
+                    }
                 }
 
                 .min-content-width {
@@ -82,7 +85,7 @@
 
 
                         .fw-semibold {
-                            color: $secondary-color-admin;
+                            color: var(--secondary-color-admin);
                         }
 
                         .fw-normal {

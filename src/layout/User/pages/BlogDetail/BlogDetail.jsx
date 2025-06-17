@@ -1,5 +1,4 @@
 import Container from "@/components/Container";
-import "./BlogDetail.scss";
 import BlogRelated from "./section/BlogRelated";
 import BlogDetailHeader from "./section/BlogDetailHeader";
 import userService from "@/services/userService";
@@ -13,6 +12,7 @@ const BlogDetail = () => {
     let [listHandbook, setListHandbook] = useState([]);
     const {
         data: handbookData,
+        loading: isLoadingHandbook,
         execute: getHandbookDetail,
     } = useMutation(() => userService.getHandbookDetail({ id }));
     const handbook = handbookData?.DT || {};
@@ -20,29 +20,29 @@ const BlogDetail = () => {
         if (id) {
             getHandbookDetail();
         }
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }, [location]);
     useEffect(() => {
         if (handbookData) {
             fetchHandbookList();
         }
     }, [handbookData]);
+
     let fetchHandbookList = async () => {
         let response = await userService.getHandbook({ tags: handbookData.DT.tags, limit: 20 });
-        if (response.data.EC === 0) {
-            setListHandbook(response.data.DT);
+        if (response.EC === 0) {
+            setListHandbook(response.DT);
         }
     }
     return (
         <div className={'bg-white'} >
-            {handbook && listHandbook &&
-                <Container>
-                    <div className="blog-detail-user">
-                        <BlogDetailHeader blogDetail={handbook} />
-                        <BlogRelated listHandbook={listHandbook} />
-                    </div>
-                </Container>
-            }
-
+            <Container>
+                <BlogDetailHeader blogDetail={handbook || {}} isLoading={isLoadingHandbook} />
+                <BlogRelated listHandbook={listHandbook || []} />
+            </Container>
         </div>
     )
 }

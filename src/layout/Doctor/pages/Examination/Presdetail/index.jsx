@@ -1,94 +1,145 @@
 import React, { useEffect, useState } from 'react';
 import './Presdetail.scss';
-import SelectBox2 from '@/layout/Doctor/components/Selectbox';
 import PropTypes from 'prop-types';
-import QuantityInput from '@/layout/Doctor/components/QuantityInput';
+import MultiSelect from '@/layout/Doctor/components/MultiSelect';
+import FreeTextInputWithSuggestions from '@/layout/Doctor/components/Selectbox/CustomSelectbox';
 
-const Presdetail = ({ id, presdetailData, onDelete, options, onChange }) => {
+const Presdetail = ({ id, presdetailData, onDelete, isEditMode, onChange }) => {
     const [medicineId, setMedicineId] = useState(presdetailData.medicineId || 0);
     const [selectedPrice, setSelectedPrice] = useState(presdetailData.price || 0);
+    const [medicineName, setMedicineName] = useState(presdetailData.name || '');
     const [medicineUnit, setMedicineUnit] = useState(presdetailData.unit || '');
     const [quantity, setQuantity] = useState(presdetailData.quantity || 0);
     const [dosage, setDosage] = useState(presdetailData.dosage || '');
+    const [session, setSession] = useState(presdetailData.session || []);
+    const [dose, setDose] = useState(presdetailData.dose || null);
 
-    const handleMedicineChange = (value) => {
-        const selectedMedicine = options.find(option => option.value === value);
-        if (selectedMedicine) {
-            setMedicineId(selectedMedicine.value);
-            setSelectedPrice(selectedMedicine.price || 0);
-            setMedicineUnit(selectedMedicine.unit || '');
-            onChange(id, medicineId, quantity, medicineUnit, selectedMedicine.price || 0, dosage);
-        }
-    };
+    const SessionOptions = [{ value: '1', label: 'Sáng' }, { value: '2', label: 'Trưa' }, { value: '3', label: 'Chiều' }, { value: '4', label: 'Tối' }];
+
+    const DoseOptions = [
+        `1 lần 1/2 ${medicineUnit}`,
+        `1 lần 1 ${medicineUnit}`,
+        `1 lần 2 ${medicineUnit}`,
+        `1 lần 3 ${medicineUnit}`,
+        `1 lần 4 ${medicineUnit}`,
+        `1 lần 5 ${medicineUnit}`,
+        `1 lần 6 ${medicineUnit}`,
+        `1 lần 7 ${medicineUnit}`,
+        `1 lần 8 ${medicineUnit}`,
+        `1 lần 9 ${medicineUnit}`
+    ];
+
+    const handleSessionChange = (value) => {
+        setSession(value);
+    }
+
+    const handleDoseChange = (value) => {
+        setDose(value);
+    }
+
+    useEffect(() => {
+        updateDosage();
+    }, [session, dose]);
+
+    const updateDosage = () => {
+        const selectedLabels = SessionOptions
+            .filter(option => session.includes(option.value))
+            .map(option => option.label)
+            .join(', ');
+
+        setDosage(`${selectedLabels} - ${dose}`);
+    }
 
     const handleQuantityChange = (newQuantity) => {
         setQuantity(newQuantity);
-        onChange(id, medicineId, newQuantity, medicineUnit, selectedPrice, dosage);
     };
 
     useEffect(() => {
-        onChange(id, medicineId, quantity, medicineUnit, selectedPrice, dosage);
+        onChange(id, medicineId, quantity, medicineUnit, selectedPrice, dosage, session, dose);
     }, [id, medicineId, quantity, medicineUnit, selectedPrice, dosage, onChange]);
+
+    const handleDosageChange = (value) => {
+        setDosage(value);
+    };
 
     return (
         <div className="presdetail-container">
-            <div className="row center-content">
-                <div className='col-12 col-lg-4'>
-                    <div className='col-4 mt-2 col-lg-12'>
-                        <p className='title'>Tên thuốc</p>
-                    </div>
-                    <div className='col-12 mt-1 col-lg-12'>
-                        <SelectBox2
-                            className="select-box2"
-                            options={options}
-                            value={medicineId !== 0 ? medicineId : undefined}
-                            placeholder="Nhập tên thuốc"
-                            onChange={handleMedicineChange}
-                        />
-                    </div>
+            {/* Header row */}
+            <div className="medicine-row">
+                <div className="medicine-name">
+                    <p className="title">Tên thuốc</p>
                 </div>
-                <div className='col-6 mt-2 col-lg-2'>
-                    <div className='row'>
-                        <p className='title center-content'>Số lượng</p>
-                    </div>
-                    <div className='row mt-1'>
-                        <QuantityInput
-                            initialValue={quantity}
-                            onChange={handleQuantityChange} />
-                    </div>
+                <div className="medicine-info">
+                    <p className="title">Số lượng</p>
+                    <p className="title"></p>
+                    <p className="title">Đơn giá</p>
                 </div>
-                <div className='col-3 mt-2 col-lg-1'>
-                    <div className='row'>
-                        <p className='title'>Đơn vị</p>
-                    </div>
-                    <div className='row mt-2'>
-                        <p className='suptext'>{medicineUnit}</p>
-                    </div>
+                <div className="medicine-timing">
+                    <p className="title">Buổi dùng</p>
                 </div>
-                <div className='col-3 mt-2 col-lg-1'>
-                    <div className='row'>
-                        <p className='title'>Đơn giá</p>
-                    </div>
-                    <div className='row mt-2'>
-                        <p className='suptext'>{selectedPrice.toLocaleString()}</p>  {/* Hiển thị giá */}
-                    </div>
+                <div className="medicine-dosage">
+                    <p className="title">Liều dùng</p>
                 </div>
-                <div className='col-12 mt-2 col-lg-3'>
-                    <div className='row'>
-                        <p className='title'>Liều dùng</p>
-                    </div>
-                    <div className='row mt-1 '>
+            </div>
+
+            {/* Content row */}
+            <div className="medicine-row">
+                <div className="medicine-name">
+                    <p className="suptext">{medicineName}</p>
+                </div>
+                <div className="medicine-info">
+                    <div>
                         <input
                             type="text"
                             className="input"
-                            placeholder="Nhập liều dùng"
-                            value={dosage}
-                            onChange={(e) => setDosage(e.target.value)} />
+                            placeholder="SL"
+                            readOnly={!isEditMode}
+                            value={quantity}
+                            onChange={(e) => {
+                                // Kiểm tra nếu giá trị nhập vào chỉ chứa số
+                                const value = e.target.value;
+                                // Chấp nhận chuỗi rỗng hoặc chỉ chứa số
+                                if (value === '' || /^[0-9]+$/.test(value)) {
+                                    handleQuantityChange(value);
+                                }
+                            }}
+                            onKeyPress={(e) => {
+                                // Ngăn người dùng nhập ký tự không phải số
+                                if (!/[0-9]/.test(e.key)) {
+                                    e.preventDefault();
+                                }
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <p className="suptext">{medicineUnit}</p>
+                    </div>
+                    <div>
+                        <p className="suptext">{selectedPrice.toLocaleString()}</p>
                     </div>
                 </div>
-                <div className='col-1 mt-2'>
-                    <i className="fa-solid fa-trash red" onClick={onDelete}></i>
+                <div className="medicine-timing">
+                    <MultiSelect
+                        options={SessionOptions}
+                        value={session}
+                        placeholder="Chọn buổi dùng"
+                        onChange={handleSessionChange}
+                        disabled={!isEditMode}
+                    />
                 </div>
+                <div className="medicine-dosage">
+                    <FreeTextInputWithSuggestions
+                        options={DoseOptions}
+                        value={dose}
+                        onChange={handleDoseChange}
+                        placeholder="Nhập liều dùng..."
+                        disabled={!isEditMode}
+                        maxSuggestions={5}
+                    />
+                </div>
+                {isEditMode && (
+                    <i className="fa-solid fa-trash delete-btn" onClick={onDelete}></i>
+                )}
             </div>
         </div>
     );
@@ -98,7 +149,7 @@ Presdetail.propTypes = {
     id: PropTypes.number.isRequired,
     presdetailData: PropTypes.object.isRequired,
     onDelete: PropTypes.func.isRequired,
-    options: PropTypes.array.isRequired,
+    isEditMode: PropTypes.bool.isRequired,
     onChange: PropTypes.func.isRequired,
 };
 

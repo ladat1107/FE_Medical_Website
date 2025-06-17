@@ -9,11 +9,11 @@ export const handleConfirmUser = (data) => {
 export const handleLogin = (data) => {
     return axios.post(`/api/handleLogin`, data)
 }
+export const handleLogoutService = () => {
+    return axios.post(`/api/handleLogout`)
+}
 export const handleForgotPassword = (data) => {
     return axios.post(`/api/forgotPassword`, data)
-}
-export const logoutUser = () => {
-    return axios.post(`/api/handleLogout`)
 }
 // USER MANAGEMENT
 export const createUser = (data) => {
@@ -100,8 +100,8 @@ export const createServiceOfRoom = (data) => {
 export const createRoom = (data) => {
     return axios.post(`/api/admin/createRoom`, data)
 }
-export const getAllRoom = (page, limit, search, searchDepartment) => {
-    return axios.get(`/api/admin/getAllRoomAdmin?page=${+page}&limit=${+limit}&search=${search}&searchDepartment=${searchDepartment}`)
+export const getAllRoom = (query) => {
+    return axios.get(`/api/admin/getAllRoomAdmin`, { params: query })
 }
 export const getRoomById = (id) => {
     return axios.get(`/api/getRoomById?id=${id}`)
@@ -163,3 +163,45 @@ export const arrangeSchedule = (data) => {
 export const getStatisticalAppoinment = (query) => {
     return axios.get(`/api/admin/getStatisticalAppoinment`, { params: query })
 }
+
+// MEDICINE MANAGEMENT
+export const getAllMedicinesAdmin = () => {
+    return axios.get(`/api/admin/getAllMedicinesAdmin`)
+}
+export const getPrescriptionUsed = (query) => {
+    return axios.get(`/api/admin/getPrescriptionUsed`, { params: query })
+}
+export const createMedicine = (data) => {
+    return axios.post(`/api/admin/createMedicine`, data)
+}
+export const updateMedicine = (data) => {
+    return axios.put(`/api/admin/updateMedicineAdmin`, data)
+}
+export const deleteMedicine = (data) => {
+    return axios.delete(`/api/admin/deleteMedicine`, { data: { id: data.id } })
+}
+export const blockMedicine = (data) => {
+    return axios.put(`/api/admin/blockMedicine`, data)
+}
+
+// EXAMINATION MANAGEMENT
+export const getAllExaminationsAdmin = (query = null) => {
+    return axios.get(`/api/admin/getAllExaminationsAdmin`, { params: query })
+}
+
+export const getExaminationByIdAdmin = (id) => {
+    return axios.get(`/api/admin/getExaminationByIdAdmin?id=${id}`)
+}
+
+// PAYMENT MANAGEMENT
+export const getPaymentAdmin = (query = null) => {
+    return axios.get(`/api/admin/getPaymentAdmin`, { params: query })
+}
+
+export const deleteExamination = (data) => {
+    return axios.delete(`/api/admin/deleteExamination`, { data: { id: data.id } })
+}
+export const blockExamination = (data) => {
+    return axios.put(`/api/admin/blockExamination`, data)
+}
+

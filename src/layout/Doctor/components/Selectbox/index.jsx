@@ -3,20 +3,20 @@ import { Select } from 'antd';
 import PropTypes from 'prop-types';
 import './SelectBox.scss';
 
-const SelectBox2 = ({ placeholder, options, value, onChange }) => (
+const SelectBox2 = ({ placeholder, options, value, onChange, disabled, allowClear = true }) => (
   <Select
     showSearch
     style={{
-      width: 200,
+      width: '100%',
     }}
     placeholder={placeholder}
     optionFilterProp="label"
-    filterSort={(optionA, optionB) =>
-      (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
-    }
-    options={options}
+    // Bỏ thuộc tính filterSort để không tự động sắp xếp kết quả tìm kiếm
+    options={options} // Sử dụng trực tiếp mảng options ban đầu
     value={value}
     onChange={onChange} 
+    disabled={disabled}
+    allowClear={allowClear}
   />
 );
 
@@ -30,6 +30,7 @@ SelectBox2.propTypes = {
   })).isRequired, 
   value: PropTypes.any,
   onChange: PropTypes.func,  
+  disabled: PropTypes.bool,
 };
 
 export default SelectBox2;

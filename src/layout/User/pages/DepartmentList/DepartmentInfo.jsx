@@ -1,17 +1,24 @@
-import React, { useState } from "react";
-import classNames from "classnames/bind";
-import styles from "./departmentList.module.scss";
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+import React, { useEffect, useState } from "react";
 import DepartmentCard from "@/components/DepartmentCard";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "@/constant/path";
+import DeparmentCardSkeleton from "@/components/DepartmentCard/DeparmentCardSkeleton";
+import { Input } from "antd";
+import { Search } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { clearBooking } from "@/redux/bookingSlice";
 
 const DepartmentInfo = (props) => {
   let [departmentList, setListDepartment] = useState(props?.departmentList);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (props.departmentList?.length > 0) {
+      setListDepartment(props.departmentList);
+    }
+  }, [props.departmentList, props.departmentLoading])
   let [search, setSearch] = useState("");
   let navigate = useNavigate();
-  let handleChangrSearch = (e) => {
+  const handleChangrSearch = (e) => {
     let _listDepartment = [...props?.departmentList];
     setSearch(e.target.value);
     if (e.target.value === "") {
@@ -21,49 +28,54 @@ const DepartmentInfo = (props) => {
     let list = _listDepartment.filter((item) => item.name.toLowerCase().includes(e.target.value.toLowerCase()));
     setListDepartment(list);
   }
+  const handleBooking = () => {
+    dispatch(clearBooking());
+    navigate(PATHS.HOME.BOOKING);
+  }
   return (
-    <div className={cx("department-info")}>
-      <div className={cx("head-section")}>
-        <div className="container-input">
-          <input
-            type="text"
-            placeholder="Tìm kiếm khoa"
-            name="text"
-            className="input"
-            value={search}
-            onChange={(e) => handleChangrSearch(e)}
-          />
-          <svg
-            fill="#000000"
-            width="20px"
-            height="20px"
-            viewBox="0 0 1920 1920"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z"
-              fillRule="evenodd"
-            />
-          </svg>
-        </div>
-        <div className={cx("btn-action")}>
-          <div className={cx("action-left")}>Tư Vấn Ngay</div>
-          <div className={cx("action-right")} onClick={() => { navigate(PATHS.HOME.BOOKING) }}>Đặt lịch hẹn</div>
+    <div className="w-full py-10" >
+      <div className="flex flex-col gap-4 w-full px-3">
+        <Input
+          type="text"
+          className="w-full border-none outline-none !shadow-card-doctor focus:border-none focus:outline-none focus:shadow-none
+          rounded-full px-3 h-11"
+          placeholder="Tìm kiếm khoa"
+          value={search}
+          prefix={<Search className="text-gray-500 me-3" />}
+          onChange={(e) => handleChangrSearch(e)}
+        />
+        <div className="flex justify-center items-center
+         w-full">
+          <div className="flex justify-between items-center gap-4 mt-3 w-full  sm:w-[90%] lg:w-[70%]">
+            <div className="flex justify-center items-center bg-[#00e0ff] text-white px-3 py-2 rounded-full shadow-card-doctor cursor-pointer w-[48%] h-11 text-center
+            hover:bg-[#00e0ff]/60 hover:scale-105 transition-all duration-300">Tư Vấn Ngay</div>
+            <div className="flex justify-center items-center bg-white text-primary-tw border-2 border-primary-tw px-3 py-2 rounded-full shadow-card-doctor cursor-pointer w-[48%]  h-11 text-center
+            hover:scale-105 transition-all duration-300" onClick={handleBooking}>Đặt lịch hẹn</div>
+          </div>
         </div>
       </div>
-      <div className={cx('list-item')} >
-        {departmentList?.length > 0 && departmentList.map((item, index) => (
-          <div
-            className="col-3 px-2 mb-2"
-            key={index}>
-            <DepartmentCard
-              id={item?.id}
-              image={item?.image}
-              name={item?.name}
-              shortDescription={item?.shortDescription}
-            />
-          </div>
-        ))}
+      <div className="flex flex-wrap justify-center items-center gap-4 mt-4" >
+        {
+          props.departmentLoading ?
+            Array.from({ length: 12 }).map((_, index) => (
+              <div
+                className="flex flex-wrap justify-center items-center"
+                key={index}>
+                <DeparmentCardSkeleton />
+              </div>))
+            :
+            departmentList?.length > 0 ? departmentList.map((item, index) => (
+              <div
+                className="flex flex-wrap justify-center items-center"
+                key={index}>
+                <DepartmentCard
+                  id={item?.id}
+                  image={item?.image}
+                  name={item?.name}
+                  shortDescription={item?.shortDescription}
+                />
+              </div>
+            )) : <div>Không tìm thấy khoa</div>}
       </div>
     </div >
   );

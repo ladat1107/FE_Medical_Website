@@ -1,9 +1,15 @@
 .html-content {
+    line-height: 2;
+    text-align: justify;
+    font-size: 16px;
 
+    h1,
     h2,
     h3,
-    h4 {
-        color: #04a9f3;
+    h4,
+    h5,
+    h6 {
+        color: #003d80;
         font-weight: 600;
         margin: 20px 0;
     }
@@ -11,6 +17,35 @@
     ul {
         padding-left: 30px;
         font-size: 14px;
+    }
+
+    a {
+        color: var(--primary-color-admin);
+        font-weight: 400;
+    }
+
+    img {
+        width: 80%;
+        height: auto;
+        border-radius: 8px;
+        margin: 15px auto;
+    }
+
+    p {
+        width: 100%;
+        padding-left: 10px;
+
+        em {
+            color: gray;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 0 auto;
+        }
+    }
+
+    strong {
+        color: #003d80;
+        font-weight: bold;
     }
 
 }

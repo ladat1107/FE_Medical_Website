@@ -1,0 +1,6 @@
+.custom-antd-select .ant-select-selector {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  padding-left: 12px;
+}

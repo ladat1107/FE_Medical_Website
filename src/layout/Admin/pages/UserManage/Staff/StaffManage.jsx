@@ -5,7 +5,6 @@ import DropdownPaginate from '@/layout/Admin/components/Dropdown/DropdownPaginat
 import DropdownAction from '@/layout/Admin/components/Dropdown/DropdownAction';
 import DropdownPosition from './DropDownPosition';
 import useDebounce from '@/hooks/useDebounce';
-import Checkbox from '@mui/material/Checkbox';
 import CreateUserModal from '@/layout/Admin/components/Modal/CreateUserModal';
 import PaginateCustom from '@/layout/Admin/components/Paginate/PaginateCustom';
 import { getUser, getUserById } from "@/services/adminService";
@@ -15,13 +14,13 @@ import "./StaffManage.scss";
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import Status from '@/layout/Admin/components/Status';
+import { SkeletonTable } from '@/layout/Admin/pages/UserManage/Staff/SkeletonTable';
 
 const StaffManage = () => {
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    let [rowsPerPage, setRowPaper] = useState(10);
     let [listUser, setListUser] = useState([]);
     let [totalPages, setTotalPage] = useState(0);
-    let [checkAll, setCheckAll] = useState(false);
     let [search, setSearch] = useState("");
     let [positionArr, setPositionArr] = useState([1, 3, 4, 5, 6, 7]);
     let [showCreateUserModal, setShowCreateUserModal] = useState(false);
@@ -29,14 +28,12 @@ const StaffManage = () => {
     let searchDebounce = "";
     let {
         data: dataUser,
-        loading: listUserLoading,
-        error: listUserError,
+        loading: loadingUser,
         execute: fetchUsers,
     } = useMutation((query) =>
-        getUser(currentPage, rowsPerPage.id, searchDebounce, positionArr)
+        getUser(currentPage, rowsPerPage, searchDebounce, positionArr)
     )
     let refresh = () => {
-        setCheckAll(false);
         setShowCreateUserModal(false);
         setObUpdate(null);
         setSearch("");
@@ -44,13 +41,10 @@ const StaffManage = () => {
         fetchUsers();
     }
     useEffect(() => {
-        if (dataUser && dataUser.DT && dataUser.DT.rows && dataUser.DT) {
-            let _listUser = [...dataUser.DT.rows];
-            for (let i = 0; i < _listUser.length; i++) {
-                _listUser[i].checked = false;
-            }
+        if (dataUser?.EC === 0) {
+            let _listUser = dataUser?.DT?.rows.map(item => ({ ...item, avatar: item?.avatar || LINK.AVATAR_NULL })) || [];
             setListUser(_listUser);
-            setTotalPage(dataUser.DT.count / rowsPerPage.value);
+            setTotalPage(dataUser?.DT?.count / rowsPerPage);
         }
     }, [dataUser])
 
@@ -58,22 +52,6 @@ const StaffManage = () => {
         fetchUsers();
     }, [currentPage, useDebounce(search, 500), positionArr, rowsPerPage]);
 
-    let handleChange = (item) => {
-        let _listUser = [...listUser];
-        _listUser = _listUser.map(obj =>
-            obj.id === item.id ? { ...obj, checked: !item.checked } : obj
-        );
-        setCheckAll(false);
-        setListUser(_listUser);
-    };
-    let handleChangeSelectedAll = () => {
-        let _listUser = [...listUser];
-        setCheckAll(!checkAll);
-        _listUser = _listUser.map(obj =>
-            checkAll === true ? { ...obj, checked: false } : { ...obj, checked: true }
-        );
-        setListUser(_listUser);
-    }
     let handleChangePosition = (newArr) => {
         setPositionArr(newArr);
         setCurrentPage(1);
@@ -87,22 +65,21 @@ const StaffManage = () => {
         setSearch(event.target.value);
         setCurrentPage(1)
     }
-
-    let handleShow = (value) => {
+    const handleShow = (value) => {
         setShowCreateUserModal(value)
     }
-    let hanldeCreateUser = () => {
+    const hanldeCreateUser = () => {
         setObUpdate(null)
         setShowCreateUserModal(true)
     }
-    let handleUpdate = async (item) => {
+    const handleUpdate = async (item) => {
         let response = await getUserById(item.id);
-        if (response?.data?.EC == 0) {
-            let value = response?.data?.DT;
+        if (response?.EC == 0) {
+            let value = response?.DT;
             setObUpdate(value)
             setShowCreateUserModal(true)
         } else {
-            message.error(response?.data?.EM || "Không thể chọn bệnh nhân")
+            message.error(response?.EM || "Không thể chọn bệnh nhân")
             refresh();
         }
     }
@@ -122,19 +99,12 @@ const StaffManage = () => {
                                 value={search}
                                 onChange={(event) => { handleChangeSearch(event) }} />
                         </div>
-
                         <div className='px-4'>
                             <table className='w-100'>
                                 <thead>
                                     <tr className="header">
-                                        <th scope="col" className="rounded-top-left d-none d-md-table-cell">
-                                            <div>
-                                                <Checkbox
-                                                    checked={checkAll}
-                                                    onChange={() => { handleChangeSelectedAll() }}
-                                                    size="small"
-                                                />
-                                            </div>
+                                        <th scope="col" className="rounded-top-left text-center px-1 py-0">
+                                            <div>#</div>
                                         </th>
                                         <th scope="col" className="text-center px-3 py-0 name">
                                             Họ và tên
@@ -161,70 +131,63 @@ const StaffManage = () => {
                                         </th>
                                     </tr>
                                 </thead>
+
                                 <tbody className='table-body text-secondary'>
-                                    {+listUser.length > 0 && +totalPages != 0 ?
-                                        <>
-                                            {
-                                                listUser.map((item, index) => {
-                                                    return (
-                                                        <tr key={index} className=" bg-white border-b text-start">
-                                                            <td className="d-none d-md-table-cell">
-                                                                <div className="">
-                                                                    <Checkbox
-                                                                        checked={item.checked}
-                                                                        onChange={() => { handleChange(item, index) }}
-                                                                        size="small"
-                                                                    /></div>
-                                                            </td>
-                                                            <td scope="row" className="px-1 py-3 min-content-width g-0">
-                                                                <img className="image" src={item?.avatar || LINK.AVATAR_NULL} alt="Jese image" />
-                                                                <div className="ps-2 email">
-                                                                    <div className="fw-semibold">{item.lastName + " " + item.firstName}</div>
-                                                                    <div className="fw-normal">{item.email}</div>
-                                                                </div>
-                                                            </td>
-
-                                                            <td className="text-start px-3 py-3">
-                                                                {item?.userRoleData?.name || "Khác"}
-                                                            </td>
-                                                            <td className="text-start px-1 py-3 text-truncate text-nowrap">
-                                                                {item?.staffUserData?.position || "Khác"}
-                                                            </td>
-                                                            <td className="text-start px-1 py-3">
-                                                                {item?.staffUserData?.staffDepartmentData?.name || "Khác"}
-                                                            </td>
-                                                            <td className="text-start line px-1 py-3 d-none d-lg-table-cell">
-                                                                {item?.phoneNumber || "Không có"}
-                                                            </td>
-                                                            <td className="text-start line px-1 py-3 d-none d-lg-table-cell">
-                                                                {item?.cid || "Không có"}
-                                                            </td>
-                                                            <td className="text-start px-1 py-3 d-none d-lg-table-cell">
-                                                                <Status data={item?.status} />
-                                                            </td>
-                                                            <td className="px-1 py-3">
-                                                                <div className='iconDetail'>
-                                                                    <DropdownAction
-                                                                        data={item}
-                                                                        action={handleUpdate}
-                                                                        refresh={refresh}
-                                                                        table={TABLE.USER}
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    )
-
-                                                })
-                                            }
-                                        </> :
+                                    {loadingUser ? (
+                                        // Hiệu ứng Skeleton cho danh sách loading
+                                        <SkeletonTable />
+                                    ) : listUser.length > 0 && totalPages !== 0 ? (
+                                        listUser.map((item, index) => (
+                                            <tr key={index} className="bg-white border-b text-start">
+                                                <td className="text-center px-1 py-3">
+                                                    {item?.id || "_"}
+                                                </td>
+                                                <td className="px-1 py-3 min-content-width g-0">
+                                                    <img className="image" src={item?.avatar || LINK.AVATAR_NULL} alt="Jese image" />
+                                                    <div className="ps-2 email">
+                                                        <div className="fw-semibold">{item.lastName + " " + item.firstName}</div>
+                                                        <div className="fw-normal">{item.email}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="text-start px-3 py-3">
+                                                    {item?.userRoleData?.name || "Khác"}
+                                                </td>
+                                                <td className="text-start px-1 py-3 text-truncate text-nowrap">
+                                                    {item?.staffUserData?.position || "Khác"}
+                                                </td>
+                                                <td className="text-start px-1 py-3">
+                                                    {item?.staffUserData?.staffDepartmentData?.name || "Khác"}
+                                                </td>
+                                                <td className="text-start line px-1 py-3 d-none d-lg-table-cell">
+                                                    {item?.phoneNumber || "Không có"}
+                                                </td>
+                                                <td className="text-start line px-1 py-3 d-none d-lg-table-cell">
+                                                    {item?.cid || "Không có"}
+                                                </td>
+                                                <td className="text-start px-1 py-3 d-none d-lg-table-cell">
+                                                    <Status data={item?.status} />
+                                                </td>
+                                                <td className="px-1 py-3">
+                                                    <div className='iconDetail'>
+                                                        <DropdownAction
+                                                            data={item}
+                                                            action={handleUpdate}
+                                                            refresh={refresh}
+                                                            table={TABLE.USER}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
                                         <tr>
-                                            <td colSpan="7" className="text-center">
+                                            <td colSpan="9" className="text-center">
                                                 <span className="text-gray-500">Không có dữ liệu</span>
                                             </td>
                                         </tr>
-                                    }
+                                    )}
                                 </tbody>
+
                             </table>
                         </div>
                         <div className='footer-table d-flex justify-content-end mx-2'>

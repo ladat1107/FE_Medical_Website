@@ -40,15 +40,15 @@ const DoctorHeader = (props) => {
                     <div className="col-10 col-lg-11 d-flex row">
                         <div className="logo-search col-7 col-lg-10 d-flex justify-content-lg-between justify-content-end align-items-center row">
                             <div className="logo d-none d-lg-block col-6 d-flex align-items-end"></div>
-                            <div className="col-lg-6 col-12  d-flex align-items-center">
+                            {/* <div className="col-lg-6 col-12  d-flex align-items-center">
                                 <Search placeholder="Tìm kiếm" onSearch={onSearch} enterButton />
-                            </div>
+                            </div> */}
                         </div>
-                        <div className="icon col-5 col-lg-2 d-flex justify-content-end ">
+                        {/* <div className="icon col-5 col-lg-2 d-flex justify-content-end ">
                             <FontAwesomeIcon icon={faLanguage} size="xl" />
                             <FontAwesomeIcon icon={faEnvelope} size="xl" />
                             <FontAwesomeIcon icon={faBell} size="xl" />
-                        </div>
+                        </div> */}
                         <div />
 
                     </div>

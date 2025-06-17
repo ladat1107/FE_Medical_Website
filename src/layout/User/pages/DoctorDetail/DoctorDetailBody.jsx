@@ -1,55 +1,68 @@
 
 
 
-import React from 'react'
-import classNames from "classnames/bind";
-import styles from "./doctorDetail.module.scss";
-import { LINK } from '@/constant/value';
-import { formatDate } from '@/utils/formatDate';
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+import React, { useEffect, useRef, useState } from 'react'
+import ParseHtml from '@/components/ParseHtml';
+import HandbookCardHorizontal from '@/components/HandbookItem/HandbookCard/HandbookCardHorizontal';
+import HandbookCardHorizontalSkeleton from '@/components/HandbookItem/HandbookCard/HandbookCardHorizontalSkeleton';
 
 const DoctorDetailBody = (props) => {
-    let { data, handbook } = props;
+    let { data, handbook, handbookLoading } = props;
+    const [showMore, setShowMore] = useState(false);
+    const [isOverflowing, setIsOverflowing] = useState(false);
 
+    const contentRef = useRef(null);
+
+    useEffect(() => {
+        if (contentRef.current) {
+            setIsOverflowing(contentRef.current.scrollHeight > 500); // Kiểm tra vượt max-height không
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (!showMore) {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+    }, [showMore]);
     return (
-        <div className={cx('doctor-body')} >
-            <div className={cx('wrapper')} >
-                <div className={cx('introduce')} >
-                    <div className={cx('introduce-top')} >
-                        <h3 className={cx('title')} >Giới thiệu</h3>
+        <div className={'doctor-body'} >
+            <div className="flex gap-6" >
+                <div className="flex flex-col gap-6 w-full sm:w-1/2 lg:w-[60%]">
+                    <div className="p-8 bg-white rounded-2xl shadow-card-doctor leading-[1.8] min-h-[300px] text-justify">
+                        <h3 className="text-2xl font-bold mb-2">Giới thiệu</h3>
                         <p>{data?.staffUserData?.shortDescription}</p>
                     </div>
-                    <div className={cx('introduce-bottom')} >
-                        <div dangerouslySetInnerHTML={{ __html: data?.staffUserData?.staffDescriptionData?.htmlContent || "" }}></div>
+                    {/* Phần nội dung chi tiết */}
+                    <div className={`p-8 bg-white rounded-2xl shadow-card-doctor leading-[1.8] text-justify overflow-hidden transition-all duration-500
+                     ${showMore ? "" : "max-h-[550px]"}`}>
+                        <div className={`${showMore ? "" : "h-[95%] overflow-hidden text-ellipsis"} mb-2`} ref={contentRef}>
+                            <ParseHtml htmlString={data?.staffUserData?.htmlDescription || ""} />
+                        </div>
+                        {isOverflowing && (
+                            <div className="text-primary-tw text-end mt-1 cursor-pointer font-semibold"
+                                onClick={() => setShowMore(!showMore)}>
+                                {showMore ? "Ẩn bớt" : "Xem thêm"}
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className={cx('related-blog')} >
-                    <div className={cx('blog-title')} >Bài viết Liên quan</div>
-                    <div className={cx('blog-item-list')} >
-                        {handbook?.length > 0 && handbook.map((item, index) => (
-                            <div className={cx('blog-item')} key={index} >
-                                <div className={cx('blog-item-img')} >
-                                    <img src={item?.image || LINK.IMAGE_HANDBOOK} alt="Ảnh cẩm nang y tế" />
-                                </div>
-                                <div className={cx('blog-item-content')} >
-                                    <div className={cx('content-title')} >
-                                        <span></span>
-                                        <p>{item?.tags || "Tin y tế"}</p>
-                                    </div>
-                                    <p className={cx('body-content')} >{item?.shortDescription || "Mô tả ngắn"}</p>
-                                    <div className={cx('date')} >
-                                        <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 24 24" height="13" width="13" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M7 11h2v2H7v-2zm14-5v14c0 1.1-.9 2-2 2H5a2 2 0 01-2-2l.01-14c0-1.1.88-2 1.99-2h1V2h2v2h8V2h2v2h1c1.1 0 2 .9 2 2zM5 8h14V6H5v2zm14 12V10H5v10h14zm-4-7h2v-2h-2v2zm-4 0h2v-2h-2v2z"></path></svg>
-                                        <span>{formatDate(item?.updatedAt || new Date())}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                <div className="hidden sm:block w-full sm:w-1/2 lg:w-[40%] bg-white rounded-2xl shadow-card-doctor h-fit" >
+                    <div className="mb-[20px] text-2xl font-bold text-primary-tw px-6 pt-8" >Bài viết Liên quan</div>
+                    <div className="overflow-y-auto overflow-x-hidden h-[800px] px-6" >
+                        {handbookLoading ?
+                            Array.from({ length: 5 }).map((_, index) => (
+                                <HandbookCardHorizontalSkeleton key={index} />
+                            ))
+                            : handbook?.length > 0 ? handbook.map((item, index) => (
+                                <HandbookCardHorizontal key={index} item={item} />
+                            )) : <div className="text-start text-gray-500">Không có bài viết liên quan</div>}
                     </div>
                 </div>
             </div>
-
         </div>
     )
 }

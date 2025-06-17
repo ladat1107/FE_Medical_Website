@@ -13,26 +13,24 @@ import PaginateCustom from "../../components/Paginate/PaginateCustom";
 import InsertDepartment from "./InsertDepartment";
 import Status from "../../components/Status";
 import DropdownAction from "../../components/Dropdown/DropdownAction";
+import SkeletonDepartment from "./SkeletonDepartment";
 
 const DepartmentManage = () => {
     let [showInsert, setShowInsert] = useState(false);
     let [currentPage, setCurrentPage] = useState(1);
-    let [rowsPerPage, setRowPaper] = useState({ value: 10, id: 1 });
+    let [rowsPerPage, setRowPaper] = useState(10);
     let [totalPages, setTotalPage] = useState(0);
     let [listDepartment, setListDepartment] = useState([]);
     let [checkAll, setCheckAll] = useState(false);
     let [search, setSearch] = useState("");
     let [obUpdate, setObUpdate] = useState({});
     let searchDebounce = "";
-    let [obDelete, setObDelete] = useState({});
     let {
         data: dataDepartment,
-        loading: listDepartmentLoading,
-        error: listDepartmentError,
+        loading: loadingDepartment,
         execute: fetchDepartments,
-    } = useMutation((query) =>
-        getDepartment(currentPage, rowsPerPage.id, searchDebounce)
-    )
+    } = useMutation((query) => getDepartment(currentPage, rowsPerPage, searchDebounce))
+    
     useEffect(() => {
         if (dataDepartment && dataDepartment.DT && dataDepartment.DT.rows && dataDepartment.DT) {
             let _listDepartment = [...dataDepartment.DT.rows];
@@ -42,14 +40,15 @@ const DepartmentManage = () => {
                 _listDepartment[i].staffQuantity = _listDepartment[i]?.staffDepartmentData?.length || 0;
             }
             setListDepartment(_listDepartment);
-            setTotalPage(dataDepartment.DT.count / rowsPerPage.value);
+            setTotalPage(dataDepartment.DT.count / rowsPerPage);
         }
     }, [dataDepartment])
 
     useEffect(() => {
         fetchDepartments();
     }, [currentPage, useDebounce(search, 500), rowsPerPage]);
-    let handleChange = (item) => {
+    
+    const handleChange = (item) => {
         let _listDepartment = [...listDepartment];
         _listDepartment = _listDepartment.map(obj =>
             obj.id === item.id ? { ...obj, checked: !item.checked } : obj
@@ -57,7 +56,7 @@ const DepartmentManage = () => {
         setCheckAll(false);
         setListDepartment(_listDepartment);
     };
-    let handleChangeSelectedAll = () => {
+    const handleChangeSelectedAll = () => {
         let _listDepartment = [...listDepartment];
         setCheckAll(!checkAll);
         _listDepartment = _listDepartment.map(obj =>
@@ -65,31 +64,32 @@ const DepartmentManage = () => {
         );
         setListDepartment(_listDepartment);
     }
-    let handleChangePaginate = (item) => {
+    const handleChangePaginate = (item) => {
         setRowPaper(item);
         setCurrentPage(1);
     }
     searchDebounce = useDebounce(search, 500);
-    let handleChangeSearch = (event) => {
+    const handleChangeSearch = (event) => {
         setSearch(event.target.value);
         setCurrentPage(1)
     }
-    let refresh = () => {
+    const refresh = () => {
         setSearch("");
         setCheckAll(false);
         setObUpdate(null);
         setShowInsert(false);
+        setCurrentPage(1);
         fetchDepartments();
     }
-    let handleUpdate = async (item) => {
+    const handleUpdate = async (item) => {
         setShowInsert(false)
         let response = await getDepartmentById(item.id);
-        if (response?.data?.EC == 0) {
-            let value = response?.data?.DT;
+        if (response?.EC == 0) {
+            let value = response?.DT;
             setObUpdate(value)
             setShowInsert(true)
         } else {
-            message.error(response?.data?.EM || "Không thể chọn phòng ban")
+            message.error(response?.EM || "Không thể chọn phòng ban")
             refresh();
         }
     }
@@ -149,69 +149,71 @@ const DepartmentManage = () => {
                                 </tr>
                             </thead>
                             <tbody className="table-body">
-                                {+listDepartment.length > 0 && +totalPages != 0 ?
-                                    <>
-                                        {
-                                            listDepartment.map((item, index) => {
-                                                return (
-                                                    <tr key={index} className="text-start">
-                                                        <td className="p-2">
-                                                            <div className="d-flex align-items-center">
-                                                                <Checkbox
-                                                                    checked={item.checked}
-                                                                    onChange={() => { handleChange(item, index) }}
-                                                                    size="small"
-                                                                />
-                                                            </div>
-                                                        </td>
-                                                        <td className="text-start px-1 py-2 name">
-                                                            <div className="text"> {item?.name || "Khác"}</div>
-                                                        </td>
-                                                        <td scope="row" className="px-1 py-2 ps-1">
-                                                            {item?.deanDepartmentData?.staffUserData.lastName ?
-                                                                <div className="depar">
-                                                                    <div className="text-up">{item?.deanDepartmentData?.staffUserData?.lastName + " " + item?.deanDepartmentData?.staffUserData?.firstName}</div>
-                                                                    <div className="text-down">{item?.deanDepartmentData?.staffUserData?.email}</div>
-                                                                </div>
-                                                                :
-                                                                <div><span>_</span></div>
-                                                            }
-                                                        </td>
-                                                        <td className="text-center px-1 py-2">
-                                                            <div className="fw-normal"><b>{item?.staffQuantity || "0"}</b></div>
-                                                        </td>
-                                                        <td className="text-start px-1 py-2">
-                                                            <div className="fw-normal">{item?.roomQuantity || "0"}<span className="ms-1 d-none d-lg-inline">phòng</span></div>
-                                                        </td>
-                                                        <td className="text-start px-1 py-2 d-none d-lg-table-cell">
-                                                            <div>
-                                                                {item?.address || "Khác"}
-                                                            </div>
-                                                        </td>
-                                                        <td className="text-center px-1 py-2 d-none d-lg-table-cell">
-                                                            <Status data={item?.status} />
-                                                        </td>
-                                                        <td className="px-1 py-2">
-                                                            <div className='iconDetail'>
-                                                                <DropdownAction
-                                                                    data={item}
-                                                                    action={handleUpdate}
-                                                                    refresh={refresh}
-                                                                    table={TABLE.DEPARTMENT}
-                                                                />
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )
+                                {
+                                    loadingDepartment ? <SkeletonDepartment /> :
+                                        +listDepartment.length > 0 && +totalPages != 0 ?
+                                            <>
+                                                {
+                                                    listDepartment.map((item, index) => {
+                                                        return (
+                                                            <tr key={index} className="text-start">
+                                                                <td className="p-2">
+                                                                    <div className="d-flex align-items-center">
+                                                                        <Checkbox
+                                                                            checked={item.checked}
+                                                                            onChange={() => { handleChange(item, index) }}
+                                                                            size="small"
+                                                                        />
+                                                                    </div>
+                                                                </td>
+                                                                <td className="text-start px-1 py-2 name">
+                                                                    <div className="text"> {item?.name || "Khác"}</div>
+                                                                </td>
+                                                                <td scope="row" className="px-1 py-2 ps-1">
+                                                                    {item?.deanDepartmentData?.staffUserData.lastName ?
+                                                                        <div className="depar">
+                                                                            <div className="text-up">{item?.deanDepartmentData?.staffUserData?.lastName + " " + item?.deanDepartmentData?.staffUserData?.firstName}</div>
+                                                                            <div className="text-down">{item?.deanDepartmentData?.staffUserData?.email}</div>
+                                                                        </div>
+                                                                        :
+                                                                        <div><span>_</span></div>
+                                                                    }
+                                                                </td>
+                                                                <td className="text-center px-1 py-2">
+                                                                    <div className="fw-normal"><b>{item?.staffQuantity || "0"}</b></div>
+                                                                </td>
+                                                                <td className="text-start px-1 py-2">
+                                                                    <div className="fw-normal">{item?.roomQuantity || "0"}<span className="ms-1 d-none d-lg-inline">phòng</span></div>
+                                                                </td>
+                                                                <td className="text-start px-1 py-2 d-none d-lg-table-cell">
+                                                                    <div>
+                                                                        {item?.address || "Khác"}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="text-center px-1 py-2 d-none d-lg-table-cell">
+                                                                    <Status data={item?.status} />
+                                                                </td>
+                                                                <td className="px-1 py-2">
+                                                                    <div className='iconDetail'>
+                                                                        <DropdownAction
+                                                                            data={item}
+                                                                            action={handleUpdate}
+                                                                            refresh={refresh}
+                                                                            table={TABLE.DEPARTMENT}
+                                                                        />
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )
 
-                                            })
-                                        }
-                                    </> :
-                                    <tr>
-                                        <td colSpan="7" className="text-center">
-                                            <span className="text-gray-500">Không có dữ liệu</span>
-                                        </td>
-                                    </tr>
+                                                    })
+                                                }
+                                            </> :
+                                            <tr>
+                                                <td colSpan="7" className="text-center">
+                                                    <span className="text-gray-500">Không có dữ liệu</span>
+                                                </td>
+                                            </tr>
                                 }
 
                             </tbody>

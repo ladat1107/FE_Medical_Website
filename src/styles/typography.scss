@@ -1,0 +1,61 @@
+// _typography.scss
+body,
+header {
+  font-family: "Be Vietnam Pro", sans-serif;
+
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--primary-color);
+}
+
+// _colors.scss
+.title-section {
+  text-align: center;
+  color: var(--main-text-color);
+  font-weight: var(--font-weight-title-section);
+  font-size: var(--font-size-title-section);
+}
+
+.subtitle-section {
+  text-align: center;
+  color: var(--main-text-color);
+  font-size: var(--font-size-large);
+  font-weight: 500;
+}
+
+.main-text {
+  color: var(--main-text-color);
+
+  font-size: 16px;
+  font-weight: var(--font-weight-main-text);
+  line-height: 19px;
+}
+
+.secondary-text {
+  color: var(--main-text-color);
+
+  font-size: 20px;
+  font-weight: var(--font-weight-main-text);
+  line-height: 25px;
+}
+
+.item-title {
+  color: var(--main-text-color);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 25px;
+  margin: 0;
+}
+
+.header-text {
+  color: var(--main-text-color);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 25px;
+}

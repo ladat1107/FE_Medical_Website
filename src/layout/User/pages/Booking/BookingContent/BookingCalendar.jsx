@@ -1,17 +1,16 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "../Booking.scss";
 import { faCircleLeft, faCircleRight, faLeftLong } from "@fortawesome/free-solid-svg-icons";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import userService from "@/services/userService";
 import { useMutation } from "@/hooks/useMutation";
-import { primaryColorHome } from "@/style/variables";
+import { primaryColorHome } from "@/styles//variables";
 import { TIMESLOTS } from "@/constant/value";
 
 const BookingCalendar = (props) => {
     let data = props?.doctor?.staffScheduleData.map(item => dayjs(item.date).format("YYYY-MM-DD"));
     const minDate = dayjs(); // Hôm nay
-    const maxDate = dayjs(data[data.length - 1]);
+    const maxDate = dayjs(data?.length > 0 ? data[data.length - 1] : dayjs());
     let [listSchedule, setListSchedule] = useState([]);
     const {
         data: dataSchedule,
@@ -82,11 +81,15 @@ const BookingCalendar = (props) => {
             return (
                 <div
                     key={dateStr}
-                    className={`day ${isAvailable ? "" : "disabled"} ${selectedDate === dateStr ? "active" : ""
-                        }`}
+                    className={`text-center cursor-pointer py-4 px-0 lg:!px-4 font-semibold ${isAvailable ? "" : "text-gray-400 pointer-events-none"} ${selectedDate === dateStr ? "flex justify-center items-center" : ""}`}
                     onClick={() => isAvailable && handleDateClick(dateStr)}
                 >
-                    <span>{day.date()}</span>
+                    {selectedDate === dateStr ?
+                        <span className="bg-primary-tw rounded text-white w-3/5 h-full flex items-center justify-center">
+                            {day.date()}
+                        </span> :
+                        <span>{day.date()}</span>
+                    }
                 </div>
             );
         });
@@ -97,40 +100,44 @@ const BookingCalendar = (props) => {
         const schedule = listSchedule.find((item) => item.date === selectedDate);
 
         return (
-            <div className="time-slots">
+            <div className="mt-8">
                 {schedule?.times.map((slot, idx) => (
-                    <div key={idx} className="slot" onClick={() => props.next({ date: schedule.date, room: schedule.room, time: slot })}>
+                    <div
+                        key={idx}
+                        className="inline-block mr-2 mb-2 px-4 py-2 border border-primary-tw rounded cursor-pointer hover:bg-primary-tw hover:text-white transition-colors"
+                        onClick={() => props.next({ date: schedule.date, room: schedule.room, time: slot })}>
                         {slot.label}
                     </div>
-                ))
-                }
-            </div >
+                ))}
+            </div>
         );
     };
     return (
         <div>
-            <div className="header" >
-                <FontAwesomeIcon className='icon-back' icon={faLeftLong} onClick={() => { props.back() }} />
+            <div className="relative bg-gradient-primary text-white text-center text-lg font-bold py-2 px-4 rounded-t-lg mb-2">
+                <FontAwesomeIcon className='absolute top-[15px] left-[25px] cursor-pointer' icon={faLeftLong} onClick={() => { props.back() }} />
                 Vui lòng chọn ngày khám
             </div>
-            <div className='content'>
-                <div className="month-booking">
-                    <FontAwesomeIcon className="icon"
+            <div className='p-4 min-h-[500px]'>
+                <div className="flex justify-center items-center w-full mb-4 text-lg font-semibold text-primary-tw gap-4">
+                    <FontAwesomeIcon
+                        className="cursor-pointer"
                         icon={faCircleLeft}
                         color={currentMonth.isAfter(minDate, "month") ? primaryColorHome : "lightgray"}
                         onClick={() => currentMonth.isAfter(minDate, "month") && handleMonthChange("back")}
                     />
                     <span>THÁNG {currentMonth.format("MM-YYYY")}</span>
-                    <FontAwesomeIcon className="icon"
+                    <FontAwesomeIcon
+                        className="cursor-pointer"
                         icon={faCircleRight}
                         color={currentMonth.isBefore(maxDate, "month") ? primaryColorHome : "lightgray"}
                         onClick={() => currentMonth.isBefore(maxDate, "month") && handleMonthChange("next")}
                     />
                 </div>
-                <div className="days">{renderCalendar()}</div>
+                <div className="grid grid-cols-7">{renderCalendar()}</div>
                 {renderTimeSlots()}
             </div>
-        </div >
+        </div>
     );
 }
 

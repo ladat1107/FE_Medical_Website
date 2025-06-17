@@ -14,7 +14,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
 
     return (
         <div className='radio-add-exam'>
-            <div className="radio-inputs">
+            <div className="radio-inputs" style={{padding: '2px'}}>
                 <label className="radio me-1">
                     <input
                         type="radio"
@@ -23,7 +23,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
                         checked={selectedOption === 'normal'}
                         onChange={handleChange}
                     />
-                    <span className="name">Không</span>
+                    <span className="name" style={{height: '35px'}}>Không</span>
                 </label>
                 <label className="radio me-1">
                     <input
@@ -33,7 +33,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
                         checked={selectedOption === 'old'}
                         onChange={handleChange}
                     />
-                    <span className="name">Người già</span>
+                    <span className="name" style={{height: '35px'}}>Người già</span>
                 </label>
 
                 <label className="radio me-1">
@@ -44,7 +44,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
                         checked={selectedOption === 'children'}
                         onChange={handleChange}
                     />
-                    <span className="name">Trẻ em</span>
+                    <span className="name" style={{height: '35px'}}>Trẻ em</span>
                 </label>
 
                 <label className="radio me-1">
@@ -55,7 +55,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
                         checked={selectedOption === 'disabled'}
                         onChange={handleChange}
                     />
-                    <span className="name">Người khuyết tật</span>
+                    <span className="name" style={{height: '35px'}}>Người khuyết tật</span>
                 </label>
 
                 <label className="radio me-1">
@@ -66,7 +66,7 @@ const RadioButtonList = ({value, handleChangePrioritize}) => {
                         checked={selectedOption === 'pregnant'}
                         onChange={handleChange}
                     />
-                    <span className="name">Phụ nữ có thai</span>
+                    <span className="name" style={{height: '35px'}}>Phụ nữ có thai</span>
                 </label>
             </div>
         </div>

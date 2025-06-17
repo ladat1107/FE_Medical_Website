@@ -1,36 +1,34 @@
-@import "../../../../style/variables.scss";
-
 .schedule-manage-content {
     display: flex;
     justify-content: center; // Căn giữa theo chiều ngang
     align-items: center; // Căn giữa theo chiều dọc
-    background: $background-color;
+    background: var(--background-color);
 
     .container {
         padding: 0 3%;
         margin: 0;
-        background: $background-color;
+        background: var(--background-color);
 
         .schedule-content-header {
             .text {
                 font-size: 1.2rem;
-                color: $secondary-color-admin;
+                color: var(--secondary-color-admin);
             }
 
             .btn-add-schedule {
-                background: $background-color;
-                border: 1px solid $primary-color-admin;
+                background: var(--background-color);
+                border: 1px solid var(--primary-color-admin);
                 border-radius: 8px;
-                color: $primary-color-admin;
+                color: var(--primary-color-admin);
                 font-weight: 500;
                 cursor: pointer;
 
                 &:hover {
-                    border: $secondary-color-admin 1px solid;
-                    color: $secondary-color-admin;
+                    border: var(--secondary-color-admin) 1px solid;
+                    color: var(--secondary-color-admin);
 
                     .icon {
-                        color: $secondary-color-admin !important;
+                        color: var(--secondary-color-admin) !important;
                     }
                 }
             }
@@ -39,7 +37,7 @@
         .schedule1-content {
             background: white;
             border-radius: 10px;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
         }
 
         .animated-div {
@@ -65,7 +63,7 @@
         .insert-schedule-content {
             border-radius: 10px;
             width: 70%;
-            box-shadow: $box-shadow-content-admin;
+            box-shadow: var(--box-shadow-content-admin);
             background: white;
             margin-bottom: 1rem;
 

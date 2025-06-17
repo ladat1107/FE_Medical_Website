@@ -1,0 +1,41 @@
+.view-noti-container {
+    border-top: 1px solid #dddddd;
+    padding: 1.5% 0;
+
+    .noti-search {
+        padding: 5px 10px;
+        border: 1px solid #dddddd;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30%;
+
+        i {
+            color: #a2a2a2;
+            margin-left: 10px;
+            font-size: 16px;
+
+            &:hover {
+                color: #003D80;
+                cursor: pointer;
+            }
+        }
+
+        input {
+            border: none;
+            outline: none;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    .date {
+        font-family: 'Be Vietnam Pro', sans-serif;
+        font-size: 16px;
+        font-weight: 400;
+        color: gray;
+        margin-bottom: 10px;
+    }
+}

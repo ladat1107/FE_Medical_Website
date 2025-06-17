@@ -1,4 +1,3 @@
-
 export const PATHS = {
     ADMIN: {
         DASHBOARD: "/admin",
@@ -12,21 +11,29 @@ export const PATHS = {
         HANDBOOK_MANAGE: "/adminHandbook",
         HANDBOOK_DETAIL: "/adminHandbookDetail",
         SCHEDULE_MANAGE: "/adminSchedule",
-        //EXAMINATION_MANAGE: "/adminExamination",
+        NOTIFICATION: "/adminNotification",
+        MEDICINE_MANAGE: "/adminMedicineManage",
+        EXAMINATION_MANAGE: "/adminExaminationManage",
+        REVENUE_MANAGE: "/adminRevenueManage",
     },
     STAFF: {
         DASHBOARD: "/doctor",
-        APPOINTMENT: "/doctorAppointment",
+        APPOINTMENT: "/examination",
         PARACLINICAL: "/doctorParaclinical",
-        EXAMINATION: "/doctorExamination/:examId",
+        EXAMINATION: "/examination/:examId",
         HANDBOOK: "/doctorHandbook",
         SCHEDULE: "/doctorSchedule",
         PROFILE: "/doctorProfile",
+        CONSULTANT: "/consultant",
+        NOTIFICATION: "/staffNotification",
+        INPATIENT: "/inpatient",
+        INPATIENT_DETAIL: "/inpatient/:id",
     },
     RECEPTIONIST: {
         DASHBOARD: "/receptionist",
         CASHIER: "/cashier",
         PRESCRIBE: "/prescribe",
+        MEDICAL_RECORD: "/medicalRecord",
     },
     HOME: {
         HOMEPAGE: "/",
@@ -43,5 +50,12 @@ export const PATHS = {
         BOOKING: "/make-appointment",
         INSTRUCTION: "/instruction",
         LOGIN: "/login",
+        NOTIFICATION: "/notification",
+        NUMERICAL: "/numerical",
+    },
+    SYSTEM: {
+        GET_NUMBER: "/getNumber",
+        PRECRIPTION_PDF: "/prescription-pdf",
+        PRINT_CHECKOUT: "/print-checkout",
     }
 }

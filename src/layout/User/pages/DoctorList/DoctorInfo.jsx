@@ -1,82 +1,123 @@
-import React, { useEffect, useState } from "react";
-import classNames from "classnames/bind";
-import styles from "./doctorList.module.scss";
-// Tạo instance của classnames với bind styles
-const cx = classNames.bind(styles);
+import React, { useEffect, useRef, useState } from "react";
 import DoctorCard from "./Component";
 import { formatCurrency } from "@/utils/formatCurrency";
-import { useNavigate } from "react-router-dom";
-import { PATHS } from "@/constant/path";
+import { useLocation, useNavigate } from "react-router-dom";
 import PaginationUser from "@/components/Pagination/Pagination";
 import userService from "@/services/userService";
 import { useMutation } from "@/hooks/useMutation";
 import useDebounce from "@/hooks/useDebounce";
-
+import DoctorCardSkeleton from "./Component/DoctorCardSkeleton";
+import useQuery from "@/hooks/useQuery";
+import { Input, Select } from "antd";
+import { SearchOutlined } from "@mui/icons-material";
+import "./doctorList.css";
 const DoctorInfo = () => {
   let [pageSize, setPageSize] = useState({ currentPage: 1, pageSize: 12 });
   let [total, setTotal] = useState(0);
   let [doctorList, setDoctorList] = useState([]);
   let [search, setSearch] = useState('');
   let searchDebounce = useDebounce(search || "", 500);
+  let [departmentId, setDepartmentId] = useState(null);
+  let [specialtyId, setSpecialtyId] = useState(null);
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const departmentIdUrl = params.get("departmentId");
+  const specialtyIdUrl = params.get("specialtyId");
+  const searchRef = useRef(null);
   const {
     data: doctorData,
     loading: doctorLoading,
     execute: getDoctor,
-  } = useMutation(() => userService.getDoctor({ limit: pageSize.pageSize, page: pageSize.currentPage, search: searchDebounce }));
+  } = useMutation(() => userService.getDoctor({ limit: pageSize.pageSize, page: pageSize.currentPage, search: searchDebounce, departmentId: departmentId, specialtyId: specialtyId }));
+  const { data: listDepartment, loading: departmentLoading } = useQuery(() => userService.getDepartment());
+  const { data: listSpecialty, loading: specialtyLoading } = useQuery(() => userService.getSpecialty());
+
   useEffect(() => {
+    if (departmentIdUrl) {
+      setDepartmentId(departmentIdUrl);
+    }
+    if (specialtyIdUrl) { setSpecialtyId(specialtyIdUrl); }
+  }, [departmentIdUrl, specialtyIdUrl]);
+
+  useEffect(() => {
+    searchRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     getDoctor();
-  }, [searchDebounce, pageSize]);
+  }, [searchDebounce, pageSize.currentPage, pageSize.pageSize, departmentId, specialtyId]);
+
   useEffect(() => {
     if (doctorData?.EC === 0) {
       setDoctorList(doctorData?.DT?.rows || []);
       setTotal(doctorData?.DT?.count || 0);
     }
   }, [doctorData]);
-  let navigate = useNavigate();
-  console.log(doctorList);
+
   return (
-    <div className={cx("doctor-info")}>
-      <div className={cx("head-section")}>
-        <div className="container-input">
-          <input
-            onChange={(e) => setSearch(e.target.value)}
-            // value={search}
-            type="text"
-            placeholder="Tìm kiếm bác sĩ"
-            name="text"
-            className="input"
-          />
-          <svg
-            fill="#000000"
-            width="20px"
-            height="20px"
-            viewBox="0 0 1920 1920"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z"
-              fillRule="evenodd"
-            />
-          </svg>
-        </div>
-        <div className={cx("btn-action")}>
-          <div className={cx("action-left")}>Tư Vấn Ngay</div>
-          <div className={cx("action-right")} onClick={() => navigate(PATHS.HOME.BOOKING)}>Đặt lịch hẹn</div>
-        </div>
+    <div className="doctor-info">
+      <div className="head-section">
+        {!departmentLoading && !specialtyLoading &&
+          <div className="flex flex-wrap justify-evenly w-full">
+            <Input
+              className="w-full sm:w-1/3 sm:mb-0 px-3 mb-3 py-1 rounded-full shadow-md border-none outline-none
+              [&.ant-input-affix-wrapper]:h-[50px] "
+              onChange={(e) => { setSearch(e.target.value), setPageSize({ ...pageSize, currentPage: 1 }) }}
+              value={search}
+              inputref={searchRef}
+              placeholder="Tìm kiếm bác sĩ" prefix={<SearchOutlined className="text-gray-400" />} />
+            <div className="px-2 w-1/2 sm:w-1/3" >
+              <div className="w-full flex justify-center items-center bg-white rounded-[30px] shadow-md h-[50px] ">
+                <Select
+                  className="w-full custom-antd-select ps-[12px]"
+                  value={listDepartment?.DT?.find((item) => +item.id === +departmentId)?.name || undefined}
+                  onChange={(value) => setDepartmentId(value)}
+                  placeholder="Khoa"
+                  showSearch
+                  allowClear
+                  optionFilterProp="label"
+                  filterSort={(optionA, optionB) =>
+                    (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                  }
+                  options={listDepartment?.DT?.map((item) => ({ value: item.id, label: item.name, }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-center items-center w-1/2 sm:w-1/3 bg-white rounded-[30px] shadow-md sm:px-3 h-[50px] ">
+              <Select
+                className="w-full custom-antd-select"
+                value={listSpecialty?.DT?.find((item) => +item.id === +specialtyId)?.name || undefined}
+                onChange={(value) => setSpecialtyId(value)}
+                placeholder="Chuyên khoa"
+                showSearch
+                allowClear
+                optionFilterProp="label"
+                filterSort={(optionA, optionB) =>
+                  (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                }
+                options={listSpecialty?.DT?.map((item) => ({ value: item.id, label: item.name, }))}
+              />
+            </div>
+          </div>}
       </div>
-      <div className={cx('list-item')} >
-        {doctorList?.length > 0 && doctorList.map((item, index) => (
-          <div key={index}>
-            <DoctorCard
-              id={item?.staffUserData?.id}
-              avatar={item?.staffUserData?.avatar}
-              name={item?.staffUserData?.lastName + " " + item?.staffUserData?.firstName}
-              specialty={item?.staffDepartmentData?.name}
-              price={formatCurrency(item?.price || 0)}
-              visits={item?.examinationStaffData?.length || 0}
-              rating="4.8" />
-          </div>
-        ))}
+      <div className="flex flex-wrap justify-center gap-4 mt-10">
+        {doctorLoading ?
+          Array.from({ length: 12 }).map((_, index) => (
+            <div key={index}>
+              <DoctorCardSkeleton />
+            </div>))
+          :
+          doctorList?.length > 0 ? doctorList.map((item, index) => (
+            <div key={index}>
+              <DoctorCard
+                id={item?.staffUserData?.id}
+                avatar={item?.staffUserData?.avatar}
+                name={(item?.staffUserData?.lastName.length + item?.staffUserData?.firstName.length) < 15 ? item?.staffUserData?.lastName + " " + item?.staffUserData?.firstName : item?.staffUserData?.firstName}
+                specialty={item?.staffDepartmentData?.name}
+                price={formatCurrency(item?.price || 0)}
+                visits={item?.examinationStaffData?.length || 0}
+                rating={item?.rating || [3, 3.5, 4, 4.5, 5][Math.floor(Math.random() * 5)]} />
+            </div>
+          )) : <div>Không tìm thấy bác sĩ</div>}
       </div>
       <div>
         <PaginationUser
@@ -87,7 +128,6 @@ const DoctorInfo = () => {
         />
       </div>
     </div>
-
   );
 };
 
