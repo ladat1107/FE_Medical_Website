@@ -5,7 +5,7 @@ import 'moment/locale/vi';
 import { message, Modal, Popconfirm } from 'antd';
 import { createVitalSign, deleteVitalSign, updateVitalSign } from '@/services/doctorService';
 
-const InpatientVitals = ({vitalsData, examId, isEditMode}) => {
+const InpatientVitals = ({vitalsData, examId, isEditMode, refresh}) => {
     const [showNewVitalForm, setShowNewVitalForm] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [localVitalsData, setLocalVitalsData] = useState([]);
@@ -112,19 +112,7 @@ const InpatientVitals = ({vitalsData, examId, isEditMode}) => {
                 
                 if (response && response.DT) {
                     message.success('Cập nhật sinh hiệu thành công!');
-                    
-                    // Cập nhật dữ liệu local
-                    setLocalVitalsData(prevData => 
-                        prevData.map(item => 
-                            item.id === editingVital.id ? 
-                            {
-                                ...data,
-                                id: editingVital.id,
-                                updatedAt: response.DT.updatedAt,
-                                createdAt: editingVital.createdAt
-                            } : item
-                        )
-                    );
+                    refresh();
                 } else {
                     message.error('Có lỗi trong quá trình cập nhật sinh hiệu.');
                 }
@@ -134,14 +122,7 @@ const InpatientVitals = ({vitalsData, examId, isEditMode}) => {
                 
                 if (response && response.DT) {
                     message.success('Lưu sinh hiệu thành công!');
-                    // Thêm sinh hiệu mới vào mảng dữ liệu local
-                    const newVitalSign = {
-                        ...data,
-                        id: response.DT.id, 
-                        updatedAt: response.DT.updatedAt,
-                        createdAt: response.DT.createdAt,
-                    };
-                    setLocalVitalsData(prevData => [...prevData, newVitalSign]);
+                    refresh();
                 } else {
                     message.error('Có lỗi trong quá trình lưu sinh hiệu.');
                 }
@@ -575,7 +556,9 @@ const InpatientVitals = ({vitalsData, examId, isEditMode}) => {
 
 InpatientVitals.propTypes = {
     vitalsData: PropTypes.array,
-    examId: PropTypes.number
+    examId: PropTypes.number,
+    isEditMode: PropTypes.bool,
+    refresh: PropTypes.func,
 };
 
 export default InpatientVitals;

@@ -30,7 +30,7 @@ export function cutSuffix(str) {
 }
 
 export const isValidInsuranceCode = (code) => {
-  if (code.length !== 15) return false;
+  if (code && code.length !== 15) return false;
 
   const isOldFormat = /^[A-Z]{2}[1-5]\d{2}\d{10}$/.test(code);
   return isOldFormat && arrCover.includes(+getThirdDigitFromLeft(code));

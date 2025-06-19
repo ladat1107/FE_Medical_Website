@@ -137,6 +137,7 @@ const NotificationUser = () => {
 
   // Combine API and socket notifications, categorize by date
   useEffect(() => {
+
     if (!apiNotifications?.rows) return
 
     const allNotifications = {
@@ -144,10 +145,27 @@ const NotificationUser = () => {
       rows: [...socketNotifications, ...(apiNotifications?.rows || [])],
     }
 
+    const uniqueNotiMap = new Map()
+
+    allNotifications?.rows?.forEach((noti) => {
+      if (noti.notiCode) {
+        const existingNoti = uniqueNotiMap.get(noti.notiCode)
+        if (
+          !existingNoti ||
+          new Date(noti.createdAt || noti.date) > new Date(existingNoti.createdAt || existingNoti.date)
+        ) {
+          uniqueNotiMap.set(noti.notiCode, noti)
+        }
+      } else {
+        const uniqueKey = noti.id || `temp-${Date.now()}-${Math.random()}`
+        uniqueNotiMap.set(uniqueKey, noti)
+      }
+    })
+
     const today = new Date().toDateString()
 
     // Filter by read status if needed
-    let filteredRows = allNotifications.rows
+    let filteredRows = Array.from(uniqueNotiMap.values())
     if (statusFilter === 2) {
       filteredRows = filteredRows.filter((noti) => noti.status === 2)
     } else if (statusFilter === 1) {

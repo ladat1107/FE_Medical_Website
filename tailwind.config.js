@@ -37,7 +37,8 @@ export default {
     "./src/layout/User/pages/Booking/**/*.{js,jsx,ts,tsx}",
     "./src/components/Print/**/*.{js,jsx,ts,tsx}",
     "./src/layout/Admin/components/Modal/CreateAppointmentModal.jsx",
-    "./src/layout/Doctor/pages/Examination/index.jsx"
+    "./src/layout/Doctor/pages/Examination/index.jsx",
+    //"./src/layout/Receptionist/components/AddExamModal/AddExamModal.jsx"
   ],
   theme: {
     extend: {

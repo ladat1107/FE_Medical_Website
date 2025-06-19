@@ -212,7 +212,7 @@ const ReceptionistDashboard = () => {
         data: dataExaminations,
         loading: loadingExaminations,
         execute: fetchExaminations,
-    } = useMutation(() => getExaminations(date, date, status, '', isAppointment, currentPage, pageSize, search, time));
+    } = useMutation(() => getExaminations(date.format('YYYY-MM-DD'), date.format('YYYY-MM-DD'), status, '', isAppointment, currentPage, pageSize, search, time));
 
     // Data updates
     useEffect(() => {
@@ -396,13 +396,15 @@ const ReceptionistDashboard = () => {
                             />
                         ))
                     )}
-                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200"
-                        onClick={() => openAddExam(time.value)}>
-                        <div className="flex justify-center items-center">
-                            <i className="fa-solid mr-2 fa-plus"></i>
-                            <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
+                    {date.isSame(dayjs(), "day") &&
+                        <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200"
+                            onClick={() => openAddExam(time)}>
+                            <div className="flex justify-center items-center">
+                                <i className="fa-solid mr-2 fa-plus"></i>
+                                <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             );
         }
@@ -436,12 +438,15 @@ const ReceptionistDashboard = () => {
                             />
                         ))
                     )}
-                    <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" onClick={() => openAddExam(timeSlot.value)}>
-                        <div className="flex justify-center items-center">
-                            <i className="fa-solid mr-2 fa-plus"></i>
-                            <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
+                    {date.isSame(dayjs(), "day") &&
+                        <div className="p-2.5 bg-white rounded-md border-[1.5px] border-dashed border-[#c9cccc] mx-2.5 justify-center mt-2 cursor-pointer hover:shadow-md hover:mx-1.5 transition-all duration-200" 
+                            onClick={() => openAddExam(timeSlot.value)}>
+                            <div className="flex justify-center items-center">
+                                <i className="fa-solid mr-2 fa-plus"></i>
+                                <p className="leading-tight text-center inline-block hover:font-semibold">Thêm bệnh nhân</p>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </div>
             );
         });

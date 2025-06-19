@@ -84,7 +84,7 @@ const MedicineStatistical = ({ medicineData, refetch, isRefetchingMedicineData, 
                 if (medicine.group.toLowerCase().includes("tân")) { group = "Tân dược" }
                 else if (medicine.group.toLowerCase().includes("đông")) { group = "Đông y" }
                 else if (medicine.group.toLowerCase().includes("thuc pham chuc nang")) { group = "Thực phẩm chức năng" }
-                else { group = "Không xác định" }
+                else { group = "Nhóm khác" }
 
                 if (!medicineGroup[group]) {
                     medicineGroup[group] = { count: 0 }

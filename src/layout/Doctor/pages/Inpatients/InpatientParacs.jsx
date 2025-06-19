@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { createRequestParaclinical, deleteParaclinical, getServiceLaboratory } from '@/services/doctorService';
 import { STATUS_BE } from '@/constant/value';
 
-const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
+const InpatientParacs = ({ paracsData, examId, isEditMode, refresh}) => {
 
     const [selectedParaclinicals, setSelectedParaclinicals] = useState([]);
     const [inputParac, setInputParac] = useState('');
@@ -141,26 +141,7 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
     
             if (response.DT && response.EC === 0) {
                 message.success('Tạo yêu cầu xét nghiệm thành công!');
-                
-                // Tạo mảng các mục mới để thêm vào state hiện tại
-                const newParacItems = response.DT.map(item => ({
-                    id: item.DT.id,
-                    name: item.DT.paracName,
-                    updatedAt: item.DT.updatedAt,
-                    createdAt: item.DT.createdAt,
-                    paracName: item.DT.paracName,
-                    doctorParaclinicalData: { 
-                        staffUserData: {
-                            fullName: item.DT.staffName,
-                        }
-                    },
-                    roomParaclinicalData: {
-                        name: item.DT.roomName
-                    }
-                }));
-                
-                // Cập nhật state bằng cách thêm các mục mới
-                setLocalParacData(prevData => [...prevData, ...newParacItems]);
+                refresh();
                 setSelectedParaclinicals([]);
             } else {
                 message.error(response.EM);
@@ -186,9 +167,7 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
             
             if (response && response.EC === 0) {
                 message.success('Xóa yêu cầu xét nghiệm thành công!');
-                
-                // Cập nhật state bằng cách loại bỏ mục đã xóa
-                setLocalParacData(prevData => prevData.filter(item => item.id !== paracId));
+                refresh();
             } else {
                 message.error(response.EM || 'Xóa yêu cầu xét nghiệm thất bại!');
             }
@@ -372,6 +351,8 @@ const InpatientParacs = ({ paracsData, examId, isEditMode}) => {
 InpatientParacs.propTypes = {
     paracsData: PropTypes.array,
     examId: PropTypes.number,
+    isEditMode: PropTypes.bool,
+    refresh: PropTypes.func.isRequired,
 };
 
 export default InpatientParacs;

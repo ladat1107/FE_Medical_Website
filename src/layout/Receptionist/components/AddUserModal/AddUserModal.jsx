@@ -21,7 +21,9 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
     const [currentWardId, setCurrentWardId] = useState(null);
     const [currentListDistrict, setCurrentListDistrict] = useState([]);
     const [currentListWard, setCurrentListWard] = useState([]);
+    const [insuranceCode, setInsuranceCode] = useState("");
     const { data: provinceData } = useQuery(() => apiService.getAllProvince())
+
 
     const addUser = async () => {
         const formData = form.getFieldsValue()
@@ -98,7 +100,7 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
                 firstName: userInfo?.firstName || "",
                 cid: userInfo?.cid || "",
                 phone: userInfo?.phoneNumber || "",
-                dob: userInfo?.dob ? dayjs(dayjs(userInfo.dob).format('DD/MM/YYYY'), "DD/MM/YYYY") : null,
+                dob: userInfo?.dob ? dayjs(dayjs(userInfo.dob, "DD/MM/YYYY"), "DD/MM/YYYY") : null,
                 gender: userInfo?.gender + "" || "",
             })
             if (dataQRCode?.DT?.type === "cid") {
@@ -190,22 +192,16 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
                             <Spin size="large" />
                         </div>
                     )}
-                    <div className={`${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div className={`${loading ? 'opacity-50 pointer-events-none' : ''} max-h-[80vh] overflow-y-visible pb-2 `}>
                         <Form
                             layout={'horizontal'}
                             form={form}
-                            labelCol={{
-                                span: 24,
-                            }}
-                            wrapperCol={{
-                                span: 24,
-                            }}
-                            initialValues={{
-                            }}
-                            style={{
-                                maxWidth: "100%",
-                            }}
+                            labelCol={{ span: 24 }}
+                            wrapperCol={{ span: 24 }}
+                            initialValues={{}}
+                            style={{ maxWidth: "100%" }}
                             validateTrigger="onBlur"
+                            autoComplete="off"
                         >
                             <Row gutter={[16, 8]}>
                                 <Col sm={24} lg={12}>
@@ -354,6 +350,7 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
                                     <Form.Item
                                         name={"insuranceCode"}
                                         label="Bảo hiểm y tế"
+                                        onChange={(e) => { setInsuranceCode(e.target.value) }}
                                         rules={[{
                                             pattern: /^[A-Z]{2}[1-5]\d{2}\d{10}$/,
                                             message: 'Mã bảo hiểm không hợp lệ!',
@@ -363,7 +360,7 @@ const AddUserModal = ({ isOpen, onClose, handleAddUserSuscess, dataQRCode }) => 
                                     </Form.Item>
                                 </Col>
                             </Row>
-                            {form.getFieldValue("insuranceCode") && (
+                            {insuranceCode && (
                                 <Row gutter={[16, 8]}>
                                     <Col sm={24} lg={12}>
                                         <Form.Item name={"dateOfIssue"} label="Ngày cấp" className='mb-0 '>

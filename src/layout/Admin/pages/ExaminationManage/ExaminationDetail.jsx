@@ -920,6 +920,12 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
                                 </Text>
                               </div>
                               <div className="flex justify-between">
+                                <Text type="secondary">Email:</Text>
+                                <Text>
+                                  {paraclinical.doctorParaclinicalData.staffUserData.email}
+                                </Text>
+                              </div>
+                              <div className="flex justify-between">
                                 <Text type="secondary">Ngày thực hiện:</Text>
                                 <div className="flex items-center">
                                   <Calendar size={14} className="mr-1 text-gray-500" />

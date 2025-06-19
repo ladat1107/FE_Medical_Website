@@ -57,7 +57,7 @@ const RevenueManage = () => {
                             payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPriceOutpatient : totalBank += coveredPriceOutpatient;
                             totalInsurance += examination?.insuranceCovered || 0;
                         }
-                    } else if (payment?.paraclinicalData?.length > 0) {
+                    } if (payment?.paraclinicalData?.length > 0) {
                         const paraclinical = payment?.paraclinicalData;
                         paraclinical.forEach(item => {
                             let coveredPriceParaclinicalOutpatient = item?.coveredPrice || item.price;
@@ -65,16 +65,16 @@ const RevenueManage = () => {
                             payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPriceParaclinicalOutpatient : totalBank += coveredPriceParaclinicalOutpatient;
                             totalInsurance += item?.insuranceCovered || 0;
                         })
-                    } else if (payment?.prescriptionData) {
+                    } if (payment?.prescriptionData) {
                         let diffDatePrescription = diffDate(payment?.prescriptionData?.createdAt, payment?.prescriptionData?.endDate || payment?.prescriptionData?.dischargedAt || dayjs()) + 1;
                         const prescription = payment?.prescriptionData;
                         let coveredPricePrescriptionOutpatient = prescription?.coveredPrice || prescription.totalMoney;
                         totalRevenue += prescription.totalMoney * diffDatePrescription;
                         payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += coveredPricePrescriptionOutpatient * diffDatePrescription : totalBank += coveredPricePrescriptionOutpatient * diffDatePrescription;
                         totalInsurance += prescription?.insuranceCovered * diffDatePrescription || 0;
-                    } else if (payment?.advanceMoneyData) {
-                        totalRevenue += payment?.advanceMoneyData?.amount;
-                        payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += payment?.advanceMoneyData?.amount : totalBank += payment?.advanceMoneyData?.amount;
+                    } if (payment?.advanceMoneyData) {
+                        totalRevenue += payment?.advanceMoneyData?.amount || 0;
+                        payment.paymentMethod === PAYMENT_METHOD.CASH ? totalCash += (payment?.advanceMoneyData?.amount || 0) : totalBank += (payment?.advanceMoneyData?.amount || 0);
                     }
                 }
             })

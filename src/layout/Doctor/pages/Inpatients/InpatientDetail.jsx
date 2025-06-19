@@ -563,70 +563,6 @@ const InpatientDetail = () => {
                                     </div>
                                 </div>
                             </div>
-                            {/* <div className='flex mt-2'>
-                                <div>                  
-                                    <button className='save-button me-2' onClick={handleOpenSummaryModal}>Báo cáo bệnh án</button>         
-                                </div>   
-                                <FlexibleCollapsible
-                                    isOpen={isOpen}
-                                    onToggle={() => setIsOpen(!isOpen)}
-                                    expandedText="Thu gọn"
-                                    collapsedText="Xem chi tiết tạm ứng"
-                                >
-                                    {examData?.advanceMoneyExaminationData?.length > 0 ? (
-                                        examData.advanceMoneyExaminationData.map((item, index) => (
-                                            <div className="flex mb-2" key={index}>
-                                                <p className="me-1">Ngày: {convertDateTime(item?.date)} -</p>
-                                                <p>Tạm ứng: {item.amount?.toLocaleString() || 0}đ</p>
-                                                {item.status=== PAYMENT_STATUS.PENDING ?
-                                                    <>
-                                                        <p className="ms-2" style={{color: '#FF8C00'}}>Chờ thanh toán</p>
-                                                        <Popconfirm
-                                                            title="Xác nhận xóa"
-                                                            description="Bạn có chắc chắn muốn xóa tạm ứng này?"
-                                                            onConfirm={() => handleDeleteAdvance(item.id)}
-                                                            okText="Xóa"
-                                                            cancelText="Hủy"
-                                                        >
-                                                            <button 
-                                                                className="action-btn action-delete pt-0 pb-0 ms-1"
-                                                                disabled={deletingId === item.id}
-                                                            >
-                                                                {deletingId === item.id ? (
-                                                                    <i className="fa-solid fa-spinner fa-spin"></i>
-                                                                ) : (
-                                                                    <i className="fa-solid fa-trash"></i>
-                                                                )}
-                                                            </button>
-                                                        </Popconfirm>
-                                                    </> : 
-                                                    item.status === PAYMENT_STATUS.PAID ?
-                                                        <p className="ms-2" style={{color: '#008000'}}>Đã thanh toán</p> :
-                                                        <p className="ms-2" style={{color: '#FF0000'}}>Đã hủy</p>                                                
-                                                }
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div>0 đ</div>
-                                    )}
-                                    {isEditMode && (
-                                        <>
-                                            <MoneyInput onChange={handleAmountChange}/>
-                                            <div className="flex">
-                                                <button className="ml-auto save-button mt-2"
-                                                    onClick={handleAddAdvanceMoney}>
-                                                    {isLoadingAddAdvance ? (
-                                                        <>
-                                                            <i className="fa-solid fa-spinner fa-spin me-2"></i>
-                                                            Đang xử lý...
-                                                        </>
-                                                    ) : 'Thêm tạm ứng'}
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </FlexibleCollapsible>      
-                            </div> */}
                         </div>
                         <div className='col-6'>
                             <p className='title mb-2'>Thông tin xuất viện</p>
@@ -737,49 +673,6 @@ const InpatientDetail = () => {
                                     </>
                                 )}
                             </div>
-                            {/* <div className='flex'>
-                                {isEditMode ? <>
-                                    {dataExamination?.DT?.status === 7 && <>
-                                        <button style={{ background: "#F44343", color: 'white' }}  
-                                                className='restore-button' 
-                                                onClick={() => {
-                                                    setIsEditMode(false);
-                                                    resetFormData();
-                                                }}>
-                                            Hủy
-                                        </button>  
-                                    </>} 
-                                    <>
-                                        <div style={{fontWeight: '500'}}>
-                                            <button className={`restore-button ${!isEditMode ? 'disabled' : ''}`} 
-                                                    disabled={!isEditMode}  onClick={handleDischargedExam}>
-                                                {isLoadingDischarged ? (
-                                                    <>
-                                                        <i className="fa-solid fa-spinner fa-spin me-2"></i>
-                                                        Đang xử lý...
-                                                    </>
-                                                ) : 'Lưu xuất viện'}
-                                            </button>               
-                                        </div>
-                                        { formData.dischargeStatus === 4 && formData.dischargeDate && (
-                                            <div className='col-3' style={{fontWeight: '500'}}>
-                                                <button className='safe-button' onClick={handleReExam}>
-                                                    {isLoadingReExam ? (
-                                                        <>
-                                                            <i className="fa-solid fa-spinner fa-spin me-2"></i>
-                                                            Đang xử lý...
-                                                        </>
-                                                    ) : 'Lưu cùng lịch hẹn'}
-                                                </button>                        
-                                            </div>
-                                        )}      
-                                    </>
-                                </> : <>
-                                    <button className='restore-button' onClick={() => setIsEditMode(true)}>
-                                        Chỉnh sửa
-                                    </button>  
-                                </>}  
-                            </div> */}
                         </div>
                     </div>
                     <div className="flex mt-3" style={{gap: '10px'}}>
@@ -1001,6 +894,7 @@ const InpatientDetail = () => {
                                     vitalsData={examData?.examinationVitalSignData}
                                     examId={+examId}
                                     isEditMode = {isEditMode}
+                                    refresh = {refresh}
                                 />
                             </div>
                         )}
@@ -1010,6 +904,7 @@ const InpatientDetail = () => {
                                     paracsData = {examData?.examinationResultParaclincalData}
                                     examId = {+examId}
                                     isEditMode = {isEditMode}
+                                    refresh = {refresh}
                                 />
                             </div>
                         )}

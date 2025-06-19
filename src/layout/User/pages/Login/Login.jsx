@@ -138,6 +138,7 @@ const Login = () => {
                                 Hoa Sen
                             </h2>
                             <Form
+                                autoComplete='off'
                                 name="basic"
                                 form={form}
                                 layout="vertical"
@@ -184,7 +185,7 @@ const Login = () => {
                                             />
                                         </Form.Item>
                                     </Tooltip> : <Form.Item
-                                        name="email"
+                                        name="email"                                        
                                         rules={[{ required: true, message: 'Vui lòng nhập thông tin!' }]}
                                     >
                                         <Input

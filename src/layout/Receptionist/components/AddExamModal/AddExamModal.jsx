@@ -2,15 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import RadioButtonList from '../RadioButton/RadioButton';
 import { createExamination, getUserInsuarance, getUserByCid, updateExamination } from '@/services/doctorService';
-import { message, Select, Spin } from 'antd';
+import { message, Modal, Select, Spin } from 'antd';
 import { getThirdDigitFromLeft, isNumericString, isValidInsuranceCode } from '@/utils/numberSeries';
 import './AddExamModal.scss';
 import AddUserModal from '../AddUserModal/AddUserModal';
 import { STATUS_BE } from '@/constant/value';
 import RoomSelectionModal from '@/layout/Doctor/components/RoomOptionModal/RoomSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatDate } from '@/utils/formatDate';
 
 const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditMode, examId, patientData, comorbiditiesOptions, specialtyOptions, dataQRCode }) => {
+    
+    
     const [selectedComorbidities, setSelectedComorbidities] = useState([]);
     const [inputComorbidity, setInputComorbidity] = useState('');
     const [shakeId, setShakeId] = useState(null);
@@ -90,11 +93,41 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
 
     useEffect(() => {
         if (dataQRCode?.EC === 0) {
-            setCid(dataQRCode.DT.cid);
-            setIsSearched(true);
-            setUserInfo(dataQRCode.DT);
-            setInsurance(isValidInsuranceCode(dataQRCode.DT.userInsuranceData?.insuranceCode) ? dataQRCode.DT.userInsuranceData?.insuranceCode : '');
-            setIsUserModalOpen(false);
+                if (dataQRCode.DT?.userExaminationData && dataQRCode.DT?.userExaminationData?.id) {
+                    // Hiển thị popup xác nhận nếu bệnh nhân đã có lịch khám
+                    Modal.confirm({
+                        title: 'Bệnh nhân đã có lịch khám',
+                        content: (
+                            <div>
+                                <p><strong>Ngày nhập viện:</strong> {formatDate(dataQRCode.DT.userExaminationData?.admissionDate) || 'Chưa xác định'}</p>
+                                <p>Bạn có muốn tiếp tục tạo lịch khám mới không?</p>
+                            </div>
+                        ),
+                        okText: 'Tiếp tục',
+                        cancelText: 'Hủy',
+                        width: 400,
+                        className: 'custom-confirm-modal',
+                        onOk() {
+                            setCid(dataQRCode.DT.cid);
+                            setIsSearched(true);
+                            setUserInfo(dataQRCode.DT);
+                            setInsurance(dataQRCode.DT.userInsuranceData?.insuranceCode || '');
+                            setIsUserModalOpen(false);
+                        },
+                        onCancel() {
+                            // Reset form nếu user chọn hủy
+                            setUserInfo({});
+                            setCid('');
+                            setInsurance('');
+                        },
+                    });
+                } else {
+                    setCid(dataQRCode.DT.cid);
+                    setIsSearched(true);
+                    setUserInfo(dataQRCode.DT);
+                    setInsurance(dataQRCode.DT.userInsuranceData?.insuranceCode || '');
+                    setIsUserModalOpen(false);
+                }
         } else if (dataQRCode?.EC === 1) {
             setIsUserModalOpen(true);
         }
@@ -152,16 +185,44 @@ const AddExamModal = ({ isOpen, onClose, timeSlot, handleAddExamSuscess, isEditM
                 return;
             }
 
-            setIsSearched(true);
-
             setLoading(true);
             const response = await getUserByCid(cid);
             if (response.DT) {
+                if (response.DT?.userExaminationData && response.DT?.userExaminationData?.id) {
+                // Hiển thị popup xác nhận nếu bệnh nhân đã có lịch khám
+                Modal.confirm({
+                    title: 'Bệnh nhân đã có lịch khám',
+                    content: (
+                        <div>
+                            <p><strong>Ngày nhập viện:</strong> {formatDate(response?.DT?.userExaminationData?.admissionDate) || 'Chưa xác định'}</p>
+                            <p>Bạn có muốn tiếp tục tạo lịch khám mới không?</p>
+                        </div>
+                    ),
+                    okText: 'Tiếp tục',
+                    cancelText: 'Hủy',
+                    width: 400,
+                    className: 'custom-confirm-modal',
+                    onOk() {
+                        // Tiếp tục với thông tin user
+                        setUserInfo(response.DT);
+                        setInsurance(response.DT.userInsuranceData?.insuranceCode || '');
+                        setIsSearched(true);
+                    },
+                    onCancel() {
+                        setUserInfo({});
+                        setCid('');
+                        setInsurance('');
+                    },
+                });
+            } else {
                 setUserInfo(response.DT);
                 setInsurance(response.DT.userInsuranceData?.insuranceCode || '');
+                setIsSearched(true);
+            }
             } else {
                 setUserInfo({});
             }
+            
             setLoading(false);
         } catch (error) {
             console.error("Error getting user by cid:", error.response || error.message);
