@@ -394,7 +394,7 @@ const ExaminationDrawer = ({ open, onClose, examinationId }) => {
               bordered={false}
             >
               <Row gutter={[16, 16]}>
-                {examinationData?.medicalTreatmentTier !== 1 &&
+                {examinationData?.medicalTreatmentTier === MEDICAL_TREATMENT_TIER.OUTPATIENT &&
                   <Col xs={24} md={12}>
                     <Card title="Thông tin bác sĩ" bordered={false} className="h-full bg-bgAdmin">
                       <div className="space-y-3">
